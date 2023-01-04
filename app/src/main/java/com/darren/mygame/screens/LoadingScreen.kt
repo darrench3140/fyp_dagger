@@ -14,7 +14,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavHostController
 import com.darren.mygame.R
 import com.darren.mygame.ScreenManager
-import com.darren.mygame.components.Background
+import com.darren.mygame.ui.DrawBackground
 import kotlinx.coroutines.delay
 
 @Composable
@@ -41,7 +41,7 @@ fun Load(alpha: Float) {
             .background(color = Color(0xFF))
             .fillMaxSize()
     ) {
-        Background()
+        DrawBackground()
         Image(
             painter = painterResource(id = R.drawable.loading),
             contentDescription = "",

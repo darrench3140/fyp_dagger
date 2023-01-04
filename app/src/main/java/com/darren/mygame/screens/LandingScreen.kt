@@ -6,7 +6,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.FloatingActionButtonDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -25,12 +24,12 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.darren.mygame.R
 import com.darren.mygame.ScreenManager
-import com.darren.mygame.components.Background
-import com.darren.mygame.components.Dagger
+import com.darren.mygame.ui.DrawBackground
+import com.darren.mygame.ui.DrawDagger
 
 @Composable
 fun LandingScreen(navController : NavHostController) {
-    Background()
+    DrawBackground()
     Column(
         modifier = Modifier
             .fillMaxSize(),
@@ -43,7 +42,7 @@ fun LandingScreen(navController : NavHostController) {
             painter = painterResource(id = R.drawable.logo),
             contentDescription = "logo"
         )
-        Dagger(modifier = Modifier
+        DrawDagger(modifier = Modifier
             .size(100.dp)
             .offset(y = (-60).dp))
 
