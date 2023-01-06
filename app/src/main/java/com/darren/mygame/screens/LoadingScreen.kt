@@ -14,7 +14,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavHostController
 import com.darren.mygame.R
 import com.darren.mygame.ScreenManager
-import com.darren.mygame.ui.DrawBackground
+import com.darren.mygame.DrawBackground
 import kotlinx.coroutines.delay
 
 @Composable

@@ -24,8 +24,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.darren.mygame.R
 import com.darren.mygame.ScreenManager
-import com.darren.mygame.ui.DrawBackground
-import com.darren.mygame.ui.DrawDagger
+import com.darren.mygame.DrawBackground
+import com.darren.mygame.DrawDagger
 
 @Composable
 fun LandingScreen(navController : NavHostController) {

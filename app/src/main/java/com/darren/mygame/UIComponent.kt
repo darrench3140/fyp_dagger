@@ -1,4 +1,4 @@
-package com.darren.mygame.ui
+package com.darren.mygame
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxSize

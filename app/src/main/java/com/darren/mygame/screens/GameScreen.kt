@@ -13,9 +13,9 @@ import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.darren.mygame.GameState
+import com.darren.mygame.states.GameState
 import com.darren.mygame.states.DaggerState
-import com.darren.mygame.ui.DrawBackground
+import com.darren.mygame.DrawBackground
 import com.darren.mygame.states.daggerImg
 
 val gameState: MutableState<GameState> = mutableStateOf(GameState())
