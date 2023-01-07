@@ -17,7 +17,7 @@ data class DaggerState(val image: ImageBitmap) {
         daggerList.add(Dagger(true))
     }
 
-    fun move() {
+    fun shoot() {
         
     }
 
