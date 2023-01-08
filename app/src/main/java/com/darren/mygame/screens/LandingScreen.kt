@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.darren.mygame.*
+import com.darren.mygame.states.GameState
 
 @Composable
 fun LandingScreen(navController : NavHostController) {
@@ -27,7 +28,10 @@ fun LandingScreen(navController : NavHostController) {
         DrawDagger(modifier = Modifier
             .size(120.dp)
             .offset(y = (-80).dp))
-        DrawButton(text = "Play", offset = (-40).dp, navController = navController, dest = ScreenManager.GameScreen.route)
+        DrawButton("Play", 0.dp, (-90).dp) {
+            gameState.value.setReset()
+            navController.navigate(ScreenManager.GameScreen.route)
+        }
     }
 }
 

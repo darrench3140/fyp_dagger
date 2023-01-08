@@ -9,19 +9,23 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.darren.mygame.states.daggerImg
+
+val myFont = FontFamily(Font(R.font.nineteenth))
 
 @Composable
 fun DrawBackground() {
@@ -70,21 +74,29 @@ fun DrawDagger(modifier: Modifier = Modifier.size(100.dp)) {
 }
 
 @Composable
-fun DrawButton(text: String, offset: Dp, navController: NavHostController, dest: String) {
-    Image(
-        painter = painterResource(id = R.drawable.button),
-        contentDescription = "button",
-        modifier = Modifier
-            .offset(y = offset)
-            .scale(2.9f)
-            .clickable { navController.navigate(dest) },
-    )
-    Text(
-        modifier = Modifier.offset(y = offset - 32.dp),
-        text = text,
-        fontSize = 26.sp,
-        color = Color.White,
-        fontFamily = FontFamily.Monospace,
-        fontWeight = FontWeight.Bold
-    )
+fun DrawButton(text: String, offsetX: Dp, offsetY: Dp, onClick: () -> Unit) {
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .offset(offsetX, offsetY)
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.button),
+            contentDescription = "button",
+            modifier = Modifier
+                .align(Alignment.Center)
+                .scale(2.9f)
+                .clickable { onClick() }
+        )
+        Text(
+            modifier = Modifier
+                .align(Alignment.Center),
+            text = text,
+            fontSize = 30.sp,
+            color = Color(0xFFF1F6F5),
+            fontFamily = myFont,
+            fontWeight = FontWeight.Bold,
+            style = TextStyle(letterSpacing = 3.sp)
+        )
+    }
+
 }
