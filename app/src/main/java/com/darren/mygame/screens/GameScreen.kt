@@ -32,10 +32,13 @@ val gameScore: MutableState<Int> = mutableStateOf(0)
 fun GameScreen(navController : NavHostController) {
 
     val animation = remember{ Animatable(initialValue = 0f) }
+    val spinSpeed by remember{ mutableStateOf(3f) }
+
     val dagger = ImageBitmap.imageResource(id = daggerImg)
     val spinner = ImageBitmap.imageResource(id = R.drawable.spinner1)
-    val daggerState = remember(dagger) { DaggerState(dagger) }
-    val spinnerState = remember(spinner) { SpinnerState(spinner) }
+
+    val daggerState = remember { DaggerState(dagger, spinSpeed) }
+    val spinnerState = remember { SpinnerState(spinner, spinSpeed) }
 
     LaunchedEffect(animation) {
         animation.animateTo(
@@ -44,7 +47,6 @@ fun GameScreen(navController : NavHostController) {
                 animation = tween(durationMillis = 250, easing = LinearEasing)
             )
         )
-
     }
 
     DrawBackground()
@@ -60,9 +62,11 @@ fun GameScreen(navController : NavHostController) {
             }
             true
         }) {
-        var tick = animation.value
+        animation.value //use to maintain animation loop
 
         spinnerState.spin()
+
+        daggerState.draw(this)
         spinnerState.draw(this)
 
     }

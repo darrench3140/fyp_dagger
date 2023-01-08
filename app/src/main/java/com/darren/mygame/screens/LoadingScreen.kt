@@ -24,8 +24,10 @@ fun LoadingScreen(navController: NavHostController) {
     var showLogo by remember { mutableStateOf(false) }
     var moveLogo by remember { mutableStateOf(false) }
     val swordAnim = animateFloatAsState(targetValue = if(showSword) 0.6f else 0f, animationSpec = tween(durationMillis = 3000))
-    val logoAlphaAnim = animateFloatAsState(targetValue = if(showLogo) 1f else 0f, animationSpec = tween(durationMillis = 1000))
-    val logoMoveAnim = animateDpAsState(targetValue = if(moveLogo) (-60).dp else 350.dp, animationSpec = tween(durationMillis = 2000, easing = Easing { fraction ->
+    val logoAlphaAnim = animateFloatAsState(targetValue = if(showLogo) 1f else 0f, animationSpec = tween(durationMillis = 2000))
+    val logoMoveAnim = animateDpAsState(
+        targetValue = if(moveLogo) (-60).dp else 150.dp,
+        animationSpec = tween(durationMillis = 2000, easing = Easing { fraction ->
         val n1 = 7.5625f
         val d1 = 2.75f
         var newFraction = fraction
@@ -43,7 +45,7 @@ fun LoadingScreen(navController: NavHostController) {
             n1 * newFraction * newFraction + 0.984375f
         }
     }))
-    LaunchedEffect(key1 = true) {
+    LaunchedEffect(true) {
         showSword = true
         delay(2000)
         showLogo = true

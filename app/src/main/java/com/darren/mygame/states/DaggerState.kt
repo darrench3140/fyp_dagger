@@ -1,46 +1,85 @@
 package com.darren.mygame.states
 
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.withTransform
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import com.darren.mygame.R
+import com.darren.mygame.screens.midX
+import com.darren.mygame.screens.midY
 
 var daggerImg = R.drawable.d1
 
-data class DaggerState(val image: ImageBitmap) {
-    private val imgWidth = 84
-    private val imgHeight = 435
+data class DaggerState(val image: ImageBitmap, var spinSpeed: Float) {
+    private val imgWidth = 69
+    private val imgHeight = 148
+    private val imgSize = IntSize(imgWidth, imgHeight)
+
+    private val shootVelocity = 10f
+
+    private var noOfDagger = 1
+
+    private var currentDagger: Dagger = Dagger(noOfDagger)
+
     private val daggerList: MutableList<Dagger> = emptyList<Dagger>().toMutableList()
 
-    fun init() {
+    fun reset() {
         daggerList.clear()
-        daggerList.add(Dagger(true))
     }
 
     fun shoot() {
-        
+        daggerList.add(currentDagger)
+        currentDagger = Dagger(noOfDagger++)
     }
 
-    fun draw(drawScope: DrawScope, timeTick: Float) {
-        return drawScope.draw()
+    fun hit() {
+//        currentDagger.dstOffset = IntOffset((midX()- 250f + 110f).toInt(), (midY() - 250f + 110f).toInt())
+        daggerList.add(currentDagger)
+        currentDagger = Dagger(noOfDagger++)
     }
 
-    private fun DrawScope.draw(){
-        daggerList.forEach{
+    fun draw(drawScope: DrawScope) {
+        return drawScope.drawCanvas()
+    }
 
-        }
-
+    private fun DrawScope.drawCanvas(){
+        //Current Dagger
+        currentDagger.dstOffset = IntOffset(midX().toInt() - imgWidth, midY().toInt() - imgHeight)
         withTransform({
-            scale(0.6f, 0.6f)
-            rotate(0f)
+            translate(0f, 700f)
         }) {
-            drawImage(image = image,
-//                srcOffset = IntOffset()
+            drawImage(
+                image = image,
+                srcOffset = IntOffset.Zero,
+                srcSize = imgSize,
+                dstOffset = currentDagger.dstOffset,
+                dstSize = imgSize * 2
             )
         }
+
+        daggerList.forEach{ dagger -> //Spin the daggers on the wood
+            dagger.rotation += spinSpeed
+            withTransform({
+                translate(0f, -250f) //mark to center
+                rotate(dagger.rotation)
+                translate(0f, 260f) //provide offset
+            }) {
+                drawImage(
+                    image = image,
+                    srcOffset = IntOffset.Zero,
+                    srcSize = imgSize,
+                    dstOffset = dagger.dstOffset,
+                    dstSize = imgSize * 2
+                )
+            }
+        }
     }
 
-    data class Dagger(var hi : Boolean = true) {
-
+    data class Dagger(val refNo: Int) {
+        var rotation = 0f
+        var dstOffset = IntOffset.Zero
     }
 }

@@ -24,7 +24,7 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
             NavHost(
                 navController = navController,
-                startDestination = ScreenManager.LoadingScreen.route
+                startDestination = ScreenManager.LandingScreen.route
             ) {
                 composable(route = ScreenManager.LoadingScreen.route) {
                     LoadingScreen(navController = navController)
