@@ -22,7 +22,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
 import com.darren.mygame.states.daggerImg
 
 val myFont = FontFamily(Font(R.font.nineteenth))
@@ -33,7 +32,7 @@ fun DrawBackground() {
         painter = painterResource(id = R.drawable.bg1),
         contentDescription = "",
         modifier = Modifier.fillMaxSize(),
-        contentScale = ContentScale.FillBounds,
+        contentScale = ContentScale.FillBounds
     )
 }
 

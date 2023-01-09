@@ -1,5 +1,6 @@
 package com.darren.mygame.screens
 
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
@@ -10,9 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.darren.mygame.*
-import com.darren.mygame.states.GameState
+import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 
 @Composable
 fun LandingScreen(navController : NavHostController) {
@@ -37,8 +37,9 @@ fun LandingScreen(navController : NavHostController) {
 
 
 
+@OptIn(ExperimentalAnimationApi::class)
 @Preview
 @Composable
 fun PreviewAct() {
-    LandingScreen(navController = rememberNavController())
+    LandingScreen(navController = rememberAnimatedNavController())
 }

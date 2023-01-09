@@ -1,6 +1,5 @@
 package com.darren.mygame.states
 
-import androidx.compose.runtime.MutableState
 import com.darren.mygame.screens.gameState
 
 data class GameState(private val status: Status = Status.RUNNING) {
