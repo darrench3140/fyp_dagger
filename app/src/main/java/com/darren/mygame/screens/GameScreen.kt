@@ -23,13 +23,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.darren.mygame.DrawBackground
-import com.darren.mygame.R
-import com.darren.mygame.myFont
-import com.darren.mygame.states.DaggerState
-import com.darren.mygame.states.GameState
-import com.darren.mygame.states.SpinnerState
-import com.darren.mygame.states.daggerImg
+import com.darren.mygame.*
+import com.darren.mygame.states.*
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import kotlinx.coroutines.delay
 
@@ -39,20 +34,22 @@ val gameScore: MutableState<Int> = mutableStateOf(0)
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun GameScreen(navController : NavHostController) {
-
+    //Animations
     val startGameAnim = remember{ mutableStateOf(true) }
     val animation = remember{ Animatable(initialValue = 0f) }
-    val spinSpeed = remember{ mutableStateOf(3f) }
-    val currentLevel = remember { mutableStateOf(1) }
 
+    val currentLevel = remember { mutableStateOf(1) }
+    //Settings
+    val spinSpeed = remember{ mutableStateOf(3f) }
     val randomSpeed = remember{ mutableStateOf(false) }
-    var minSpeed = 1
-    var maxSpeed = 5
+    val minSpeed = remember{ mutableStateOf(1) }
+    val maxSpeed = remember{ mutableStateOf(5) }
+    val remainingDaggers = remember{ mutableStateOf(8) }
 
     val dagger = ImageBitmap.imageResource(id = daggerImg)
-    val spinner = ImageBitmap.imageResource(id = R.drawable.spinner1)
+    val spinner = ImageBitmap.imageResource(id = spinnerImg)
 
-    val daggerState = remember { DaggerState(dagger, spinSpeed) }
+    val daggerState = remember { DaggerState(dagger, spinSpeed, remainingDaggers) }
     val spinnerState = remember { SpinnerState(spinner, spinSpeed) }
 
     // game animation controller coroutine
@@ -71,11 +68,15 @@ fun GameScreen(navController : NavHostController) {
     // spin speed controller coroutine
     LaunchedEffect(randomSpeed.value) {
         while(randomSpeed.value) {
-            spinSpeed.value = (minSpeed..maxSpeed).random().toFloat()
+            spinSpeed.value = (minSpeed.value..maxSpeed.value).random().toFloat()
             delay(2000)
         }
         if (!randomSpeed.value) { spinSpeed.value = 3f }
     }
+    LaunchedEffect(gameState.value.isStopped()) {
+        Log.d("game", "stopped ${gameState.value.isStopped()}")
+    }
+
 
     DrawBackground()
     Canvas(modifier = Modifier
@@ -91,15 +92,18 @@ fun GameScreen(navController : NavHostController) {
             true
         }) {
         animation.value //use to maintain animation loop
-        Log.d("game", "recompose ${gameState.value}")
+
         if (gameState.value.isReset()) {
             daggerState.reset()
+            gameScore.value = 0
+            currentLevel.value = 1
+            LevelUtil.updateLevelInfo(currentLevel.value, randomSpeed, spinSpeed, minSpeed, maxSpeed, remainingDaggers)
             gameState.value.setRunning()
         } else if (gameState.value.isShooting()) {
             daggerState.shoot()
         } else if (gameState.value.isLosing()) {
             spinSpeed.value = 0f
-            daggerState.drop(navController)
+            daggerState.drop()
         }
 
         spinnerState.spin()
@@ -110,7 +114,8 @@ fun GameScreen(navController : NavHostController) {
     Row(
         Modifier
             .fillMaxWidth()
-            .padding(vertical = 40.dp)) {
+            .padding(vertical = 40.dp)
+    ) {
         Spacer(modifier = Modifier.weight(0.1f))
         Text( //Score
             text = gameScore.value.toString(),

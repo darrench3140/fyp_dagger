@@ -8,9 +8,12 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
+import com.darren.mygame.R
 import com.darren.mygame.screens.gameState
 import com.darren.mygame.screens.midX
 import com.darren.mygame.screens.midY
+
+var spinnerImg = R.drawable.spinner1
 
 data class SpinnerState(val image: ImageBitmap, var spinSpeed: MutableState<Float>) {
     private val imgWidth = 220

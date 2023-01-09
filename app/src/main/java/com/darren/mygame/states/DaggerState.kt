@@ -6,9 +6,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
-import androidx.navigation.NavHostController
 import com.darren.mygame.R
-import com.darren.mygame.ScreenManager
 import com.darren.mygame.screens.gameScore
 import com.darren.mygame.screens.gameState
 import com.darren.mygame.screens.midX
@@ -16,7 +14,7 @@ import com.darren.mygame.screens.midY
 
 var daggerImg = R.drawable.d1
 
-data class DaggerState(val image: ImageBitmap, var spinSpeed: MutableState<Float>) {
+data class DaggerState(val image: ImageBitmap, val spinSpeed: MutableState<Float>, val remainingDaggers: MutableState<Int>) {
     private val imgWidth = 69
     private val imgHeight = 148
     private val imgSize = IntSize(imgWidth, imgHeight)
@@ -32,7 +30,6 @@ data class DaggerState(val image: ImageBitmap, var spinSpeed: MutableState<Float
 
     fun reset() {
         daggerList.clear()
-        gameScore.value = daggerList.size
     }
 
     fun shoot() {
@@ -48,19 +45,17 @@ data class DaggerState(val image: ImageBitmap, var spinSpeed: MutableState<Float
                 daggerList.add(currentDagger)
                 noOfDagger++
                 currentDagger = Dagger(noOfDagger)
-                gameScore.value = daggerList.size
+                gameScore.value++
                 gameState.value.setRunning()
             }
         }
     }
 
-    fun drop(navController: NavHostController) {
+    fun drop() {
         currentDagger.rotation += 10f
         currentDagger.translation += dropVelocity
         if (currentDagger.translation > 1200f) {
             gameState.value.setStopped()
-            navController.popBackStack()
-            navController.navigate(ScreenManager.ScoreScreen.route)
         }
     }
 

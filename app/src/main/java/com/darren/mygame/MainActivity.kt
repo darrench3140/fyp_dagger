@@ -37,26 +37,14 @@ class MainActivity : ComponentActivity() {
                 }
                 composable(
                     route = ScreenManager.GameScreen.route,
-                    exitTransition = {
-                        slideOutVertically(
-                            targetOffsetY = {1000},
-                            animationSpec = tween(durationMillis = 3000, easing = LinearEasing)
-                        )
-                    }
-
+//                    exitTransition = {
+//                        slideOutVertically(
+//                            targetOffsetY = {1000},
+//                            animationSpec = tween(durationMillis = 100, easing = LinearEasing)
+//                        )
+//                    }
                 ) {
                     GameScreen(navController = navController)
-                }
-                composable(
-                    route = ScreenManager.ScoreScreen.route,
-                    enterTransition = {
-                        slideInVertically(
-                            initialOffsetY = {-1000},
-                            animationSpec = tween(durationMillis = 100)
-                        )
-                    }
-                ) {
-                    ScoreScreen(navController = navController)
                 }
             }
         }
