@@ -113,7 +113,7 @@ fun DrawReturnButton(offsetX: Dp = 0.dp, offsetY: Dp = 0.dp, onClick: () -> Unit
 }
 
 @Composable
-fun DrawTopBar(currentLevel: MutableState<Int>, topBarOffset: State<Dp>) {
+fun DrawTopBar(topBarOffset: State<Dp>) {
     Row(
         Modifier
             .fillMaxWidth()
@@ -131,7 +131,7 @@ fun DrawTopBar(currentLevel: MutableState<Int>, topBarOffset: State<Dp>) {
         )
         Spacer(modifier = Modifier.weight(0.2f))
         Text(
-            text = "STAGE ${currentLevel.value}",
+            text = "STAGE ${gameLevel.value}",
             fontSize = 30.sp,
             fontFamily = myFont,
             fontWeight = FontWeight.Bold,
@@ -171,6 +171,8 @@ fun DrawScoreBoard(navController: NavHostController, scoreBoardOffset: State<Dp>
             )
         }
         DrawButton(text = "RESTART", offsetY = 280.dp) {
+            gameScore.value = 0
+            gameLevel.value = 1 
             gameState.value.setReset()
         }
         DrawReturnButton(offsetX = -(150).dp, offsetY = 400.dp) {
