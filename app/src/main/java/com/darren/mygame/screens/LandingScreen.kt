@@ -30,6 +30,7 @@ fun LandingScreen(navController : NavHostController) {
             .offset(y = (-80).dp))
         DrawButton(text = "PLAY", offsetY = (-90).dp) {
             gameState.value.setReset()
+            gameScore.value = 0
             navController.navigate(ScreenManager.GameScreen.route)
         }
     }
