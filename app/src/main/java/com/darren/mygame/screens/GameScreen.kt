@@ -73,7 +73,10 @@ fun GameScreen(navController : NavHostController) {
     }
     LaunchedEffect(gameState.value.isNextLevel() {
         if (gameState.value.isNextLevel()) {
-            
+            currentLevel.value++
+            delay(1000)
+            //random spinner
+            gameState.value.setReset()
         }
     }
 
@@ -94,17 +97,13 @@ fun GameScreen(navController : NavHostController) {
 //        Log.d("game", "ticking with state: ${gameState.value}")
 
         if (gameState.value.isReset()) {
-            currentLevel.value = 1
             LevelUtil.updateLevelInfo(currentLevel.value, randomSpeed, spinSpeed, minSpeed, maxSpeed, remainingDaggers)
             daggerState.reset()
             spinnerState.reset()
-            gameScore.value = 0
             gameState.value.setRunning()
             Log.d("game", "[Level Information]\nlevel: ${currentLevel.value}\nrandomSpeed: ${randomSpeed.value}\nspinSpeed: ${spinSpeed.value}\nminSpeed: ${minSpeed.value}\nmaxSpeed: ${maxSpeed.value}\nnumberOfDaggers: ${remainingDaggers.value}")
-        } else if (gameState.value.isShooting()) {
+        } else if (gameState.value.isShooting() || gameState.value.isNextLevel()) {
             daggerState.shoot()
-        } else if (gameState.value.isNextLevel) {
-            daggerState.move()
         } else if (gameState.value.isLosing()) {
             spinSpeed.value = 0f
             daggerState.drop()
