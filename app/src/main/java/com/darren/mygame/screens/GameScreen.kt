@@ -31,13 +31,14 @@ val gameLevel: MutableState<Int> = mutableStateOf(1)
 fun GameScreen(navController : NavHostController) {
     //Animations
     val animation = remember{ Animatable(initialValue = 0f) }
-    var showScoreBoard by remember { mutableStateOf(false) }
-    val uiAlpha = animateFloatAsState(targetValue = if(showScoreBoard || gameState.value.isNextLevel()) 0f else 1f, animationSpec = tween(durationMillis = 100))
-    val topBarOffset = animateDpAsState(targetValue = if (showScoreBoard) (-200).dp else 0.dp, animationSpec = tween(durationMillis = 2000))
-    val scoreBoardOffset = animateDpAsState(targetValue = if (showScoreBoard) (-70).dp else (-1000).dp, animationSpec = tween(durationMillis = 500))
+    val uiAlpha = animateFloatAsState(targetValue = if(gameState.value.isStopped() || gameState.value.isLeveling()) 0f else 1f, animationSpec = tween(durationMillis = 500))
+    val uiAlpha2 = animateFloatAsState(targetValue = if(gameState.value.isStopped() || gameState.value.isLeveling()) 0f else 1f, animationSpec = tween(durationMillis = 100))
+    val topBarOffset = animateDpAsState(targetValue = if (gameState.value.isStopped()) (-200).dp else 0.dp, animationSpec = tween(durationMillis = 2000))
+    val scoreBoardOffset = animateDpAsState(targetValue = if (gameState.value.isStopped()) (-70).dp else (-1000).dp, animationSpec = tween(durationMillis = 500))
 
-    val spinSpeed = remember{ mutableStateOf(0f) }
     val randomSpeed = remember{ mutableStateOf(false) }
+    val clockwise = remember{ mutableStateOf(false) }
+    val spinSpeed = remember{ mutableStateOf(0f) }
     val minSpeed = remember{ mutableStateOf(0) }
     val maxSpeed = remember{ mutableStateOf(0) }
     val remainingDaggers = remember{ mutableStateOf(0) }
@@ -46,9 +47,9 @@ fun GameScreen(navController : NavHostController) {
     val spinner = ImageBitmap.imageResource(id = spinnerImg)
     val remainingDagger = ImageBitmap.imageResource(id = R.drawable.remaining_dagger)
 
-    val daggerState = remember { DaggerState(dagger, spinSpeed, remainingDaggers, uiAlpha) }
+    val daggerState = remember { DaggerState(dagger, spinSpeed, remainingDaggers, uiAlpha2) }
     val spinnerState = remember { SpinnerState(spinner, spinSpeed, uiAlpha) }
-    val remainingDaggerState = remember { RemainingDaggerState(remainingDagger, remainingDaggers) }
+    val remainingDaggerState = remember { RemainingDaggerState(remainingDagger, remainingDaggers, uiAlpha) }
 
     // game animation controller coroutine
     LaunchedEffect(true) {
@@ -62,19 +63,15 @@ fun GameScreen(navController : NavHostController) {
     // spin speed controller coroutine
     LaunchedEffect(randomSpeed.value) {
         while(randomSpeed.value) {
-            spinSpeed.value = (minSpeed.value..maxSpeed.value).random().toFloat()
+            spinSpeed.value = (minSpeed.value..maxSpeed.value).random().toFloat() * (if(clockwise.value) 1 else -1)
             delay(2000)
         }
     }
-    // score board controller coroutine
-    LaunchedEffect(gameState.value.isStopped()) {
-        showScoreBoard = gameState.value.isStopped()
-    }
-    LaunchedEffect(gameState.value.isNextLevel() {
-        if (gameState.value.isNextLevel()) {
-            currentLevel.value++
-            delay(1000)
-            //random spinner
+    // level up action coroutine
+    LaunchedEffect(gameState.value.isLeveling()) {
+        if (gameState.value.isLeveling()) {
+            gameLevel.value++
+            delay(700)
             gameState.value.setReset()
         }
     }
@@ -96,21 +93,21 @@ fun GameScreen(navController : NavHostController) {
 //        Log.d("game", "ticking with state: ${gameState.value}")
 
         if (gameState.value.isReset()) {
-            LevelUtil.updateLevelInfo(randomSpeed, spinSpeed, minSpeed, maxSpeed, remainingDaggers)
+            LevelUtil.updateLevelInfo(randomSpeed, clockwise, spinSpeed, minSpeed, maxSpeed, remainingDaggers)
+            spinSpeed.value *= if(clockwise.value) 1f else -1f
             daggerState.reset()
             spinnerState.reset()
             gameState.value.setRunning()
             Log.d("game", "[Level Information]\nlevel: ${gameLevel.value}\nrandomSpeed: ${randomSpeed.value}\nspinSpeed: ${spinSpeed.value}\nminSpeed: ${minSpeed.value}\nmaxSpeed: ${maxSpeed.value}\nnumberOfDaggers: ${remainingDaggers.value}")
-        } else if (gameState.value.isShooting() || gameState.value.isNextLevel()) {
+        } else if (gameState.value.isShooting() || gameState.value.isLeveling()) {
             daggerState.shoot()
         } else if (gameState.value.isLosing()) {
             spinSpeed.value = 0f
             daggerState.drop()
         }
-
-        spinnerState.spin()
         daggerState.draw(this)
         spinnerState.draw(this)
+        remainingDaggerState.draw(this)
     }
 
     //Top Bar
@@ -122,6 +119,12 @@ fun GameScreen(navController : NavHostController) {
 
 fun DrawScope.midX(): Float { return ((size.width) / 2) }
 fun DrawScope.midY(): Float { return ((size.height) / 2) }
+
+fun gameReset() {
+    gameScore.value = 0
+    gameLevel.value = 1
+    gameState.value.setReset()
+}
 
 @OptIn(ExperimentalAnimationApi::class)
 @Preview

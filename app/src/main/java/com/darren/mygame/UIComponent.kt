@@ -5,7 +5,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,8 +19,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.darren.mygame.screens.gameReset
+import com.darren.mygame.screens.gameLevel
 import com.darren.mygame.screens.gameScore
-import com.darren.mygame.screens.gameState
 import com.darren.mygame.states.daggerImg
 
 val myFont = FontFamily(Font(R.font.nineteenth))
@@ -171,9 +171,7 @@ fun DrawScoreBoard(navController: NavHostController, scoreBoardOffset: State<Dp>
             )
         }
         DrawButton(text = "RESTART", offsetY = 280.dp) {
-            gameScore.value = 0
-            gameLevel.value = 1 
-            gameState.value.setReset()
+            gameReset()
         }
         DrawReturnButton(offsetX = -(150).dp, offsetY = 400.dp) {
             navController.popBackStack()

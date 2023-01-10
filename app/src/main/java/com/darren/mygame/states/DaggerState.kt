@@ -1,21 +1,14 @@
 package com.darren.mygame.states
 
-import android.util.Log
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.withTransform
-import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import com.darren.mygame.R
-import com.darren.mygame.screens.gameScore
-import com.darren.mygame.screens.gameState
-import com.darren.mygame.screens.midX
-import com.darren.mygame.screens.midY
+import com.darren.mygame.screens.*
 import kotlin.math.abs
 
 var daggerImg = R.drawable.d1
@@ -37,11 +30,16 @@ data class DaggerState(val image: ImageBitmap, val spinSpeed: MutableState<Float
         daggerList.clear()
         noOfDagger = 1
         currentDagger = Dagger(noOfDagger)
+        (1..gameLevel.value).forEach{ _ ->
+            val dagger = Dagger(0)
+            dagger.rotation = (0..359).random().toFloat()
+            daggerList.add(dagger)
+        }
     }
 
     fun shoot() {
         currentDagger.translation -= shootVelocity
-        if (gameState.value.isShooting && currentDagger.translation <= 0f) { //Arrived wood
+        if (gameState.value.isShooting() && currentDagger.translation <= 0f) { //Arrived wood
             //Check collision
             if (daggerList.any { dagger ->
                     val degree = abs(dagger.rotation % 360)
@@ -51,7 +49,7 @@ data class DaggerState(val image: ImageBitmap, val spinSpeed: MutableState<Float
             } else {
                 gameScore.value++
                 if (remainingDaggers.value <= 1) {
-                    gameState.value.setNextLevel()
+                    gameState.value.setLeveling()
                 } else {
                     remainingDaggers.value--
                     daggerList.add(currentDagger)
@@ -72,23 +70,22 @@ data class DaggerState(val image: ImageBitmap, val spinSpeed: MutableState<Float
     }
 
     fun draw(drawScope: DrawScope) {
-        return drawScope.drawCanvas()
+        drawScope.drawCanvas()
     }
 
     private fun DrawScope.drawCanvas(){
         // Current Dagger
-        currentDagger.dstOffset = IntOffset(midX().toInt() - imgWidth, midY().toInt() - imgHeight)
-        drawDagger(currentDagger, currentDagger.translation, 0f)
+        drawDagger(currentDagger, currentDagger.translation, 0f, 1f)
 
         // Daggers on the wood
         daggerList.forEach{ dagger ->
             dagger.rotation += spinSpeed.value
             val offset = if(gameState.value.isShooting()) 20f else 0f
-            drawDagger(dagger, -250f - offset, 260f)
+            drawDagger(dagger, -250f - offset, 260f, uiAlpha.value)
         }
     }
 
-    private fun DrawScope.drawDagger(dagger: Dagger, trans1: Float, trans2: Float) {
+    private fun DrawScope.drawDagger(dagger: Dagger, trans1: Float, trans2: Float, alpha: Float) {
         withTransform({
             translate(0f, trans1) //mark to center
             rotate(dagger.rotation)
@@ -98,9 +95,9 @@ data class DaggerState(val image: ImageBitmap, val spinSpeed: MutableState<Float
                 image = image,
                 srcOffset = IntOffset.Zero,
                 srcSize = imgSize,
-                dstOffset = dagger.dstOffset,
+                dstOffset = IntOffset(midX().toInt() - imgWidth, midY().toInt() - imgHeight),
                 dstSize = imgSize * 2,
-                alpha = uiAlpha.value
+                alpha = alpha
             )
         }
     }
@@ -108,6 +105,5 @@ data class DaggerState(val image: ImageBitmap, val spinSpeed: MutableState<Float
     data class Dagger(val refNo: Int) {
         var rotation = 0f
         var translation: Float = 700f
-        var dstOffset = IntOffset.Zero
     }
 }

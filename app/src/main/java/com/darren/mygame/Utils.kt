@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.view.View
 import android.view.WindowManager
 import androidx.compose.runtime.MutableState
+import com.darren.mygame.screens.gameLevel
 
 object StatusBarUtil {
     fun transparentStatusBar(activity: Activity) {
@@ -20,13 +21,13 @@ object StatusBarUtil {
 }
 
 object LevelUtil {
-    fun updateLevelInfo(randomSpeed: MutableState<Boolean>, spinSpeed: MutableState<Float>, minSpeed: MutableState<Int>, maxSpeed: MutableState<Int>, remainingDaggers: MutableState<Int>) {
+    fun updateLevelInfo(randomSpeed: MutableState<Boolean>, clockwise: MutableState<Boolean>, spinSpeed: MutableState<Float>, minSpeed: MutableState<Int>, maxSpeed: MutableState<Int>, remainingDaggers: MutableState<Int>) {
         val level = gameLevel.value
-        var clockwise = if((0..1).random() == 0) -1 else 1
-        randomSpeed.value = level >= 5
-        spinSpeed.value = ((level + (2..4).random()) * clockwise).toFloat()
-        minSpeed.value = (level - 4) * clockwise
-        maxSpeed.value = level * clockwise
-        remainingDaggers.value = level + (5..7).random()
+        clockwise.value = (0..1).random() == 1
+        randomSpeed.value = level >= 3
+        spinSpeed.value = (3..5).random().toFloat()
+        minSpeed.value = ((1+level/4)..(3+level/4)).random()
+        maxSpeed.value = ((5+level/4)..(7+level/4)).random()
+        remainingDaggers.value = level / 2 + (5..7).random()
     }
 }

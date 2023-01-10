@@ -26,17 +26,14 @@ data class SpinnerState(val image: ImageBitmap, var spinSpeed: MutableState<Floa
         currentRotation = 0f
     }
 
-    fun spin() {
-        currentRotation += spinSpeed.value
-    }
-
     fun draw(drawScope: DrawScope) {
-        return drawScope.drawCanvas()
+        drawScope.drawCanvas()
     }
 
     private fun DrawScope.drawCanvas() {
         val offset = if (gameState.value.isShooting()) 20f else 0f
         val saturation = if (gameState.value.isShooting()) 1.5f else 1f
+        currentRotation += spinSpeed.value
         withTransform({
             translate(0f, -250f - offset)
             rotate(currentRotation)
