@@ -41,7 +41,7 @@ data class DaggerState(val image: ImageBitmap, val spinSpeed: MutableState<Float
 
     fun shoot() {
         currentDagger.translation -= shootVelocity
-        if (currentDagger.translation <= 0f) { //Arrived wood
+        if (gameState.value.isShooting && currentDagger.translation <= 0f) { //Arrived wood
             //Check collision
             if (daggerList.any { dagger ->
                     val degree = abs(dagger.rotation % 360)
