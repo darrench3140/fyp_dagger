@@ -24,6 +24,7 @@ import kotlinx.coroutines.delay
 
 val gameState: MutableState<GameState> = mutableStateOf(GameState())
 val gameScore: MutableState<Int> = mutableStateOf(0)
+val gameLevel: MutableState<Int> = mutableStateOf(1)
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -35,8 +36,6 @@ fun GameScreen(navController : NavHostController) {
     val topBarOffset = animateDpAsState(targetValue = if (showScoreBoard) (-200).dp else 0.dp, animationSpec = tween(durationMillis = 2000))
     val scoreBoardOffset = animateDpAsState(targetValue = if (showScoreBoard) (-70).dp else (-1000).dp, animationSpec = tween(durationMillis = 500))
 
-    val currentLevel = remember { mutableStateOf(1) }
-    //Settings
     val spinSpeed = remember{ mutableStateOf(0f) }
     val randomSpeed = remember{ mutableStateOf(false) }
     val minSpeed = remember{ mutableStateOf(0) }
@@ -97,11 +96,11 @@ fun GameScreen(navController : NavHostController) {
 //        Log.d("game", "ticking with state: ${gameState.value}")
 
         if (gameState.value.isReset()) {
-            LevelUtil.updateLevelInfo(currentLevel.value, randomSpeed, spinSpeed, minSpeed, maxSpeed, remainingDaggers)
+            LevelUtil.updateLevelInfo(randomSpeed, spinSpeed, minSpeed, maxSpeed, remainingDaggers)
             daggerState.reset()
             spinnerState.reset()
             gameState.value.setRunning()
-            Log.d("game", "[Level Information]\nlevel: ${currentLevel.value}\nrandomSpeed: ${randomSpeed.value}\nspinSpeed: ${spinSpeed.value}\nminSpeed: ${minSpeed.value}\nmaxSpeed: ${maxSpeed.value}\nnumberOfDaggers: ${remainingDaggers.value}")
+            Log.d("game", "[Level Information]\nlevel: ${gameLevel.value}\nrandomSpeed: ${randomSpeed.value}\nspinSpeed: ${spinSpeed.value}\nminSpeed: ${minSpeed.value}\nmaxSpeed: ${maxSpeed.value}\nnumberOfDaggers: ${remainingDaggers.value}")
         } else if (gameState.value.isShooting() || gameState.value.isNextLevel()) {
             daggerState.shoot()
         } else if (gameState.value.isLosing()) {
@@ -115,7 +114,7 @@ fun GameScreen(navController : NavHostController) {
     }
 
     //Top Bar
-    DrawTopBar(currentLevel, topBarOffset)
+    DrawTopBar(topBarOffset)
 
     //Score Board
     DrawScoreBoard(navController, scoreBoardOffset)
