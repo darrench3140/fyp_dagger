@@ -20,7 +20,8 @@ object StatusBarUtil {
 }
 
 object LevelUtil {
-    fun updateLevelInfo(level: Int, randomSpeed: MutableState<Boolean>, spinSpeed: MutableState<Float>, minSpeed: MutableState<Int>, maxSpeed: MutableState<Int>, remainingDaggers: MutableState<Int>) {
+    fun updateLevelInfo(randomSpeed: MutableState<Boolean>, spinSpeed: MutableState<Float>, minSpeed: MutableState<Int>, maxSpeed: MutableState<Int>, remainingDaggers: MutableState<Int>) {
+        val level = gameLevel.value
         var clockwise = if((0..1).random() == 0) -1 else 1
         randomSpeed.value = level >= 5
         spinSpeed.value = ((level + (2..4).random()) * clockwise).toFloat()
