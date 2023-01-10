@@ -31,7 +31,7 @@ fun GameScreen(navController : NavHostController) {
     //Animations
     val animation = remember{ Animatable(initialValue = 0f) }
     var showScoreBoard by remember { mutableStateOf(false) }
-    val uiAlpha = animateFloatAsState(targetValue = if(showScoreBoard) 0f else 1f, animationSpec = tween(durationMillis = 500))
+    val uiAlpha = animateFloatAsState(targetValue = if(showScoreBoard || gameState.value.isNextLevel()) 0f else 1f, animationSpec = tween(durationMillis = 100))
     val topBarOffset = animateDpAsState(targetValue = if (showScoreBoard) (-200).dp else 0.dp, animationSpec = tween(durationMillis = 2000))
     val scoreBoardOffset = animateDpAsState(targetValue = if (showScoreBoard) (-70).dp else (-1000).dp, animationSpec = tween(durationMillis = 500))
 
@@ -67,10 +67,15 @@ fun GameScreen(navController : NavHostController) {
             delay(2000)
         }
     }
+    // score board controller coroutine
     LaunchedEffect(gameState.value.isStopped()) {
         showScoreBoard = gameState.value.isStopped()
     }
-
+    LaunchedEffect(gameState.value.isNextLevel() {
+        if (gameState.value.isNextLevel()) {
+            
+        }
+    }
 
     DrawBackground()
     Canvas(modifier = Modifier
@@ -98,6 +103,8 @@ fun GameScreen(navController : NavHostController) {
             Log.d("game", "[Level Information]\nlevel: ${currentLevel.value}\nrandomSpeed: ${randomSpeed.value}\nspinSpeed: ${spinSpeed.value}\nminSpeed: ${minSpeed.value}\nmaxSpeed: ${maxSpeed.value}\nnumberOfDaggers: ${remainingDaggers.value}")
         } else if (gameState.value.isShooting()) {
             daggerState.shoot()
+        } else if (gameState.value.isNextLevel) {
+            daggerState.move()
         } else if (gameState.value.isLosing()) {
             spinSpeed.value = 0f
             daggerState.drop()
