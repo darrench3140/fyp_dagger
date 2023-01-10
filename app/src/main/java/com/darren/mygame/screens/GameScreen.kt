@@ -3,27 +3,21 @@ package com.darren.mygame.screens
 import android.util.Log
 import android.view.MotionEvent
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.res.imageResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.darren.mygame.*
+import com.darren.mygame.R
 import com.darren.mygame.states.*
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import kotlinx.coroutines.delay
@@ -35,35 +29,36 @@ val gameScore: MutableState<Int> = mutableStateOf(0)
 @Composable
 fun GameScreen(navController : NavHostController) {
     //Animations
-    val startGameAnim = remember{ mutableStateOf(true) }
     val animation = remember{ Animatable(initialValue = 0f) }
+    var showScoreBoard by remember { mutableStateOf(false) }
+    val uiAlpha = animateFloatAsState(targetValue = if(showScoreBoard) 0f else 1f, animationSpec = tween(durationMillis = 500))
+    val topBarOffset = animateDpAsState(targetValue = if (showScoreBoard) (-200).dp else 0.dp, animationSpec = tween(durationMillis = 2000))
+    val scoreBoardOffset = animateDpAsState(targetValue = if (showScoreBoard) (-70).dp else (-1000).dp, animationSpec = tween(durationMillis = 500))
 
     val currentLevel = remember { mutableStateOf(1) }
     //Settings
-    val spinSpeed = remember{ mutableStateOf(3f) }
+    val spinSpeed = remember{ mutableStateOf(0f) }
     val randomSpeed = remember{ mutableStateOf(false) }
-    val minSpeed = remember{ mutableStateOf(1) }
-    val maxSpeed = remember{ mutableStateOf(5) }
-    val remainingDaggers = remember{ mutableStateOf(8) }
+    val minSpeed = remember{ mutableStateOf(0) }
+    val maxSpeed = remember{ mutableStateOf(0) }
+    val remainingDaggers = remember{ mutableStateOf(0) }
 
     val dagger = ImageBitmap.imageResource(id = daggerImg)
     val spinner = ImageBitmap.imageResource(id = spinnerImg)
+    val remainingDagger = ImageBitmap.imageResource(id = R.drawable.remaining_dagger)
 
-    val daggerState = remember { DaggerState(dagger, spinSpeed, remainingDaggers) }
-    val spinnerState = remember { SpinnerState(spinner, spinSpeed) }
+    val daggerState = remember { DaggerState(dagger, spinSpeed, remainingDaggers, uiAlpha) }
+    val spinnerState = remember { SpinnerState(spinner, spinSpeed, uiAlpha) }
+    val remainingDaggerState = remember { RemainingDaggerState(remainingDagger, remainingDaggers) }
 
     // game animation controller coroutine
-    LaunchedEffect(startGameAnim.value) {
-        if (startGameAnim.value) {
-            animation.animateTo(
-                targetValue = 1f,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(durationMillis = 250, easing = LinearEasing)
-                )
+    LaunchedEffect(true) {
+        animation.animateTo(
+            targetValue = 1f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(durationMillis = 250, easing = LinearEasing)
             )
-        } else {
-            animation.stop()
-        }
+        )
     }
     // spin speed controller coroutine
     LaunchedEffect(randomSpeed.value) {
@@ -71,10 +66,9 @@ fun GameScreen(navController : NavHostController) {
             spinSpeed.value = (minSpeed.value..maxSpeed.value).random().toFloat()
             delay(2000)
         }
-        if (!randomSpeed.value) { spinSpeed.value = 3f }
     }
     LaunchedEffect(gameState.value.isStopped()) {
-        Log.d("game", "stopped ${gameState.value.isStopped()}")
+        showScoreBoard = gameState.value.isStopped()
     }
 
 
@@ -92,13 +86,16 @@ fun GameScreen(navController : NavHostController) {
             true
         }) {
         animation.value //use to maintain animation loop
+//        Log.d("game", "ticking with state: ${gameState.value}")
 
         if (gameState.value.isReset()) {
-            daggerState.reset()
-            gameScore.value = 0
             currentLevel.value = 1
             LevelUtil.updateLevelInfo(currentLevel.value, randomSpeed, spinSpeed, minSpeed, maxSpeed, remainingDaggers)
+            daggerState.reset()
+            spinnerState.reset()
+            gameScore.value = 0
             gameState.value.setRunning()
+            Log.d("game", "[Level Information]\nlevel: ${currentLevel.value}\nrandomSpeed: ${randomSpeed.value}\nspinSpeed: ${spinSpeed.value}\nminSpeed: ${minSpeed.value}\nmaxSpeed: ${maxSpeed.value}\nnumberOfDaggers: ${remainingDaggers.value}")
         } else if (gameState.value.isShooting()) {
             daggerState.shoot()
         } else if (gameState.value.isLosing()) {
@@ -111,31 +108,11 @@ fun GameScreen(navController : NavHostController) {
         spinnerState.draw(this)
     }
 
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .padding(vertical = 40.dp)
-    ) {
-        Spacer(modifier = Modifier.weight(0.1f))
-        Text( //Score
-            text = gameScore.value.toString(),
-            modifier = Modifier.weight(0.2f),
-            fontSize = 30.sp,
-            fontWeight = FontWeight.Bold,
-            fontFamily = myFont,
-            color = Color(0xFFFFB26B),
-        )
-        Spacer(modifier = Modifier.weight(0.2f))
-        Text(
-            text = "STAGE ${currentLevel.value}",
-            fontSize = 30.sp,
-            fontFamily = myFont,
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFFF1F6F5)
-        )
-        Spacer(modifier = Modifier.weight(0.5f))
-    }
+    //Top Bar
+    DrawTopBar(currentLevel, topBarOffset)
 
+    //Score Board
+    DrawScoreBoard(navController, scoreBoardOffset)
 }
 
 fun DrawScope.midX(): Float { return ((size.width) / 2) }

@@ -28,7 +28,7 @@ fun LandingScreen(navController : NavHostController) {
         DrawDagger(modifier = Modifier
             .size(120.dp)
             .offset(y = (-80).dp))
-        DrawButton("Play", 0.dp, (-90).dp) {
+        DrawButton(text = "PLAY", offsetY = (-90).dp) {
             gameState.value.setReset()
             navController.navigate(ScreenManager.GameScreen.route)
         }

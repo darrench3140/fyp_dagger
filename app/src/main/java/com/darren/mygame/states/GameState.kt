@@ -2,7 +2,7 @@ package com.darren.mygame.states
 
 import com.darren.mygame.screens.gameState
 
-data class GameState(private val status: Status = Status.RUNNING) {
+data class GameState(private val status: Status = Status.RESET) {
     enum class Status {
         RESET,
         RUNNING,
