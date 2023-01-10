@@ -51,7 +51,7 @@ data class DaggerState(val image: ImageBitmap, val spinSpeed: MutableState<Float
             } else {
                 gameScore.value++
                 if (remainingDaggers.value <= 1) {
-                    gameState.value.setLevelUp()
+                    gameState.value.setNextLevel()
                 } else {
                     remainingDaggers.value--
                     daggerList.add(currentDagger)
