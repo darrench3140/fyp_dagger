@@ -17,7 +17,7 @@ data class RemainingDaggerState(val image: ImageBitmap, val remainingDaggers: Mu
     }
 
     private fun DrawScope.drawCanvas() {
-        (1..remainingDaggers.value).forEach{
+        (1 .. remainingDaggers.value).forEach{
 
             drawImage(
                 image = image,

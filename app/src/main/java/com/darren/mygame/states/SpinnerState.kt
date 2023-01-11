@@ -2,23 +2,25 @@ package com.darren.mygame.states
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
-import com.darren.mygame.R
 import com.darren.mygame.screens.gameState
 import com.darren.mygame.screens.midX
 import com.darren.mygame.screens.midY
 
-var spinnerImg = R.drawable.spinner1
-
-data class SpinnerState(val image: ImageBitmap, var spinSpeed: MutableState<Float>, val uiAlpha: State<Float>) {
+data class SpinnerState(
+    val image: MutableState<ImageBitmap>,
+    val cover: ImageBitmap,
+    var spinSpeed: MutableState<Float>,
+    val uiAlpha: State<Float>,
+    val hitOffset: State<Float>
+) {
     private val imgWidth = 220
     private val imgHeight = 220
+    private val imgSize = IntSize(imgWidth, imgHeight)
 
     private var currentRotation = 0f
 
@@ -31,21 +33,26 @@ data class SpinnerState(val image: ImageBitmap, var spinSpeed: MutableState<Floa
     }
 
     private fun DrawScope.drawCanvas() {
-        val offset = if (gameState.value.isShooting()) 20f else 0f
-        val saturation = if (gameState.value.isShooting()) 1.5f else 1f
         currentRotation += spinSpeed.value
         withTransform({
-            translate(0f, -250f - offset)
+            translate(0f, -250f - hitOffset.value)
             rotate(currentRotation)
         }) {
             drawImage(
-                image = image,
+                image = image.value,
                 srcOffset = IntOffset.Zero,
-                srcSize = IntSize(imgWidth, imgHeight),
+                srcSize = imgSize,
                 dstOffset = IntOffset(midX().toInt() - imgWidth, midY().toInt() - imgHeight),
-                dstSize = IntSize(imgWidth * 2, imgHeight * 2),
-                colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(saturation) }),
+                dstSize = imgSize * 2,
                 alpha = uiAlpha.value
+            )
+            drawImage(
+                image = cover,
+                srcOffset = IntOffset.Zero,
+                srcSize = imgSize,
+                dstOffset = IntOffset(midX().toInt() - imgWidth, midY().toInt() - imgHeight),
+                dstSize = imgSize * 2,
+                alpha = if(gameState.value.isShooting()) 0.6f else 0f
             )
         }
     }

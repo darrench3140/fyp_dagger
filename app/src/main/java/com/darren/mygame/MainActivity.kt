@@ -16,6 +16,7 @@ import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 
 var screenHeight: Dp = 0.dp
 var screenWidth: Dp = 0.dp
+val spinnerUtil = SpinnerUtil()
 
 class MainActivity : ComponentActivity() {
 
@@ -28,7 +29,7 @@ class MainActivity : ComponentActivity() {
             val configuration = LocalConfiguration.current
             screenHeight = configuration.screenHeightDp.dp
             screenWidth = configuration.screenWidthDp.dp
-
+            spinnerUtil.initList()
             val navController = rememberAnimatedNavController()
             AnimatedNavHost(
                 navController = navController,
