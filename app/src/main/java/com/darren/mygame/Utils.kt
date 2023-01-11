@@ -2,7 +2,6 @@ package com.darren.mygame
 
 import android.app.Activity
 import android.graphics.Color
-import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import androidx.compose.runtime.Composable
@@ -10,7 +9,6 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.res.imageResource
 import com.darren.mygame.screens.gameLevel
-import com.darren.mygame.states.DaggerState
 
 object StatusBarUtil {
     fun transparentStatusBar(activity: Activity) {
@@ -37,24 +35,27 @@ object LevelUtil {
     }
 }
 
-
-
-//    fun getRandomSpinner(): ImageBitmap {
-//        return when ((1..2).random()) {
-//            1 -> ImageBitmap.imageResource(id = R.drawable.spinner1)
-//            2 -> ImageBitmap.imageResource(id = R.drawable.spinner2)
-//            else -> ImageBitmap.imageResource(id = R.drawable.spinner0)
-//        }
-//    }
-data class SpinnerUtil(
-    val totalSpinners: Int = 2,
-) {
+data class SpinnerUtil(val totalSpinners: Int = 16) {
     private val spinnerList: MutableList<ImageBitmap> = emptyList<ImageBitmap>().toMutableList()
 
     private fun getSpinner(id: Int): Int {
         return when(id) {
             1 -> R.drawable.spinner1
             2 -> R.drawable.spinner2
+            3 -> R.drawable.spinner3
+            4 -> R.drawable.spinner4
+            5 -> R.drawable.spinner5
+            6 -> R.drawable.spinner6
+            7 -> R.drawable.spinner7
+            8 -> R.drawable.spinner8
+            9 -> R.drawable.spinner9
+            10 -> R.drawable.spinner10
+            11 -> R.drawable.spinner11
+            12 -> R.drawable.spinner12
+            13 -> R.drawable.spinner13
+            14 -> R.drawable.spinner14
+            15 -> R.drawable.spinner15
+            16 -> R.drawable.spinner16
             else -> R.drawable.spinner0
         }
     }

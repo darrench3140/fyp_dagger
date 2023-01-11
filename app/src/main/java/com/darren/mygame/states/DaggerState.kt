@@ -72,7 +72,7 @@ data class DaggerState(
         currentDagger.rotation += 10f
         currentDagger.translation += dropVelocity
         if (currentDagger.translation > 1200f) {
-            gameState.value.setStopped()
+            gameState.value.setOver()
         }
     }
 

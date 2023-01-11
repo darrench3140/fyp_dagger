@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,9 +20,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.darren.mygame.screens.gameReset
-import com.darren.mygame.screens.gameLevel
-import com.darren.mygame.screens.gameScore
+import com.darren.mygame.screens.*
 import com.darren.mygame.states.daggerImg
 
 val myFont = FontFamily(Font(R.font.nineteenth))
@@ -116,7 +115,7 @@ fun DrawReturnButton(offsetX: Dp = 0.dp, offsetY: Dp = 0.dp, onClick: () -> Unit
 fun DrawTopBar(topBarOffset: State<Dp>) {
     Row(
         Modifier
-            .fillMaxWidth()
+            .fillMaxSize()
             .padding(vertical = 40.dp)
             .offset(0.dp, topBarOffset.value)
     ) {
@@ -142,7 +141,29 @@ fun DrawTopBar(topBarOffset: State<Dp>) {
 }
 
 @Composable
-fun DrawScoreBoard(navController: NavHostController, scoreBoardOffset: State<Dp>) {
+fun DrawTopFruit() {
+    Row(
+        modifier = Modifier.fillMaxSize().padding(vertical = 40.dp),
+        horizontalArrangement = Arrangement.End
+    ) {
+        Text(
+            text = fruitCount.value.toString(),
+            modifier = Modifier.offset(x = (-25).dp),
+            fontSize = 30.sp,
+            fontWeight = FontWeight.Bold,
+            fontFamily = myFont,
+            color = Color(0xFFF1F6F5),
+        )
+        Image(
+            painter = painterResource(id = R.drawable.fruit_crack),
+            contentDescription = "fruit_top_bar",
+            modifier = Modifier.size(30.dp).offset(x = (-20).dp)
+        )
+    }
+}
+
+@Composable
+fun DrawScoreBoard(navController: NavHostController, scoreBoardOffset: State<Dp>, showTopScore: MutableState<Boolean>) {
     Box(modifier = Modifier
         .fillMaxSize()
         .offset(y = scoreBoardOffset.value)
@@ -152,7 +173,16 @@ fun DrawScoreBoard(navController: NavHostController, scoreBoardOffset: State<Dp>
             contentDescription = "score_board",
             modifier = Modifier
                 .align(Alignment.Center)
-                .size(screenWidth - 50.dp)
+                .size(345.dp)
+        )
+        Image(
+            painter = painterResource(id = R.drawable.top_score),
+            contentDescription = "top_score",
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .offset(x = (-5).dp, y = 100.dp)
+                .size(130.dp),
+            alpha = if(showTopScore.value) 1f else 0f
         )
         Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
             Text(
@@ -163,7 +193,7 @@ fun DrawScoreBoard(navController: NavHostController, scoreBoardOffset: State<Dp>
                 fontWeight = FontWeight.Bold,
             )
             Text(
-                text = gameScore.value.toString(),
+                text = lastScore.value.toString(),
                 fontSize = 60.sp,
                 color = Color(0xFFF1F6F5),
                 fontFamily = myFont,
@@ -172,6 +202,7 @@ fun DrawScoreBoard(navController: NavHostController, scoreBoardOffset: State<Dp>
         }
         DrawButton(text = "RESTART", offsetY = 280.dp) {
             gameReset()
+            showTopScore.value = false
         }
         DrawReturnButton(offsetX = -(150).dp, offsetY = 400.dp) {
             navController.popBackStack()

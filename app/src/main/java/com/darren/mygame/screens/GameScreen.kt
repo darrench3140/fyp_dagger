@@ -25,18 +25,23 @@ import kotlinx.coroutines.delay
 val gameState: MutableState<GameState> = mutableStateOf(GameState())
 val gameScore: MutableState<Int> = mutableStateOf(0)
 val gameLevel: MutableState<Int> = mutableStateOf(1)
+val lastScore: MutableState<Int> = mutableStateOf(0)
+val maxScore: MutableState<Int> = mutableStateOf(0)
+val fruitCount: MutableState<Int> = mutableStateOf(0)
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun GameScreen(navController : NavHostController) {
     //Animations
     val animation = remember{ Animatable(initialValue = 0f) }
-    val uiAlpha = animateFloatAsState(targetValue = if(gameState.value.isStopped() || gameState.value.isLeveling()) 0f else 1f, animationSpec = tween(durationMillis = 500))
-    val uiAlpha2 = animateFloatAsState(targetValue = if(gameState.value.isStopped() || gameState.value.isLeveling()) 0f else 1f, animationSpec = tween(durationMillis = 100))
-    val topBarOffset = animateDpAsState(targetValue = if (gameState.value.isStopped()) (-200).dp else 0.dp, animationSpec = tween(durationMillis = 2000))
-    val scoreBoardOffset = animateDpAsState(targetValue = if (gameState.value.isStopped()) (-70).dp else (-1000).dp, animationSpec = tween(durationMillis = 500))
+    val uiAlpha = animateFloatAsState(targetValue = if(gameState.value.isOver() || gameState.value.isLeveling()) 0f else 1f, animationSpec = tween(durationMillis = 500))
+    val uiAlpha2 = animateFloatAsState(targetValue = if(gameState.value.isOver() || gameState.value.isLeveling()) 0f else 1f, animationSpec = tween(durationMillis = 100))
+    val topBarOffset = animateDpAsState(targetValue = if (gameState.value.isOver()) (-200).dp else 0.dp, animationSpec = tween(durationMillis = 2000))
+    val scoreBoardOffset = animateDpAsState(targetValue = if (gameState.value.isOver()) (-70).dp else (-1000).dp, animationSpec = tween(durationMillis = 500))
+    val showTopScore = remember{ mutableStateOf(false) }
     val hit = remember{ mutableStateOf(false) }
-    val hitOffset = animateFloatAsState(targetValue = if (hit.value) 20f else 0f, animationSpec = if (!hit.value) tween(durationMillis = 100) else tween(durationMillis = 0))
+    val hitOffset = animateFloatAsState(targetValue = if (hit.value) 20f else 0f, animationSpec = tween(durationMillis = if (!hit.value) 100 else 0))
+    val hitAlpha = animateFloatAsState(targetValue = if (hit.value) 0.6f else 0f, animationSpec = tween(durationMillis = if (!hit.value) 10 else 0))
     //Game Settings
     val randomSpeed = remember{ mutableStateOf(false) }
     val clockwise = remember{ mutableStateOf(false) }
@@ -47,11 +52,9 @@ fun GameScreen(navController : NavHostController) {
     //Game Resources
     val dagger = ImageBitmap.imageResource(id = daggerImg)
     val daggerState = remember { DaggerState(dagger, spinSpeed, remainingDaggers, uiAlpha2, hitOffset) }
-
     val spinner = remember{ mutableStateOf(spinnerUtil.getRandomSpinner()) }
     val cover = ImageBitmap.imageResource(id = R.drawable.spinner0)
-    val spinnerState = remember { SpinnerState(spinner, cover, spinSpeed, uiAlpha, hitOffset) }
-
+    val spinnerState = remember { SpinnerState(spinner, cover, spinSpeed, uiAlpha, hitAlpha, hitOffset) }
     val remainingDagger = ImageBitmap.imageResource(id = R.drawable.remaining_dagger)
     val remainingDaggerState = remember { RemainingDaggerState(remainingDagger, remainingDaggers, uiAlpha) }
 
@@ -71,12 +74,26 @@ fun GameScreen(navController : NavHostController) {
             delay(2000)
         }
     }
-    // level up action coroutine
-    LaunchedEffect(gameState.value.isLeveling()) {
-        if (gameState.value.isLeveling()) {
+    // game state handling for important events
+    LaunchedEffect(gameState.value) {
+        if (gameState.value.isReset()) {
+            LevelUtil.updateLevelInfo(randomSpeed, clockwise, spinSpeed, minSpeed, maxSpeed, remainingDaggers)
+            spinSpeed.value *= if(clockwise.value) 1f else -1f
+            spinner.value = spinnerUtil.getRandomSpinner()
+            daggerState.reset()
+            spinnerState.reset()
+            gameState.value.setRunning()
+            Log.d("game", "[Level Information]\nlevel: ${gameLevel.value}\nrandomSpeed: ${randomSpeed.value}\nspinSpeed: ${spinSpeed.value}\nminSpeed: ${minSpeed.value}\nmaxSpeed: ${maxSpeed.value}\nnumberOfDaggers: ${remainingDaggers.value}")
+        } else if (gameState.value.isLeveling()) {
             gameLevel.value++
             delay(700)
             gameState.value.setReset()
+        } else if (gameState.value.isOver()) {
+            lastScore.value = gameScore.value
+            if (maxScore.value < gameScore.value) {
+                maxScore.value = gameScore.value
+                showTopScore.value = true
+            }
         }
     }
     // hit animation
@@ -103,15 +120,7 @@ fun GameScreen(navController : NavHostController) {
         animation.value //use to maintain animation loop
 //        Log.d("game", "ticking with state: ${gameState.value}")
 
-        if (gameState.value.isReset()) {
-            LevelUtil.updateLevelInfo(randomSpeed, clockwise, spinSpeed, minSpeed, maxSpeed, remainingDaggers)
-            spinSpeed.value *= if(clockwise.value) 1f else -1f
-            spinner.value = spinnerUtil.getRandomSpinner()
-            daggerState.reset()
-            spinnerState.reset()
-            gameState.value.setRunning()
-            Log.d("game", "[Level Information]\nlevel: ${gameLevel.value}\nrandomSpeed: ${randomSpeed.value}\nspinSpeed: ${spinSpeed.value}\nminSpeed: ${minSpeed.value}\nmaxSpeed: ${maxSpeed.value}\nnumberOfDaggers: ${remainingDaggers.value}")
-        } else if (gameState.value.isShooting() || gameState.value.isLeveling()) {
+        if (gameState.value.isShooting() || gameState.value.isLeveling()) {
             daggerState.shoot {
                 hit.value = true
             }
@@ -128,7 +137,7 @@ fun GameScreen(navController : NavHostController) {
     DrawTopBar(topBarOffset)
 
     //Score Board
-    DrawScoreBoard(navController, scoreBoardOffset)
+    DrawScoreBoard(navController, scoreBoardOffset, showTopScore)
 }
 
 fun DrawScope.midX(): Float { return ((size.width) / 2) }

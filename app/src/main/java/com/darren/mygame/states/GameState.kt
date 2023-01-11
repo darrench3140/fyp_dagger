@@ -9,7 +9,7 @@ data class GameState(private val status: Status = Status.RESET) {
         SHOOTING,
         LEVELING,
         LOSING,
-        STOPPED,
+        OVER,
     }
 
     fun isReset() = status == Status.RESET
@@ -17,12 +17,12 @@ data class GameState(private val status: Status = Status.RESET) {
     fun isShooting() = status == Status.SHOOTING
     fun isLeveling() = status == Status.LEVELING
     fun isLosing() = status == Status.LOSING
-    fun isStopped() = status == Status.STOPPED
+    fun isOver() = status == Status.OVER
 
     fun setReset() { gameState.value = GameState(Status.RESET) }
     fun setRunning() { gameState.value = GameState(Status.RUNNING) }
     fun setShooting() { gameState.value = GameState(Status.SHOOTING) }
     fun setLeveling() { gameState.value = GameState(Status.LEVELING) }
     fun setLosing() { gameState.value = GameState(Status.LOSING) }
-    fun setStopped() { gameState.value = GameState(Status.STOPPED) }
+    fun setOver() { gameState.value = GameState(Status.OVER) }
 }

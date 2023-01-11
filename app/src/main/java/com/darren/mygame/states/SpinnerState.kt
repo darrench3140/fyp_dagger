@@ -16,6 +16,7 @@ data class SpinnerState(
     val cover: ImageBitmap,
     var spinSpeed: MutableState<Float>,
     val uiAlpha: State<Float>,
+    val hitAlpha: State<Float>,
     val hitOffset: State<Float>
 ) {
     private val imgWidth = 220
@@ -52,7 +53,7 @@ data class SpinnerState(
                 srcSize = imgSize,
                 dstOffset = IntOffset(midX().toInt() - imgWidth, midY().toInt() - imgHeight),
                 dstSize = imgSize * 2,
-                alpha = if(gameState.value.isShooting()) 0.6f else 0f
+                alpha = hitAlpha.value
             )
         }
     }

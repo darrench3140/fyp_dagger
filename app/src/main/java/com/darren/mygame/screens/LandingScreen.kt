@@ -1,10 +1,7 @@
 package com.darren.mygame.screens
 
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -17,6 +14,7 @@ import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 @Composable
 fun LandingScreen(navController : NavHostController) {
     DrawBackground()
+    DrawTopFruit()
     Column(
         modifier = Modifier
             .fillMaxSize(),
