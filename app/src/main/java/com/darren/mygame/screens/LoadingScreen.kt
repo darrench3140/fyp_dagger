@@ -1,6 +1,5 @@
 package com.darren.mygame.screens
 
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -12,13 +11,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.darren.mygame.DrawBackground
 import com.darren.mygame.DrawLogo
 import com.darren.mygame.DrawSword
-import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import kotlinx.coroutines.delay
 
 @Composable
@@ -67,11 +64,4 @@ fun LoadingScreen(navController: NavHostController) {
             .offset(y = logoMoveAnim.value), alpha = logoAlphaAnim.value
         )
     }
-}
-
-@OptIn(ExperimentalAnimationApi::class)
-@Preview
-@Composable
-fun PreviewLoadingScreen() {
-    LoadingScreen(navController = rememberAnimatedNavController())
 }

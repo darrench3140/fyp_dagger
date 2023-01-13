@@ -2,7 +2,6 @@ package com.darren.mygame.screens
 
 import android.util.Log
 import android.view.MotionEvent
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
@@ -13,20 +12,17 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.res.imageResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.darren.mygame.*
 import com.darren.mygame.R
 import com.darren.mygame.states.*
-import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import kotlinx.coroutines.delay
 
 //Global variables
 val gameState: MutableState<GameState> = mutableStateOf(GameState())
 val gameScore: MutableState<Int> = mutableStateOf(0)
 val gameLevel: MutableState<Int> = mutableStateOf(1)
-val lastScore: MutableState<Int> = mutableStateOf(0)
 
 //Game Settings
 val maxScore: MutableState<Int> = mutableStateOf(0)
@@ -34,7 +30,7 @@ val fruitCount: MutableState<Int> = mutableStateOf(0)
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun GameScreen(navController : NavHostController) {
+fun GameScreen(navController: NavHostController) {
     //Animations
     val animation = remember{ Animatable(initialValue = 0f) }
     val uiAlpha = animateFloatAsState(targetValue = if(gameState.value.isOver() || gameState.value.isLeveling()) 0f else 1f, animationSpec = tween(durationMillis = 500))
@@ -59,7 +55,7 @@ fun GameScreen(navController : NavHostController) {
     val spinnerState = remember { SpinnerState(spinner, cover, spinSpeed, uiAlpha, hitAlpha, hitOffset) }
     val remainingDagger = ImageBitmap.imageResource(id = R.drawable.remaining_dagger)
     val remainingDaggerState = remember { RemainingDaggerState(remainingDagger, remainingDaggers, uiAlpha) }
-
+    val lastScore = remember{ mutableStateOf(0) }
     // game animation controller coroutine
     LaunchedEffect(true) {
         animation.animateTo(
@@ -140,7 +136,7 @@ fun GameScreen(navController : NavHostController) {
     DrawTopFruit()
 
     //Score Board
-    DrawScoreBoard(navController, scoreBoardOffset, showTopScore)
+    DrawScoreBoard(navController, scoreBoardOffset, showTopScore, lastScore)
 }
 
 fun DrawScope.midX(): Float { return ((size.width) / 2) }
@@ -150,11 +146,4 @@ fun gameReset() {
     gameScore.value = 0
     gameLevel.value = 1
     gameState.value.setReset()
-}
-
-@OptIn(ExperimentalAnimationApi::class)
-@Preview
-@Composable
-fun PreviewGame() {
-    GameScreen(navController = rememberAnimatedNavController())
 }

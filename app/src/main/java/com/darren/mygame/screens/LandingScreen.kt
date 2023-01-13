@@ -1,26 +1,25 @@
 package com.darren.mygame.screens
 
-import androidx.compose.animation.ExperimentalAnimationApi
+import android.os.SystemClock
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.darren.mygame.*
-import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import kotlinx.coroutines.delay
 
 @Composable
-fun LandingScreen(navController : NavHostController) {
+fun LandingScreen(navController: NavHostController) {
     val moveUp = remember { mutableStateOf(false) }
     val logoOffset = animateDpAsState(targetValue = if(moveUp.value) 10.dp else 0.dp, animationSpec = tween(durationMillis = 1000))
+    var lastClickTime by remember { mutableStateOf(0L) }
 
     LaunchedEffect(true) {
         while(true) {
@@ -33,26 +32,27 @@ fun LandingScreen(navController : NavHostController) {
     DrawBackground()
     DrawTopFruit()
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        DrawLogo(modifier = Modifier.align(Alignment.Center)
+        DrawLogo(modifier = Modifier
+            .align(Alignment.Center)
             .size(300.dp)
-            .offset(y = (-180).dp - logoOffset.value)
+            .offset(y = -screenHeight.times(0.25f) - logoOffset.value)
         )
         DrawDagger(modifier = Modifier
-            .size(120.dp)
-            .offset(y = 80.dp)
+            .size(140.dp)
+            .offset(y = screenHeight.times(0.03f))
         )
-        DrawButton(text = "PLAY", offsetY = 200.dp) {
-            gameReset()
-            navController.navigate("game_screen")
+        DrawButton(text = "PLAY", offsetY = screenHeight.times(0.22f)) {
+            if (SystemClock.elapsedRealtime() - lastClickTime > 2000L) {
+                gameReset()
+                navController.navigate("game_screen")
+                lastClickTime = SystemClock.elapsedRealtime()
+            }
+        }
+        DrawShopButton(offsetY = screenHeight.times(0.35f)) {
+            if (SystemClock.elapsedRealtime() - lastClickTime > 2000L) {
+                navController.navigate("shop_screen")
+                lastClickTime = SystemClock.elapsedRealtime()
+            }
         }
     }
-}
-
-
-
-@OptIn(ExperimentalAnimationApi::class)
-@Preview
-@Composable
-fun PreviewAct() {
-    LandingScreen(navController = rememberAnimatedNavController())
 }

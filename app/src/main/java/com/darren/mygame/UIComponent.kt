@@ -7,10 +7,14 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
@@ -20,7 +24,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.darren.mygame.screens.*
+import com.darren.mygame.screens.fruitCount
+import com.darren.mygame.screens.gameLevel
+import com.darren.mygame.screens.gameReset
+import com.darren.mygame.screens.gameScore
 
 val myFont = FontFamily(Font(R.font.nineteenth))
 
@@ -95,7 +102,45 @@ fun DrawButton(text: String, offsetX: Dp = 0.dp, offsetY: Dp = 0.dp, onClick: ()
 }
 
 @Composable
-fun DrawReturnButton(offsetX: Dp = 0.dp, offsetY: Dp = 0.dp, onClick: () -> Unit) {
+fun DrawShopButton(offsetY: Dp, onClick: () -> Unit) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        Image(
+            painter = painterResource(id = R.drawable.shop_button_bg),
+            contentDescription = "shop_bg",
+            modifier = Modifier.align(Alignment.Center).size(55.dp).offset(y = offsetY).clickable { onClick() }
+        )
+        Image(
+            painter = painterResource(id = R.drawable.shop_button_fg),
+            contentDescription = "shop_fg",
+            modifier = Modifier.align(Alignment.Center).size(40.dp).offset(y = offsetY)
+        )
+    }
+}
+@Composable
+fun DrawShopLight(lightAlpha: State<Float> = mutableStateOf(1f), rotation: Float) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        val shopLightFilter = floatArrayOf(
+            1f, 0f, 0f, 0f, 255f,
+            0f, 1f, 0f, 0f, 255f,
+            0f, 0f, 1f, 0f, 255f,
+            0f, 0f, 0f, 1f, 0f
+        )
+        Image(
+            painter = painterResource(id = R.drawable.shop_light),
+            contentDescription = "shop_light",
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .offset(y = screenHeight.times(0.1f))
+                .size(180.dp)
+                .rotate(rotation),
+            colorFilter = ColorFilter.colorMatrix(ColorMatrix(shopLightFilter)),
+            alpha = lightAlpha.value
+        )
+    }
+}
+
+@Composable
+fun DrawReturnButton(offsetX: Dp = 50.dp, offsetY: Dp = 0.dp, onClick: () -> Unit) {
     Box(modifier = Modifier
         .fillMaxSize()
         .offset(offsetX, offsetY)) {
@@ -103,7 +148,7 @@ fun DrawReturnButton(offsetX: Dp = 0.dp, offsetY: Dp = 0.dp, onClick: () -> Unit
             painter = painterResource(id = R.drawable.return_button),
             contentDescription = "return menu",
             modifier = Modifier
-                .align(Alignment.Center)
+                .align(Alignment.BottomStart)
                 .scale(2.5f)
                 .clickable { onClick() }
         )
@@ -142,7 +187,9 @@ fun DrawTopBar(topBarOffset: State<Dp>) {
 @Composable
 fun DrawTopFruit() {
     Row(
-        modifier = Modifier.fillMaxSize().padding(vertical = 40.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(vertical = 40.dp),
         horizontalArrangement = Arrangement.End
     ) {
         Text(
@@ -156,13 +203,20 @@ fun DrawTopFruit() {
         Image(
             painter = painterResource(id = R.drawable.fruit_crack),
             contentDescription = "fruit_top_bar",
-            modifier = Modifier.size(30.dp).offset(x = (-20).dp)
+            modifier = Modifier
+                .size(30.dp)
+                .offset(x = (-20).dp)
         )
     }
 }
 
 @Composable
-fun DrawScoreBoard(navController: NavHostController, scoreBoardOffset: State<Dp>, showTopScore: MutableState<Boolean>) {
+fun DrawScoreBoard(
+    navController: NavHostController,
+    scoreBoardOffset: State<Dp>,
+    showTopScore: MutableState<Boolean>,
+    lastScore: MutableState<Int>
+) {
     Box(modifier = Modifier
         .fillMaxSize()
         .offset(y = scoreBoardOffset.value)
@@ -203,7 +257,7 @@ fun DrawScoreBoard(navController: NavHostController, scoreBoardOffset: State<Dp>
             gameReset()
             showTopScore.value = false
         }
-        DrawReturnButton(offsetX = -(150).dp, offsetY = 400.dp) {
+        DrawReturnButton(offsetY = 20.dp) {
             navController.popBackStack()
         }
     }

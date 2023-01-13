@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.dp
 import com.darren.mygame.screens.GameScreen
 import com.darren.mygame.screens.LandingScreen
 import com.darren.mygame.screens.LoadingScreen
+import com.darren.mygame.screens.ShopScreen
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
@@ -36,13 +37,13 @@ class MainActivity : ComponentActivity() {
             val navController = rememberAnimatedNavController()
             AnimatedNavHost(
                 navController = navController,
-                startDestination = "loading_screen"
+                startDestination = "landing_screen"
             ) {
                 composable(
                     route = "loading_screen",
                     exitTransition = { fadeOut(animationSpec = tween(durationMillis = 5000)) },
                 ) {
-                    LoadingScreen(navController = navController)
+                    LoadingScreen(navController)
                 }
                 composable(
                     route = "landing_screen",
@@ -50,16 +51,27 @@ class MainActivity : ComponentActivity() {
                         "game_screen" -> slideIntoContainer(AnimatedContentScope.SlideDirection.Right, animationSpec = tween(500))
                         else -> fadeIn(animationSpec = tween(500))
                     }},
-                    exitTransition = { slideOutOfContainer(AnimatedContentScope.SlideDirection.Left, animationSpec = tween(500))},
+                    exitTransition = { when (targetState.destination.route) {
+                        "game_screen" -> slideOutOfContainer(AnimatedContentScope.SlideDirection.Left, animationSpec = tween(500))
+                        else -> fadeOut(animationSpec = tween(100, 500))
+                    }}
                 ) {
-                    LandingScreen(navController = navController)
+                    LandingScreen(navController)
                 }
                 composable(
                     route = "game_screen",
                     enterTransition = { slideIntoContainer(AnimatedContentScope.SlideDirection.Left, animationSpec = tween(500))},
+                    exitTransition = { fadeOut(animationSpec = tween(5000)) },
                     popExitTransition = { slideOutOfContainer(AnimatedContentScope.SlideDirection.Right, animationSpec = tween(500))},
                 ) {
-                    GameScreen(navController = navController)
+                    GameScreen(navController)
+                }
+                composable(
+                    route = "shop_screen",
+                    enterTransition = { slideIntoContainer(AnimatedContentScope.SlideDirection.Up, animationSpec = tween(500))},
+                    popExitTransition = { slideOutOfContainer(AnimatedContentScope.SlideDirection.Down, animationSpec = tween(500, 500))}
+                ) {
+                    ShopScreen(navController)
                 }
             }
         }
