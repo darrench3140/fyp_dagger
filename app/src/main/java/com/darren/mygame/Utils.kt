@@ -45,9 +45,8 @@ data class SpinnerUtil(val totalSpinners: Int = 16) {
             spinnerList.add(ImageBitmap.imageResource(id = getSpinner(it)))
         }
     }
-    fun getRandomSpinner(): ImageBitmap {
-        return spinnerList[(0 until totalSpinners).random()]
-    }
+    fun getRandomSpinner(): ImageBitmap = spinnerList[(0 until totalSpinners).random()]
+
     private fun getSpinner(id: Int): Int {
         return when(id) {
             1 -> R.drawable.spinner1
@@ -83,15 +82,12 @@ data class DaggerUtil(val totalDaggers: Int = 16) {
         (1..totalDaggers).forEach{ daggerList.add(ImageBitmap.imageResource(id = getDagger(it))) }
         (1..totalDaggers).forEach{ lockedList.add(ImageBitmap.imageResource(id = getLocked(it)))}
     }
-    fun getRandomDagger(): ImageBitmap {
-        return daggerList[(0 until totalDaggers).random()]
-    }
-    fun getDaggerID(): Int {
-        return getDagger(daggerInUseID)
-    }
-    fun getDaggerInUse(): ImageBitmap {
-        return daggerList[daggerInUseID - 1]
-    }
+    fun setDaggerInUseID(daggerID: Int) { daggerInUseID = daggerID }
+    fun getDaggerInUseID() = daggerInUseID
+    fun getDaggerResource(daggerID: Int = daggerInUseID) = getDagger(daggerID)
+    fun getDaggerBitmap(daggerID: Int = daggerInUseID) = daggerList[daggerID - 1]
+    fun getRandomDagger() = daggerList[(0 until totalDaggers).random()]
+
     private fun getDagger(id: Int): Int {
         return when(id) {
             1 -> R.drawable.d1

@@ -68,7 +68,7 @@ class MainActivity : ComponentActivity() {
                 }
                 composable(
                     route = "shop_screen",
-                    enterTransition = { slideIntoContainer(AnimatedContentScope.SlideDirection.Up, animationSpec = tween(500))},
+                    enterTransition = { slideIntoContainer(AnimatedContentScope.SlideDirection.Up, animationSpec = tween(500)) },
                     popExitTransition = { slideOutOfContainer(AnimatedContentScope.SlideDirection.Down, animationSpec = tween(500, 500))}
                 ) {
                     ShopScreen(navController)

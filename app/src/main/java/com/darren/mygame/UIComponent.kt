@@ -1,13 +1,13 @@
 package com.darren.mygame
 
+import android.os.SystemClock
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -28,6 +28,7 @@ import com.darren.mygame.screens.fruitCount
 import com.darren.mygame.screens.gameLevel
 import com.darren.mygame.screens.gameReset
 import com.darren.mygame.screens.gameScore
+import kotlinx.coroutines.delay
 
 val myFont = FontFamily(Font(R.font.nineteenth))
 
@@ -67,10 +68,10 @@ fun DrawLogo(modifier: Modifier, alpha: Float = 1f) {
 }
 
 @Composable
-fun DrawDagger(modifier: Modifier = Modifier) {
+fun DrawDagger(modifier: Modifier, daggerID: Int = daggerUtil.getDaggerResource()) {
     Image(
         modifier = modifier.size(100.dp),
-        painter = painterResource(id = daggerUtil.getDaggerID()),
+        painter = painterResource(id = daggerID),
         contentDescription = "dagger"
     )
 }
@@ -97,44 +98,6 @@ fun DrawButton(text: String, offsetX: Dp = 0.dp, offsetY: Dp = 0.dp, onClick: ()
             color = Color(0xFFF1F6F5),
             fontFamily = myFont,
             fontWeight = FontWeight.Bold,
-        )
-    }
-}
-
-@Composable
-fun DrawShopButton(offsetY: Dp, onClick: () -> Unit) {
-    Box(modifier = Modifier.fillMaxSize()) {
-        Image(
-            painter = painterResource(id = R.drawable.shop_button_bg),
-            contentDescription = "shop_bg",
-            modifier = Modifier.align(Alignment.Center).size(55.dp).offset(y = offsetY).clickable { onClick() }
-        )
-        Image(
-            painter = painterResource(id = R.drawable.shop_button_fg),
-            contentDescription = "shop_fg",
-            modifier = Modifier.align(Alignment.Center).size(40.dp).offset(y = offsetY)
-        )
-    }
-}
-@Composable
-fun DrawShopLight(lightAlpha: State<Float> = mutableStateOf(1f), rotation: Float) {
-    Box(modifier = Modifier.fillMaxSize()) {
-        val shopLightFilter = floatArrayOf(
-            1f, 0f, 0f, 0f, 255f,
-            0f, 1f, 0f, 0f, 255f,
-            0f, 0f, 1f, 0f, 255f,
-            0f, 0f, 0f, 1f, 0f
-        )
-        Image(
-            painter = painterResource(id = R.drawable.shop_light),
-            contentDescription = "shop_light",
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .offset(y = screenHeight.times(0.1f))
-                .size(180.dp)
-                .rotate(rotation),
-            colorFilter = ColorFilter.colorMatrix(ColorMatrix(shopLightFilter)),
-            alpha = lightAlpha.value
         )
     }
 }
@@ -217,6 +180,7 @@ fun DrawScoreBoard(
     showTopScore: MutableState<Boolean>,
     lastScore: MutableState<Int>
 ) {
+    var lastClickTime by remember { mutableStateOf(0L) }
     Box(modifier = Modifier
         .fillMaxSize()
         .offset(y = scoreBoardOffset.value)
@@ -253,12 +217,139 @@ fun DrawScoreBoard(
                 fontWeight = FontWeight.Bold,
             )
         }
-        DrawButton(text = "RESTART", offsetY = 280.dp) {
-            gameReset()
-            showTopScore.value = false
+        DrawButton(text = "RESTART", offsetY = 270.dp) {
+            if (SystemClock.elapsedRealtime() - lastClickTime > 2000L) {
+                gameReset()
+                showTopScore.value = false
+                lastClickTime = SystemClock.elapsedRealtime()
+            }
         }
-        DrawReturnButton(offsetY = 20.dp) {
-            navController.popBackStack()
+        DrawShopButton(offsetY = 370.dp) {
+            if (SystemClock.elapsedRealtime() - lastClickTime > 2000L) {
+                navController.navigate("shop_screen")
+                lastClickTime = SystemClock.elapsedRealtime()
+            }
         }
+        DrawReturnButton(offsetY = 50.dp) {
+            if (SystemClock.elapsedRealtime() - lastClickTime > 2000L) {
+                navController.popBackStack()
+                lastClickTime = SystemClock.elapsedRealtime()
+            }
+        }
+    }
+}
+
+@Composable
+fun DrawShopButton(offsetY: Dp, onClick: () -> Unit) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        Image(
+            painter = painterResource(id = R.drawable.shop_button_bg),
+            contentDescription = "shop_bg",
+            modifier = Modifier
+                .align(Alignment.Center)
+                .size(55.dp)
+                .offset(y = offsetY)
+                .clickable { onClick() }
+        )
+        Image(
+            painter = painterResource(id = R.drawable.shop_button_fg),
+            contentDescription = "shop_fg",
+            modifier = Modifier
+                .align(Alignment.Center)
+                .size(40.dp)
+                .offset(y = offsetY)
+        )
+    }
+}
+@Composable
+fun DrawShopLight(lightAlpha: State<Float> = mutableStateOf(1f), rotation: Float) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        val shopLightFilter = floatArrayOf(
+            1f, 0f, 0f, 0f, 255f,
+            0f, 1f, 0f, 0f, 255f,
+            0f, 0f, 1f, 0f, 255f,
+            0f, 0f, 0f, 1f, 0f
+        )
+        Image(
+            painter = painterResource(id = R.drawable.shop_light),
+            contentDescription = "shop_light",
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .offset(y = screenHeight.times(0.1f))
+                .size(180.dp)
+                .rotate(rotation),
+            colorFilter = ColorFilter.colorMatrix(ColorMatrix(shopLightFilter)),
+            alpha = lightAlpha.value
+        )
+    }
+}
+
+@Composable
+fun DrawShopLights() {
+    val lightControl = remember{ mutableStateOf(false) }
+    val lightAlpha1 = animateFloatAsState(targetValue = if (!lightControl.value) 1f else 0f, animationSpec = tween(500))
+    val lightAlpha2 = animateFloatAsState(targetValue = if (lightControl.value) 1f else 0f, animationSpec = tween(500))
+
+    LaunchedEffect(true) {
+        while(true) {
+            lightControl.value = !lightControl.value
+            delay(500)
+        }
+    }
+    DrawShopLight(lightAlpha = lightAlpha1, rotation = 0f)
+    DrawShopLight(lightAlpha = lightAlpha2, rotation = 20f)
+    DrawShopLight(rotation = 40f)
+}
+
+@Composable
+fun DrawShopBanner() {
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .offset(y = -screenHeight.times(0.12f))) {
+        Image(
+            painter = painterResource(id = R.drawable.shop_banner),
+            contentDescription = "shop_banner",
+            modifier = Modifier
+                .align(Alignment.Center)
+                .size(340.dp)
+        )
+        Text(
+            text = "Dagger Shop",
+            fontSize = 30.sp,
+            color = Color(0xFFF1F6F5),
+            fontFamily = myFont,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.align(Alignment.Center)
+        )
+    }
+}
+
+@Composable
+fun DrawShopItem(id: Int, pinkBoxID: MutableState<Int>) {
+    Box(modifier = Modifier.size(83.dp)) {
+        Image(
+            painter = painterResource(id = R.drawable.shop_grid_bg),
+            contentDescription = "",
+            modifier = Modifier
+                .align(Alignment.Center)
+                .size(83.dp)
+                .clickable {
+                    pinkBoxID.value = id
+                    daggerUtil.setDaggerInUseID(id)
+                }
+        )
+        DrawDagger(modifier = Modifier
+            .align(Alignment.Center)
+            .size(75.dp)
+            .rotate(45f), daggerID = daggerUtil.getDaggerResource(id))
+
+        Image(
+            painter = painterResource(id = R.drawable.shop_pink_box),
+            contentDescription = "selected_dagger",
+            modifier = Modifier
+                .align(Alignment.Center)
+                .size(83.dp),
+            alpha = if (id == pinkBoxID.value) 1f else 0f
+        )
     }
 }

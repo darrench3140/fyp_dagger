@@ -36,7 +36,7 @@ fun GameScreen(navController: NavHostController) {
     val uiAlpha = animateFloatAsState(targetValue = if(gameState.value.isOver() || gameState.value.isLeveling()) 0f else 1f, animationSpec = tween(durationMillis = 500))
     val uiAlpha2 = animateFloatAsState(targetValue = if(gameState.value.isOver() || gameState.value.isLeveling()) 0f else 1f, animationSpec = tween(durationMillis = 100))
     val topBarOffset = animateDpAsState(targetValue = if (gameState.value.isOver()) (-200).dp else 0.dp, animationSpec = tween(durationMillis = 2000))
-    val scoreBoardOffset = animateDpAsState(targetValue = if (gameState.value.isOver()) (-70).dp else (-1000).dp, animationSpec = tween(durationMillis = 500))
+    val scoreBoardOffset = animateDpAsState(targetValue = if (gameState.value.isOver()) (-100).dp else (-1000).dp, animationSpec = tween(durationMillis = 500))
     val showTopScore = remember{ mutableStateOf(false) }
     val hit = remember{ mutableStateOf(false) }
     val hitOffset = animateFloatAsState(targetValue = if (hit.value) 20f else 0f, animationSpec = tween(durationMillis = if (!hit.value) 100 else 0))

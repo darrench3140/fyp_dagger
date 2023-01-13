@@ -103,7 +103,7 @@ data class DaggerState(
         }
     }
 
-    data class Dagger(val image: ImageBitmap = daggerUtil.getDaggerInUse()) {
+    data class Dagger(val image: ImageBitmap = daggerUtil.getDaggerBitmap()) {
         var rotation = 0f
         var translation: Float = 700f
     }
