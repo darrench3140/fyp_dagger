@@ -21,7 +21,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.darren.mygame.screens.*
-import com.darren.mygame.states.daggerImg
 
 val myFont = FontFamily(Font(R.font.nineteenth))
 
@@ -64,7 +63,7 @@ fun DrawLogo(modifier: Modifier, alpha: Float = 1f) {
 fun DrawDagger(modifier: Modifier = Modifier) {
     Image(
         modifier = modifier.size(100.dp),
-        painter = painterResource(id = daggerImg),
+        painter = painterResource(id = daggerUtil.getDaggerID()),
         contentDescription = "dagger"
     )
 }
@@ -206,7 +205,6 @@ fun DrawScoreBoard(navController: NavHostController, scoreBoardOffset: State<Dp>
         }
         DrawReturnButton(offsetX = -(150).dp, offsetY = 400.dp) {
             navController.popBackStack()
-            navController.navigate(ScreenManager.LandingScreen.route)
         }
     }
 }

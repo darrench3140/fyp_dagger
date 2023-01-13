@@ -3,7 +3,8 @@ package com.darren.mygame
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -17,6 +18,7 @@ import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 var screenHeight: Dp = 0.dp
 var screenWidth: Dp = 0.dp
 val spinnerUtil = SpinnerUtil()
+val daggerUtil = DaggerUtil()
 
 class MainActivity : ComponentActivity() {
 
@@ -29,26 +31,33 @@ class MainActivity : ComponentActivity() {
             val configuration = LocalConfiguration.current
             screenHeight = configuration.screenHeightDp.dp
             screenWidth = configuration.screenWidthDp.dp
-            spinnerUtil.initList()
+            spinnerUtil.Init()
+            daggerUtil.Init(16)
             val navController = rememberAnimatedNavController()
             AnimatedNavHost(
                 navController = navController,
-                startDestination = ScreenManager.LandingScreen.route
+                startDestination = "loading_screen"
             ) {
-                composable(route = ScreenManager.LoadingScreen.route) {
+                composable(
+                    route = "loading_screen",
+                    exitTransition = { fadeOut(animationSpec = tween(durationMillis = 5000)) },
+                ) {
                     LoadingScreen(navController = navController)
                 }
-                composable(route = ScreenManager.LandingScreen.route) {
+                composable(
+                    route = "landing_screen",
+                    enterTransition = { when (initialState.destination.route) {
+                        "game_screen" -> slideIntoContainer(AnimatedContentScope.SlideDirection.Right, animationSpec = tween(500))
+                        else -> fadeIn(animationSpec = tween(500))
+                    }},
+                    exitTransition = { slideOutOfContainer(AnimatedContentScope.SlideDirection.Left, animationSpec = tween(500))},
+                ) {
                     LandingScreen(navController = navController)
                 }
                 composable(
-                    route = ScreenManager.GameScreen.route,
-//                    exitTransition = {
-//                        slideOutVertically(
-//                            targetOffsetY = {1000},
-//                            animationSpec = tween(durationMillis = 100, easing = LinearEasing)
-//                        )
-//                    }
+                    route = "game_screen",
+                    enterTransition = { slideIntoContainer(AnimatedContentScope.SlideDirection.Left, animationSpec = tween(500))},
+                    popExitTransition = { slideOutOfContainer(AnimatedContentScope.SlideDirection.Right, animationSpec = tween(500))},
                 ) {
                     GameScreen(navController = navController)
                 }

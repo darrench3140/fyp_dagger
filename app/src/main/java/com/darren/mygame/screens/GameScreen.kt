@@ -22,10 +22,13 @@ import com.darren.mygame.states.*
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import kotlinx.coroutines.delay
 
+//Global variables
 val gameState: MutableState<GameState> = mutableStateOf(GameState())
 val gameScore: MutableState<Int> = mutableStateOf(0)
 val gameLevel: MutableState<Int> = mutableStateOf(1)
 val lastScore: MutableState<Int> = mutableStateOf(0)
+
+//Game Settings
 val maxScore: MutableState<Int> = mutableStateOf(0)
 val fruitCount: MutableState<Int> = mutableStateOf(0)
 
@@ -50,8 +53,7 @@ fun GameScreen(navController : NavHostController) {
     val maxSpeed = remember{ mutableStateOf(0) }
     val remainingDaggers = remember{ mutableStateOf(0) }
     //Game Resources
-    val dagger = ImageBitmap.imageResource(id = daggerImg)
-    val daggerState = remember { DaggerState(dagger, spinSpeed, remainingDaggers, uiAlpha2, hitOffset) }
+    val daggerState = remember { DaggerState(spinSpeed, remainingDaggers, uiAlpha2, hitOffset) }
     val spinner = remember{ mutableStateOf(spinnerUtil.getRandomSpinner()) }
     val cover = ImageBitmap.imageResource(id = R.drawable.spinner0)
     val spinnerState = remember { SpinnerState(spinner, cover, spinSpeed, uiAlpha, hitAlpha, hitOffset) }
@@ -99,7 +101,7 @@ fun GameScreen(navController : NavHostController) {
     // hit animation
     LaunchedEffect(hit.value) {
         if (hit.value) {
-            delay(100)
+            delay(50)
             hit.value = false
         }
     }
@@ -135,6 +137,7 @@ fun GameScreen(navController : NavHostController) {
 
     //Top Bar
     DrawTopBar(topBarOffset)
+    DrawTopFruit()
 
     //Score Board
     DrawScoreBoard(navController, scoreBoardOffset, showTopScore)

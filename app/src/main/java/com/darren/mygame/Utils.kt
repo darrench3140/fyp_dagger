@@ -38,6 +38,16 @@ object LevelUtil {
 data class SpinnerUtil(val totalSpinners: Int = 16) {
     private val spinnerList: MutableList<ImageBitmap> = emptyList<ImageBitmap>().toMutableList()
 
+    @Composable
+    fun Init() {
+        spinnerList.clear()
+        (1..totalSpinners).forEach{
+            spinnerList.add(ImageBitmap.imageResource(id = getSpinner(it)))
+        }
+    }
+    fun getRandomSpinner(): ImageBitmap {
+        return spinnerList[(0 until totalSpinners).random()]
+    }
     private fun getSpinner(id: Int): Int {
         return when(id) {
             1 -> R.drawable.spinner1
@@ -59,17 +69,68 @@ data class SpinnerUtil(val totalSpinners: Int = 16) {
             else -> R.drawable.spinner0
         }
     }
+}
 
+data class DaggerUtil(val totalDaggers: Int = 16) {
+    private val daggerList: MutableList<ImageBitmap> = emptyList<ImageBitmap>().toMutableList()
+    private val lockedList: MutableList<ImageBitmap> = emptyList<ImageBitmap>().toMutableList()
+    private var daggerInUseID: Int = 0
     @Composable
-    fun initList() {
-        spinnerList.clear()
-        (1..totalSpinners).forEach{
-            spinnerList.add(ImageBitmap.imageResource(id = getSpinner(it)))
+    fun Init(daggerToUse: Int) {
+        daggerList.clear()
+        lockedList.clear()
+        daggerInUseID = daggerToUse
+        (1..totalDaggers).forEach{ daggerList.add(ImageBitmap.imageResource(id = getDagger(it))) }
+        (1..totalDaggers).forEach{ lockedList.add(ImageBitmap.imageResource(id = getLocked(it)))}
+    }
+    fun getRandomDagger(): ImageBitmap {
+        return daggerList[(0 until totalDaggers).random()]
+    }
+    fun getDaggerID(): Int {
+        return getDagger(daggerInUseID)
+    }
+    fun getDaggerInUse(): ImageBitmap {
+        return daggerList[daggerInUseID - 1]
+    }
+    private fun getDagger(id: Int): Int {
+        return when(id) {
+            1 -> R.drawable.d1
+            2 -> R.drawable.d2
+            3 -> R.drawable.d3
+            4 -> R.drawable.d4
+            5 -> R.drawable.d5
+            6 -> R.drawable.d6
+            7 -> R.drawable.d7
+            8 -> R.drawable.d8
+            9 -> R.drawable.d9
+            10 -> R.drawable.d10
+            11 -> R.drawable.d11
+            12 -> R.drawable.d12
+            13 -> R.drawable.d13
+            14 -> R.drawable.d14
+            15 -> R.drawable.d15
+            16 -> R.drawable.d16
+            else -> R.drawable.d1
         }
     }
-
-    fun getRandomSpinner(): ImageBitmap {
-        return spinnerList[(0 until totalSpinners).random()]
+    private fun getLocked(id: Int): Int {
+        return when(id) {
+            2 -> R.drawable.d2s
+            3 -> R.drawable.d3s
+            4 -> R.drawable.d4s
+            5 -> R.drawable.d5s
+            6 -> R.drawable.d6s
+            7 -> R.drawable.d7s
+            8 -> R.drawable.d8s
+            9 -> R.drawable.d9s
+            10 -> R.drawable.d10s
+            11 -> R.drawable.d11s
+            12 -> R.drawable.d12s
+            13 -> R.drawable.d13s
+            14 -> R.drawable.d14s
+            15 -> R.drawable.d15s
+            16 -> R.drawable.d16s
+            else -> R.drawable.d1
+        }
     }
-
 }

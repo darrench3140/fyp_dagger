@@ -7,37 +7,33 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
-import com.darren.mygame.R
+import com.darren.mygame.daggerUtil
 import com.darren.mygame.screens.*
 import kotlin.math.abs
 
-var daggerImg = R.drawable.d1
-
 data class DaggerState(
-    val image: ImageBitmap,
     val spinSpeed: MutableState<Float>,
     val remainingDaggers: MutableState<Int>,
     val uiAlpha: State<Float>,
     val hitOffset: State<Float>
 ) {
-    private val imgWidth = 69
-    private val imgHeight = 148
+    private val imgWidth = 70
+    private val imgHeight = 140
     private val imgSize = IntSize(imgWidth, imgHeight)
 
     private val shootVelocity = 175f
     private val dropVelocity = 60f
 
-    private var noOfDagger = 1
-    private var currentDagger: Dagger = Dagger(noOfDagger)
+    private var currentDagger: Dagger = Dagger()
 
     private val daggerList: MutableList<Dagger> = emptyList<Dagger>().toMutableList()
 
     fun reset() {
         daggerList.clear()
-        noOfDagger = 1
-        currentDagger = Dagger(noOfDagger)
+        currentDagger = Dagger()
+        val defaultDagger = daggerUtil.getRandomDagger()
         (1..gameLevel.value+1).forEach{ _ ->
-            val dagger = Dagger(0)
+            val dagger = Dagger(defaultDagger)
             dagger.rotation = (0..359).random().toFloat()
             daggerList.add(dagger)
         }
@@ -57,8 +53,7 @@ data class DaggerState(
                     gameState.value.setLeveling()
                 } else {
                     daggerList.add(currentDagger)
-                    noOfDagger++
-                    currentDagger = Dagger(noOfDagger)
+                    currentDagger = Dagger()
                     gameState.value.setRunning()
                 }
                 gameScore.value++
@@ -98,7 +93,7 @@ data class DaggerState(
             translate(0f, trans2) //provide offset
         }) {
             drawImage(
-                image = image,
+                image = dagger.image,
                 srcOffset = IntOffset.Zero,
                 srcSize = imgSize,
                 dstOffset = IntOffset(midX().toInt() - imgWidth, midY().toInt() - imgHeight),
@@ -108,7 +103,7 @@ data class DaggerState(
         }
     }
 
-    data class Dagger(val refNo: Int) {
+    data class Dagger(val image: ImageBitmap = daggerUtil.getDaggerInUse()) {
         var rotation = 0f
         var translation: Float = 700f
     }

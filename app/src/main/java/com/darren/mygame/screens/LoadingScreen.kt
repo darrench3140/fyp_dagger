@@ -5,9 +5,12 @@ import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -15,7 +18,6 @@ import androidx.navigation.NavHostController
 import com.darren.mygame.DrawBackground
 import com.darren.mygame.DrawLogo
 import com.darren.mygame.DrawSword
-import com.darren.mygame.ScreenManager
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import kotlinx.coroutines.delay
 
@@ -27,7 +29,7 @@ fun LoadingScreen(navController: NavHostController) {
     val swordAnim = animateFloatAsState(targetValue = if(showSword) 0.6f else 0f, animationSpec = tween(durationMillis = 3000))
     val logoAlphaAnim = animateFloatAsState(targetValue = if(showLogo) 1f else 0f, animationSpec = tween(durationMillis = 2000))
     val logoMoveAnim = animateDpAsState(
-        targetValue = if(moveLogo) (-60).dp else 150.dp,
+        targetValue = if(moveLogo) (-180).dp else 130.dp,
         animationSpec = tween(durationMillis = 2000, easing = Easing { fraction ->
         val n1 = 7.5625f
         val d1 = 2.75f
@@ -55,13 +57,16 @@ fun LoadingScreen(navController: NavHostController) {
         moveLogo = true
         delay(2100)
         navController.popBackStack()
-        navController.navigate(ScreenManager.LandingScreen.route)
+        navController.navigate("landing_screen")
     }
     DrawBackground()
     DrawSword(swordAnim.value)
-    DrawLogo(modifier = Modifier
-        .size(500.dp)
-        .offset(y = logoMoveAnim.value), alpha = logoAlphaAnim.value)
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        DrawLogo(modifier = Modifier
+            .size(300.dp)
+            .offset(y = logoMoveAnim.value), alpha = logoAlphaAnim.value
+        )
+    }
 }
 
 @OptIn(ExperimentalAnimationApi::class)
