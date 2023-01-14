@@ -20,7 +20,6 @@ fun LandingScreen(navController: NavHostController) {
     val moveUp = remember { mutableStateOf(false) }
     val logoOffset = animateDpAsState(targetValue = if(moveUp.value) 10.dp else 0.dp, animationSpec = tween(durationMillis = 1000))
     var lastClickTime by remember { mutableStateOf(0L) }
-
     LaunchedEffect(true) {
         while(true) {
             moveUp.value = true

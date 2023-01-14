@@ -1,9 +1,8 @@
 package com.darren.mygame.screens
 
+import android.os.SystemClock
 import androidx.compose.foundation.layout.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -15,11 +14,15 @@ import com.darren.mygame.*
 fun ShopScreen(navController: NavHostController) {
 
     val pinkBoxID = remember { mutableStateOf(daggerUtil.getDaggerInUseID()) }
+    var lastClickTime by remember { mutableStateOf(0L) }
 
     DrawBackground()
     DrawTopFruit()
     DrawReturnButton(offsetY = (-50).dp) {
-        navController.popBackStack()
+        if (SystemClock.elapsedRealtime() - lastClickTime > 2000L) {
+            lastClickTime = SystemClock.elapsedRealtime()
+            navController.popBackStack()
+        }
     }
     Box(modifier = Modifier.fillMaxSize()) {
         DrawShopLights()

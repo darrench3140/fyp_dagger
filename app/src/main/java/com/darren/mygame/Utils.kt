@@ -1,12 +1,16 @@
 package com.darren.mygame
 
 import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import android.graphics.Color
 import android.view.View
 import android.view.WindowManager
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.imageResource
 import com.darren.mygame.screens.gameLevel
 
@@ -20,6 +24,28 @@ object StatusBarUtil {
             window.decorView.systemUiVisibility = option or vis
             window.statusBarColor = Color.TRANSPARENT
         }
+    }
+}
+
+object OrientationUtil {
+    @Composable
+    fun LockScreenOrientation(orientation: Int) {
+        val context = LocalContext.current
+        DisposableEffect(Unit) {
+            val activity = context.findActivity() ?: return@DisposableEffect onDispose {}
+            val originalOrientation = activity.requestedOrientation
+            activity.requestedOrientation = orientation
+            onDispose {
+                // restore original orientation when view disappears
+                activity.requestedOrientation = originalOrientation
+            }
+        }
+    }
+
+    private fun Context.findActivity(): Activity? = when (this) {
+        is Activity -> this
+        is ContextWrapper -> baseContext.findActivity()
+        else -> null
     }
 }
 

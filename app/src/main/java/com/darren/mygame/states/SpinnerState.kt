@@ -7,7 +7,6 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
-import com.darren.mygame.screens.gameState
 import com.darren.mygame.screens.midX
 import com.darren.mygame.screens.midY
 

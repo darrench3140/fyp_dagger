@@ -1,5 +1,7 @@
 package com.darren.mygame
 
+import android.annotation.SuppressLint
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -23,17 +25,23 @@ val daggerUtil = DaggerUtil()
 
 class MainActivity : ComponentActivity() {
 
+    @SuppressLint("SourceLockedOrientationActivity")
     @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 //        val splashScreen = installSplashScreen()
         StatusBarUtil.transparentStatusBar(this)
+
         setContent {
+            OrientationUtil.LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+
             val configuration = LocalConfiguration.current
             screenHeight = configuration.screenHeightDp.dp
             screenWidth = configuration.screenWidthDp.dp
+
             spinnerUtil.Init()
             daggerUtil.Init(16)
+
             val navController = rememberAnimatedNavController()
             AnimatedNavHost(
                 navController = navController,
@@ -41,7 +49,7 @@ class MainActivity : ComponentActivity() {
             ) {
                 composable(
                     route = "loading_screen",
-                    exitTransition = { fadeOut(animationSpec = tween(durationMillis = 5000)) },
+                    exitTransition = { fadeOut(animationSpec = tween(durationMillis = 100, 500)) },
                 ) {
                     LoadingScreen(navController)
                 }
@@ -61,7 +69,7 @@ class MainActivity : ComponentActivity() {
                 composable(
                     route = "game_screen",
                     enterTransition = { slideIntoContainer(AnimatedContentScope.SlideDirection.Left, animationSpec = tween(500))},
-                    exitTransition = { fadeOut(animationSpec = tween(5000)) },
+                    exitTransition = { fadeOut(animationSpec = tween(100, 500)) },
                     popExitTransition = { slideOutOfContainer(AnimatedContentScope.SlideDirection.Right, animationSpec = tween(500))},
                 ) {
                     GameScreen(navController)

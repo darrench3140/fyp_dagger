@@ -219,21 +219,21 @@ fun DrawScoreBoard(
         }
         DrawButton(text = "RESTART", offsetY = 270.dp) {
             if (SystemClock.elapsedRealtime() - lastClickTime > 2000L) {
+                lastClickTime = SystemClock.elapsedRealtime()
                 gameReset()
                 showTopScore.value = false
-                lastClickTime = SystemClock.elapsedRealtime()
             }
         }
         DrawShopButton(offsetY = 370.dp) {
             if (SystemClock.elapsedRealtime() - lastClickTime > 2000L) {
-                navController.navigate("shop_screen")
                 lastClickTime = SystemClock.elapsedRealtime()
+                navController.navigate("shop_screen")
             }
         }
         DrawReturnButton(offsetY = 50.dp) {
             if (SystemClock.elapsedRealtime() - lastClickTime > 2000L) {
-                navController.popBackStack()
                 lastClickTime = SystemClock.elapsedRealtime()
+                navController.popBackStack()
             }
         }
     }
