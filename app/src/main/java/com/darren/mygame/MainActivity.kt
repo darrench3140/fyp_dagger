@@ -1,31 +1,26 @@
 package com.darren.mygame
 
-import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.darren.mygame.screens.GameScreen
-import com.darren.mygame.screens.LandingScreen
-import com.darren.mygame.screens.LoadingScreen
-import com.darren.mygame.screens.ShopScreen
+import com.darren.mygame.screens.*
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 
 var screenHeight: Dp = 0.dp
 var screenWidth: Dp = 0.dp
-val spinnerUtil = SpinnerUtil()
-val daggerUtil = DaggerUtil()
 
 class MainActivity : ComponentActivity() {
 
-    @SuppressLint("SourceLockedOrientationActivity")
     @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,8 +34,15 @@ class MainActivity : ComponentActivity() {
             screenHeight = configuration.screenHeightDp.dp
             screenWidth = configuration.screenWidthDp.dp
 
+            val context = LocalContext.current
+            val gameData = GameSetUpUtil.loadSettings(context)
+
+            // 3 gameModes, "god" "reset" "normal"
+            GameSetUpUtil.SetGameMode(gameData, mode = "normal")
+
+            val savedDaggerInUseID = gameData.getDaggerInUseID.collectAsState(initial = 1)
+            daggerUtil.Init(savedDaggerInUseID.value)
             spinnerUtil.Init()
-            daggerUtil.Init(16)
 
             val navController = rememberAnimatedNavController()
             AnimatedNavHost(
@@ -72,7 +74,7 @@ class MainActivity : ComponentActivity() {
                     exitTransition = { fadeOut(animationSpec = tween(100, 500)) },
                     popExitTransition = { slideOutOfContainer(AnimatedContentScope.SlideDirection.Right, animationSpec = tween(500))},
                 ) {
-                    GameScreen(navController)
+                    GameScreen(navController, gameData)
                 }
                 composable(
                     route = "shop_screen",

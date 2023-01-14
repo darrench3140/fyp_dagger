@@ -6,13 +6,65 @@ import android.content.ContextWrapper
 import android.graphics.Color
 import android.view.View
 import android.view.WindowManager
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.imageResource
-import com.darren.mygame.screens.gameLevel
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+
+class GameData(private val context: Context) {
+    companion object{
+        private val Context.dataStore: DataStore<Preferences> by preferencesDataStore("data_storage")
+        val MAX_SCORE = intPreferencesKey("max_score")
+        val FRUIT_COUNT = intPreferencesKey("fruit_count")
+        val DAGGER_IN_USE_ID = intPreferencesKey("dagger_in_use_ID")
+        val PURCHASED_COUNT = intPreferencesKey("purchased_count")
+    }
+    val getMaxScore: Flow<Int> = context.dataStore.data.map { it[MAX_SCORE] ?: 0 }
+    val getFruitCount: Flow<Int> = context.dataStore.data.map { it[FRUIT_COUNT] ?: 0 }
+    val getDaggerInUseID: Flow<Int> = context.dataStore.data.map { it[DAGGER_IN_USE_ID] ?: 1 }
+    val getPurchasedCount: Flow<Int> = context.dataStore.data.map { it[PURCHASED_COUNT] ?: 1 }
+    suspend fun saveMaxScore(score: Int) { context.dataStore.edit { it[MAX_SCORE] = score } }
+    suspend fun saveFruitCount(count: Int) { context.dataStore.edit { it[FRUIT_COUNT] = count }}
+    suspend fun saveDaggerInUseID(id: Int) { context.dataStore.edit { it[DAGGER_IN_USE_ID] = id }}
+    suspend fun savePurchasedCount(count: Int) { context.dataStore.edit { it[PURCHASED_COUNT] = count }}
+}
+
+object GameSetUpUtil {
+    @Composable
+    fun loadSettings(context: Context): GameData {
+        val gameData = GameData(context)
+        val savedMaxScore = gameData.getMaxScore.collectAsState(initial = 0)
+        val savedFruitCount = gameData.getFruitCount.collectAsState(initial = 0)
+        val savedPurchasedCount = gameData.getPurchasedCount.collectAsState(initial = 1)
+        maxScore.value = savedMaxScore.value
+        fruitCount.value = savedFruitCount.value
+        purchasedCount.value = savedPurchasedCount.value
+        return gameData
+    }
+
+    @Composable
+    fun SetGameMode(gameData: GameData, mode: String) {
+        LaunchedEffect(mode) {
+            if (mode == "god") {
+                gameData.saveFruitCount(999)
+                gameData.savePurchasedCount(16)
+                gameData.saveDaggerInUseID(16)
+            } else if (mode == "reset") {
+                gameData.saveFruitCount(0)
+                gameData.saveMaxScore(0)
+                gameData.savePurchasedCount(1)
+                gameData.saveDaggerInUseID(1)
+            }
+        }
+    }
+}
 
 object StatusBarUtil {
     fun transparentStatusBar(activity: Activity) {
@@ -111,6 +163,7 @@ data class DaggerUtil(val totalDaggers: Int = 16) {
     fun setDaggerInUseID(daggerID: Int) { daggerInUseID = daggerID }
     fun getDaggerInUseID() = daggerInUseID
     fun getDaggerResource(daggerID: Int = daggerInUseID) = getDagger(daggerID)
+    fun getLockedResource(daggerID: Int) = getLocked(daggerID)
     fun getDaggerBitmap(daggerID: Int = daggerInUseID) = daggerList[daggerID - 1]
     fun getRandomDagger() = daggerList[(0 until totalDaggers).random()]
 

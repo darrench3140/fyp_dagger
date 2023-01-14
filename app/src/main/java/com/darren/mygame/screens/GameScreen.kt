@@ -19,18 +19,9 @@ import com.darren.mygame.R
 import com.darren.mygame.states.*
 import kotlinx.coroutines.delay
 
-//Global variables
-val gameState: MutableState<GameState> = mutableStateOf(GameState())
-val gameScore: MutableState<Int> = mutableStateOf(0)
-val gameLevel: MutableState<Int> = mutableStateOf(1)
-
-//Game Settings
-val maxScore: MutableState<Int> = mutableStateOf(0)
-val fruitCount: MutableState<Int> = mutableStateOf(0)
-
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun GameScreen(navController: NavHostController) {
+fun GameScreen(navController: NavHostController, gameData: GameData) {
     //Animations
     val animation = remember{ Animatable(initialValue = 0f) }
     val uiAlpha = animateFloatAsState(targetValue = if(gameState.value.isOver() || gameState.value.isLeveling()) 0f else 1f, animationSpec = tween(durationMillis = 500))
@@ -55,6 +46,8 @@ fun GameScreen(navController: NavHostController) {
     val spinnerState = remember { SpinnerState(spinner, cover, spinSpeed, uiAlpha, hitAlpha, hitOffset) }
     val remainingDagger = ImageBitmap.imageResource(id = R.drawable.remaining_dagger)
     val remainingDaggerState = remember { RemainingDaggerState(remainingDagger, remainingDaggers, uiAlpha) }
+    val fruit = ImageBitmap.imageResource(id = R.drawable.fruit)
+    val fruitState = remember { FruitState(fruit, spinSpeed)}
     val lastScore = remember{ mutableStateOf(0) }
     // game animation controller coroutine
     LaunchedEffect(true) {
@@ -78,7 +71,8 @@ fun GameScreen(navController: NavHostController) {
             LevelUtil.updateLevelInfo(randomSpeed, clockwise, spinSpeed, minSpeed, maxSpeed, remainingDaggers)
             spinSpeed.value *= if(clockwise.value) 1f else -1f
             spinner.value = spinnerUtil.getRandomSpinner()
-            daggerState.reset()
+            val rotationList = daggerState.reset()
+            fruitState.reset(rotationList)
             spinnerState.reset()
             gameState.value.setRunning()
             Log.d("game", "[Level Information]\nlevel: ${gameLevel.value}\nrandomSpeed: ${randomSpeed.value}\nspinSpeed: ${spinSpeed.value}\nminSpeed: ${minSpeed.value}\nmaxSpeed: ${maxSpeed.value}\nnumberOfDaggers: ${remainingDaggers.value}")
@@ -90,6 +84,7 @@ fun GameScreen(navController: NavHostController) {
             lastScore.value = gameScore.value
             if (maxScore.value < gameScore.value) {
                 maxScore.value = gameScore.value
+                gameData.saveMaxScore(maxScore.value)
                 showTopScore.value = true
             }
         }
@@ -116,7 +111,6 @@ fun GameScreen(navController: NavHostController) {
             true
         }) {
         animation.value //use to maintain animation loop
-//        Log.d("game", "ticking with state: ${gameState.value}")
 
         if (gameState.value.isShooting() || gameState.value.isLeveling()) {
             daggerState.shoot {
@@ -127,6 +121,7 @@ fun GameScreen(navController: NavHostController) {
             daggerState.drop()
         }
         daggerState.draw(this)
+        fruitState.draw(this)
         spinnerState.draw(this)
         remainingDaggerState.draw(this)
     }

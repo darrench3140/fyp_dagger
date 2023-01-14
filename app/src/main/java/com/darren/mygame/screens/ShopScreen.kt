@@ -14,6 +14,7 @@ import com.darren.mygame.*
 fun ShopScreen(navController: NavHostController) {
 
     val pinkBoxID = remember { mutableStateOf(daggerUtil.getDaggerInUseID()) }
+    val greenBoxID = remember { mutableStateOf(0) }
     var lastClickTime by remember { mutableStateOf(0L) }
 
     DrawBackground()
@@ -49,7 +50,7 @@ fun ShopScreen(navController: NavHostController) {
                 ) {
                     repeat(4) { y ->
                         val id = x * 4 + y + 1
-                        DrawShopItem(id, pinkBoxID)
+                        DrawShopItem(id, pinkBoxID, greenBoxID)
                     }
                 }
             }

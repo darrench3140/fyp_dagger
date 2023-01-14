@@ -1,5 +1,6 @@
 package com.darren.mygame.states
 
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.ui.graphics.ImageBitmap
@@ -8,7 +9,11 @@ import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import com.darren.mygame.daggerUtil
-import com.darren.mygame.screens.*
+import com.darren.mygame.gameLevel
+import com.darren.mygame.gameScore
+import com.darren.mygame.gameState
+import com.darren.mygame.screens.midX
+import com.darren.mygame.screens.midY
 import kotlin.math.abs
 
 data class DaggerState(
@@ -22,21 +27,34 @@ data class DaggerState(
     private val imgSize = IntSize(imgWidth, imgHeight)
 
     private val shootVelocity = 175f
+    private val rotationMargin = 7f
     private val dropVelocity = 60f
 
     private var currentDagger: Dagger = Dagger()
 
     private val daggerList: MutableList<Dagger> = emptyList<Dagger>().toMutableList()
 
-    fun reset() {
+    fun reset(): List<Float> {
+        Log.d("game", "dagger state reset")
         daggerList.clear()
         currentDagger = Dagger()
-        val defaultDagger = daggerUtil.getRandomDagger()
+        val randomDagger = daggerUtil.getRandomDagger()
+        val rotationList: MutableList<Float> = emptyList<Float>().toMutableList()
         (1..gameLevel.value+1).forEach{ _ ->
-            val dagger = Dagger(defaultDagger)
-            dagger.rotation = (0..359).random().toFloat()
+            val dagger = Dagger(randomDagger)
+            run { while (true) { //keep generate random float until not collided with any other daggers
+                dagger.rotation = (10..349).random().toFloat()
+                if (rotationList.isEmpty()) return@run
+                else {
+                    var crashed = false
+                    rotationList.forEach{ if (!crashed && dagger.rotation in (it - rotationMargin.. it + rotationMargin)) crashed = true }
+                    if (!crashed) return@run
+                }
+            }}
+            rotationList.add(dagger.rotation)
             daggerList.add(dagger)
         }
+        return rotationList
     }
 
     fun shoot(hit: () -> Unit) {
@@ -45,7 +63,7 @@ data class DaggerState(
             //Check collision
             if (daggerList.any { dagger ->
                     val degree = abs(dagger.rotation % 360)
-                    degree in 0f..7f || degree in 353f..360f
+                    degree in 0f..rotationMargin || degree in (360f-rotationMargin)..360f
                 }) {
                 gameState.value.setLosing()
             } else {

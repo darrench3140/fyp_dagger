@@ -24,10 +24,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.darren.mygame.screens.fruitCount
-import com.darren.mygame.screens.gameLevel
 import com.darren.mygame.screens.gameReset
-import com.darren.mygame.screens.gameScore
 import kotlinx.coroutines.delay
 
 val myFont = FontFamily(Font(R.font.nineteenth))
@@ -325,7 +322,7 @@ fun DrawShopBanner() {
 }
 
 @Composable
-fun DrawShopItem(id: Int, pinkBoxID: MutableState<Int>) {
+fun DrawShopItem(id: Int, pinkBoxID: MutableState<Int>, greenBoxID: MutableState<Int>) {
     Box(modifier = Modifier.size(83.dp)) {
         Image(
             painter = painterResource(id = R.drawable.shop_grid_bg),
@@ -334,14 +331,19 @@ fun DrawShopItem(id: Int, pinkBoxID: MutableState<Int>) {
                 .align(Alignment.Center)
                 .size(83.dp)
                 .clickable {
-                    pinkBoxID.value = id
-                    daggerUtil.setDaggerInUseID(id)
+                    if (id <= purchasedCount.value) {
+                        greenBoxID.value = 0
+                        pinkBoxID.value = id
+                        daggerUtil.setDaggerInUseID(id)
+                    } else {
+                        greenBoxID.value = id
+                    }
                 }
         )
         DrawDagger(modifier = Modifier
             .align(Alignment.Center)
             .size(75.dp)
-            .rotate(45f), daggerID = daggerUtil.getDaggerResource(id))
+            .rotate(45f), daggerID = if (id <= purchasedCount.value) daggerUtil.getDaggerResource(id) else daggerUtil.getLockedResource(id))
 
         Image(
             painter = painterResource(id = R.drawable.shop_pink_box),
@@ -350,6 +352,14 @@ fun DrawShopItem(id: Int, pinkBoxID: MutableState<Int>) {
                 .align(Alignment.Center)
                 .size(83.dp),
             alpha = if (id == pinkBoxID.value) 1f else 0f
+        )
+        Image(
+            painter = painterResource(id = R.drawable.shop_green_box),
+            contentDescription = "view_dagger",
+            modifier = Modifier
+                .align(Alignment.Center)
+                .size(83.dp),
+            alpha = if (id == greenBoxID.value) 1f else 0f
         )
     }
 }

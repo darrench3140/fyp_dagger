@@ -1,6 +1,6 @@
 package com.darren.mygame.states
 
-import com.darren.mygame.screens.gameState
+import com.darren.mygame.gameState
 
 data class GameState(private val status: Status = Status.RESET) {
     enum class Status {
