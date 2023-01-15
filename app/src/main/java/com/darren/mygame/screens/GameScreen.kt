@@ -29,9 +29,10 @@ fun GameScreen(navController: NavHostController, gameData: GameData) {
     val topBarOffset = animateDpAsState(targetValue = if (gameState.value.isOver()) (-200).dp else 0.dp, animationSpec = tween(durationMillis = 2000))
     val scoreBoardOffset = animateDpAsState(targetValue = if (gameState.value.isOver()) (-100).dp else (-1000).dp, animationSpec = tween(durationMillis = 500))
     val showTopScore = remember{ mutableStateOf(false) }
-    val hit = remember{ mutableStateOf(false) }
-    val hitOffset = animateFloatAsState(targetValue = if (hit.value) 20f else 0f, animationSpec = tween(durationMillis = if (!hit.value) 100 else 0))
-    val hitAlpha = animateFloatAsState(targetValue = if (hit.value) 0.6f else 0f, animationSpec = tween(durationMillis = if (!hit.value) 10 else 0))
+    val daggerHit = remember{ mutableStateOf(false) }
+    val hitOffset = animateFloatAsState(targetValue = if (daggerHit.value) 20f else 0f, animationSpec = tween(durationMillis = if (!daggerHit.value) 100 else 0))
+    val hitAlpha = animateFloatAsState(targetValue = if (daggerHit.value) 0.6f else 0f, animationSpec = tween(durationMillis = if (!daggerHit.value) 10 else 0))
+    val fruitHit = remember{ mutableStateOf(0) }
     //Game Settings
     val randomSpeed = remember{ mutableStateOf(false) }
     val clockwise = remember{ mutableStateOf(false) }
@@ -40,30 +41,22 @@ fun GameScreen(navController: NavHostController, gameData: GameData) {
     val maxSpeed = remember{ mutableStateOf(0) }
     val remainingDaggers = remember{ mutableStateOf(0) }
     //Game Resources
-    val daggerState = remember { DaggerState(spinSpeed, remainingDaggers, uiAlpha2, hitOffset) }
     val spinner = remember{ mutableStateOf(spinnerUtil.getRandomSpinner()) }
     val cover = ImageBitmap.imageResource(id = R.drawable.spinner0)
-    val spinnerState = remember { SpinnerState(spinner, cover, spinSpeed, uiAlpha, hitAlpha, hitOffset) }
     val remainingDagger = ImageBitmap.imageResource(id = R.drawable.remaining_dagger)
-    val remainingDaggerState = remember { RemainingDaggerState(remainingDagger, remainingDaggers, uiAlpha) }
     val fruit = ImageBitmap.imageResource(id = R.drawable.fruit)
-    val fruitState = remember { FruitState(fruit, spinSpeed)}
+    val fruitCrack = ImageBitmap.imageResource(id = R.drawable.fruit_crack)
+    val daggerState = remember { DaggerState(spinSpeed, remainingDaggers, uiAlpha2, hitOffset) }
+    val spinnerState = remember { SpinnerState(spinner, cover, spinSpeed, uiAlpha, hitAlpha, hitOffset) }
+    val remainingDaggerState = remember { RemainingDaggerState(remainingDagger, remainingDaggers, uiAlpha) }
+    val fruitState = remember { FruitState(fruit, fruitCrack, spinSpeed, uiAlpha, hitOffset)}
     val lastScore = remember{ mutableStateOf(0) }
     // game animation controller coroutine
     LaunchedEffect(true) {
         animation.animateTo(
             targetValue = 1f,
-            animationSpec = infiniteRepeatable(
-                animation = tween(durationMillis = 250, easing = LinearEasing)
-            )
+            animationSpec = infiniteRepeatable(animation = tween(durationMillis = 250, easing = LinearEasing))
         )
-    }
-    // spin speed controller coroutine
-    LaunchedEffect(randomSpeed.value) {
-        while(randomSpeed.value) {
-            spinSpeed.value = (minSpeed.value..maxSpeed.value).random().toFloat() * (if(clockwise.value) 1 else -1)
-            delay(2000)
-        }
     }
     // game state handling for important events
     LaunchedEffect(gameState.value) {
@@ -89,12 +82,25 @@ fun GameScreen(navController: NavHostController, gameData: GameData) {
             }
         }
     }
-    // hit animation
-    LaunchedEffect(hit.value) {
-        if (hit.value) {
-            delay(50)
-            hit.value = false
+    // spin speed controller coroutine
+    LaunchedEffect(randomSpeed.value) {
+        while(randomSpeed.value) {
+            spinSpeed.value = (minSpeed.value..maxSpeed.value).random().toFloat() * (if(clockwise.value) 1 else -1)
+            delay(2000)
         }
+    }
+    // hit animation
+    LaunchedEffect(daggerHit.value) {
+        if (daggerHit.value) {
+            delay(50)
+            daggerHit.value = false
+        }
+    }
+    LaunchedEffect(fruitHit.value) {
+        delay(500)
+        fruitCount.value += fruitHit.value
+        fruitHit.value = 0
+//        gameData.saveFruitCount(fruitCount.value)
     }
 
     DrawBackground()
@@ -103,9 +109,7 @@ fun GameScreen(navController: NavHostController, gameData: GameData) {
         .pointerInteropFilter {
             when (it.action) {
                 MotionEvent.ACTION_UP -> {
-                    if (gameState.value.isRunning()) {
-                        gameState.value.setShooting()
-                    }
+                    if (gameState.value.isRunning()) gameState.value.setShooting()
                 }
             }
             true
@@ -114,7 +118,10 @@ fun GameScreen(navController: NavHostController, gameData: GameData) {
 
         if (gameState.value.isShooting() || gameState.value.isLeveling()) {
             daggerState.shoot {
-                hit.value = true
+                daggerHit.value = true
+                fruitState.checkCollision {
+                    fruitHit.value += 1
+                }
             }
         } else if (gameState.value.isLosing()) {
             spinSpeed.value = 0f

@@ -1,7 +1,7 @@
 package com.darren.mygame.states
 
-import android.util.Log
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.withTransform
@@ -9,21 +9,23 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import com.darren.mygame.screens.midX
 import com.darren.mygame.screens.midY
+import kotlin.math.abs
 
-data class FruitState(val image: ImageBitmap, val spinSpeed: MutableState<Float>) {
+data class FruitState(val image: ImageBitmap, val image_crack: ImageBitmap, val spinSpeed: MutableState<Float>, val uiAlpha: State<Float>, val hitOffset: State<Float>) {
     private val imgWidth = 56
     private val imgHeight = 56
     private val imgSize = IntSize(imgWidth, imgHeight)
-    private val rotationMargin = 10f
+    private val rotationMargin = 20f
     private val fruitList: MutableList<Fruit> = emptyList<Fruit>().toMutableList()
+    private val completedFruitList: MutableList<Fruit> = emptyList<Fruit>().toMutableList()
 
     fun reset(rotationList: List<Float>) {
-        Log.d("game", "fruit state reset")
         fruitList.clear()
+        completedFruitList.clear()
         (1..(1..4).random()).forEach { _ ->
             var rotation: Float
             run { while (true) {
-                rotation = (10..349).random().toFloat()
+                rotation = (20..339).random().toFloat()
                 var crashed = false
                 rotationList.forEach{ if (!crashed && rotation in (it - rotationMargin .. it + rotationMargin)) crashed = true }
                 fruitList.forEach{ if (!crashed && rotation in (it.rotation - rotationMargin .. it.rotation + rotationMargin)) crashed = true }
@@ -34,8 +36,19 @@ data class FruitState(val image: ImageBitmap, val spinSpeed: MutableState<Float>
         }
     }
 
-    fun hit() {
-
+    fun checkCollision(fruitHit: () -> Unit) {
+        val remove: MutableList<Fruit> = emptyList<Fruit>().toMutableList()
+        fruitList.forEach{ fruit ->
+            val degree = abs(fruit.rotation % 360)
+            if (degree in 0f..rotationMargin || degree in (360f-rotationMargin)..360f) {
+                remove.add(fruit) //so that multiple fruit being hit can be handled correctly
+                if (fruit.rotation < 0) fruit.rotation = 360 - abs(fruit.rotation % 360)
+                else fruit.rotation = abs(fruit.rotation % 360)
+                completedFruitList.add(fruit)
+                fruitHit()
+            }
+        }
+        remove.forEach{ fruit -> fruitList.remove(fruit) }
     }
 
     fun draw(drawScope: DrawScope) {
@@ -46,20 +59,49 @@ data class FruitState(val image: ImageBitmap, val spinSpeed: MutableState<Float>
         fruitList.forEach{ fruit ->
             fruit.rotation += spinSpeed.value
             withTransform({
-                translate(0f, -250f)
-                rotate(fruit.rotation)
-                translate(0f, 300f)
+                translate(0f, -250f - hitOffset.value)
+                rotate(180f + fruit.rotation)
+                translate(0f, -280f)
             }){
                 drawImage(
                     image = image,
                     srcOffset = IntOffset.Zero,
                     srcSize = imgSize,
                     dstOffset = IntOffset(midX().toInt() - imgWidth, midY().toInt() - imgHeight),
-                    dstSize = imgSize * 2
+                    dstSize = imgSize * 2,
+                    alpha = uiAlpha.value
                 )
             }
         }
+        completedFruitList.forEach{ fruit ->
+            withTransform({
+                translate(0f + fruit.transX, -250f + fruit.transY)
+                rotate(fruit.rotation)
+                translate(0f, 280f)
+                rotate(-fruit.rotation)
+                scale(fruit.scale, fruit.scale)
+            }) {
+                drawImage(
+                    image = image_crack,
+                    srcOffset = IntOffset.Zero,
+                    srcSize = imgSize,
+                    dstOffset = IntOffset(midX().toInt() - imgWidth, midY().toInt() - imgHeight),
+                    dstSize = imgSize * 2,
+                )
+            }
+            if (fruit.rotation % 360 in (160f..300f)) {
+                fruit.transX += 52
+                fruit.transY -= 40
+            } else {
+                fruit.rotation += 10
+            }
+            fruit.scale *= 0.95f
+        }
     }
 
-    data class Fruit(var rotation: Float)
+    data class Fruit(var rotation: Float) {
+        var transX: Float = 0f
+        var transY: Float = 0f
+        var scale: Float = 1f
+    }
 }

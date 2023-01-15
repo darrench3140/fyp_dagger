@@ -106,7 +106,7 @@ object LevelUtil {
         val level = gameLevel.value
         clockwise.value = (0..1).random() == 1
         randomSpeed.value = level >= 3
-        spinSpeed.value = (3..5).random().toFloat()
+        spinSpeed.value = (2..5).random().toFloat()
         minSpeed.value = ((1+level/4)..(3+level/4)).random()
         maxSpeed.value = ((5+level/4)..(7+level/4)).random()
         remainingDaggers.value = level / 2 + (5..7).random()

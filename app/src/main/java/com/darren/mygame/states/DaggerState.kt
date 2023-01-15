@@ -1,6 +1,5 @@
 package com.darren.mygame.states
 
-import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.ui.graphics.ImageBitmap
@@ -27,7 +26,7 @@ data class DaggerState(
     private val imgSize = IntSize(imgWidth, imgHeight)
 
     private val shootVelocity = 175f
-    private val rotationMargin = 7f
+    private val rotationMargin = 8f
     private val dropVelocity = 60f
 
     private var currentDagger: Dagger = Dagger()
@@ -35,29 +34,23 @@ data class DaggerState(
     private val daggerList: MutableList<Dagger> = emptyList<Dagger>().toMutableList()
 
     fun reset(): List<Float> {
-        Log.d("game", "dagger state reset")
         daggerList.clear()
         currentDagger = Dagger()
         val randomDagger = daggerUtil.getRandomDagger()
         val rotationList: MutableList<Float> = emptyList<Float>().toMutableList()
         (1..gameLevel.value+1).forEach{ _ ->
             val dagger = Dagger(randomDagger)
-            run { while (true) { //keep generate random float until not collided with any other daggers
-                dagger.rotation = (10..349).random().toFloat()
-                if (rotationList.isEmpty()) return@run
-                else {
-                    var crashed = false
-                    rotationList.forEach{ if (!crashed && dagger.rotation in (it - rotationMargin.. it + rotationMargin)) crashed = true }
-                    if (!crashed) return@run
-                }
-            }}
+            dagger.rotation = rotationMargin * (1 until (360/rotationMargin.toInt())).random().toFloat()
+            while(dagger.rotation in rotationList) {
+                dagger.rotation = rotationMargin * (1 until (360/rotationMargin.toInt())).random().toFloat()
+            }
             rotationList.add(dagger.rotation)
             daggerList.add(dagger)
         }
         return rotationList
     }
 
-    fun shoot(hit: () -> Unit) {
+    fun shoot(daggerHit: () -> Unit) {
         currentDagger.translation -= shootVelocity
         if (gameState.value.isShooting() && currentDagger.translation <= 0f) { //Arrived wood
             //Check collision
@@ -76,7 +69,7 @@ data class DaggerState(
                 }
                 gameScore.value++
                 remainingDaggers.value--
-                hit()
+                daggerHit()
             }
         }
     }
