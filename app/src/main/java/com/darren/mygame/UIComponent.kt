@@ -214,14 +214,14 @@ fun DrawScoreBoard(
                 fontWeight = FontWeight.Bold,
             )
         }
-        DrawButton(text = "RESTART", offsetY = 270.dp) {
+        DrawButton(text = "RESTART", offsetY = screenHeightDp.div(3.12222f)) { //screenHeight 843 -> offset 270
             if (SystemClock.elapsedRealtime() - lastClickTime > 2000L) {
                 lastClickTime = SystemClock.elapsedRealtime()
                 gameReset()
                 showTopScore.value = false
             }
         }
-        DrawShopButton(offsetY = 370.dp) {
+        DrawShopButton(offsetY = screenHeightDp.div(2.2784f)) { //screenHeight 843 -> offset 370
             if (SystemClock.elapsedRealtime() - lastClickTime > 2000L) {
                 lastClickTime = SystemClock.elapsedRealtime()
                 navController.navigate("shop_screen")
@@ -271,9 +271,9 @@ fun DrawShopLight(lightAlpha: State<Float> = mutableStateOf(1f), rotation: Float
             painter = painterResource(id = R.drawable.shop_light),
             contentDescription = "shop_light",
             modifier = Modifier
-                .align(Alignment.TopCenter)
-                .offset(y = screenHeight.times(0.1f))
-                .size(180.dp)
+                .align(Alignment.Center)
+                .offset(y = -screenHeightDp.times(0.3f))
+                .size(screenWidthDp.div(2.2833f))
                 .rotate(rotation),
             colorFilter = ColorFilter.colorMatrix(ColorMatrix(shopLightFilter)),
             alpha = lightAlpha.value
@@ -299,16 +299,16 @@ fun DrawShopLights() {
 }
 
 @Composable
-fun DrawShopBanner() {
+fun DrawShopBanner(offset: Dp) {
     Box(modifier = Modifier
         .fillMaxSize()
-        .offset(y = -screenHeight.times(0.12f))) {
+        .offset(y = offset)) {
         Image(
             painter = painterResource(id = R.drawable.shop_banner),
             contentDescription = "shop_banner",
             modifier = Modifier
                 .align(Alignment.Center)
-                .size(340.dp)
+                .size(screenWidthDp.div(1.2088f), screenWidthDp.div(10.2748f))
         )
         Text(
             text = "Dagger Shop",
@@ -323,13 +323,14 @@ fun DrawShopBanner() {
 
 @Composable
 fun DrawShopItem(id: Int, pinkBoxID: MutableState<Int>, greenBoxID: MutableState<Int>) {
-    Box(modifier = Modifier.size(83.dp)) {
+    val size = screenWidthDp.div(4.8352f) - 2.dp //size of an item box
+    Box(modifier = Modifier.size(size)) {
         Image(
             painter = painterResource(id = R.drawable.shop_grid_bg),
             contentDescription = "",
             modifier = Modifier
                 .align(Alignment.Center)
-                .size(83.dp)
+                .size(size)
                 .clickable {
                     if (id <= purchasedCount.value) {
                         greenBoxID.value = 0
@@ -342,7 +343,7 @@ fun DrawShopItem(id: Int, pinkBoxID: MutableState<Int>, greenBoxID: MutableState
         )
         DrawDagger(modifier = Modifier
             .align(Alignment.Center)
-            .size(75.dp)
+            .size(size.div(1.10667f))
             .rotate(45f), daggerID = if (id <= purchasedCount.value) daggerUtil.getDaggerResource(id) else daggerUtil.getLockedResource(id))
 
         Image(
@@ -350,7 +351,7 @@ fun DrawShopItem(id: Int, pinkBoxID: MutableState<Int>, greenBoxID: MutableState
             contentDescription = "selected_dagger",
             modifier = Modifier
                 .align(Alignment.Center)
-                .size(83.dp),
+                .size(size),
             alpha = if (id == pinkBoxID.value) 1f else 0f
         )
         Image(
@@ -358,7 +359,7 @@ fun DrawShopItem(id: Int, pinkBoxID: MutableState<Int>, greenBoxID: MutableState
             contentDescription = "view_dagger",
             modifier = Modifier
                 .align(Alignment.Center)
-                .size(83.dp),
+                .size(size),
             alpha = if (id == greenBoxID.value) 1f else 0f
         )
     }

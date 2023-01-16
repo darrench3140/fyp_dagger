@@ -9,6 +9,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.darren.mygame.screens.*
@@ -16,8 +17,10 @@ import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 
-var screenHeight: Dp = 0.dp
-var screenWidth: Dp = 0.dp
+var screenHeightDp: Dp = 0.dp
+var screenWidthDp: Dp = 0.dp
+var screenHeightInt: Int = 0
+var screenWidthInt: Int = 0
 
 class MainActivity : ComponentActivity() {
 
@@ -31,8 +34,10 @@ class MainActivity : ComponentActivity() {
             OrientationUtil.LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
 
             val configuration = LocalConfiguration.current
-            screenHeight = configuration.screenHeightDp.dp
-            screenWidth = configuration.screenWidthDp.dp
+            screenHeightDp = configuration.screenHeightDp.dp
+            screenWidthDp = configuration.screenWidthDp.dp
+            screenHeightInt = with(LocalDensity.current) { screenHeightDp.toPx().toInt() }
+            screenWidthInt = with(LocalDensity.current) { screenWidthDp.toPx().toInt() }
 
             val context = LocalContext.current
             val gameData = GameSetUpUtil.loadSettings(context)

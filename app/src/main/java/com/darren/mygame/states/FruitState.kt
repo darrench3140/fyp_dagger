@@ -1,5 +1,6 @@
 package com.darren.mygame.states
 
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.ui.graphics.ImageBitmap
@@ -7,9 +8,14 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.dp
+import com.darren.mygame.screenHeightInt
+import com.darren.mygame.screenWidthInt
 import com.darren.mygame.screens.midX
 import com.darren.mygame.screens.midY
 import kotlin.math.abs
+import kotlin.math.cos
+import kotlin.math.sin
 
 data class FruitState(val image: ImageBitmap, val image_crack: ImageBitmap, val spinSpeed: MutableState<Float>, val uiAlpha: State<Float>, val hitOffset: State<Float>) {
     private val imgWidth = 56
@@ -61,7 +67,7 @@ data class FruitState(val image: ImageBitmap, val image_crack: ImageBitmap, val 
             withTransform({
                 translate(0f, -250f - hitOffset.value)
                 rotate(180f + fruit.rotation)
-                translate(0f, -280f)
+                translate(0f, -285f)
             }){
                 drawImage(
                     image = image,
@@ -77,7 +83,7 @@ data class FruitState(val image: ImageBitmap, val image_crack: ImageBitmap, val 
             withTransform({
                 translate(0f + fruit.transX, -250f + fruit.transY)
                 rotate(fruit.rotation)
-                translate(0f, 280f)
+                translate(0f, 285f)
                 rotate(-fruit.rotation)
                 scale(fruit.scale, fruit.scale)
             }) {
@@ -90,12 +96,14 @@ data class FruitState(val image: ImageBitmap, val image_crack: ImageBitmap, val 
                 )
             }
             if (fruit.rotation % 360 in (160f..300f)) {
-                fruit.transX += 52
-                fruit.transY -= 40
-            } else {
-                fruit.rotation += 10
-            }
-            fruit.scale *= 0.95f
+                val rotation = 160f
+                val transX = ((screenWidthInt - 20.dp.toPx()) - (screenWidthInt/2 - 285*sin(180 - rotation))) / 20
+                val transY = ((screenHeightInt/2 - 250 - 285 * cos(180 - rotation)) - (45.dp.toPx())) / 20
+                Log.d("game", "rotation: ${rotation}, $transX, $transY")
+                fruit.transX += transX
+                fruit.transY -= transY
+            } else fruit.rotation += 10
+            if (fruit.scale > 0.5f) fruit.scale *= 0.95f
         }
     }
 

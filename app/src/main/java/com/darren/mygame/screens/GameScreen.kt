@@ -27,7 +27,7 @@ fun GameScreen(navController: NavHostController, gameData: GameData) {
     val uiAlpha = animateFloatAsState(targetValue = if(gameState.value.isOver() || gameState.value.isLeveling()) 0f else 1f, animationSpec = tween(durationMillis = 500))
     val uiAlpha2 = animateFloatAsState(targetValue = if(gameState.value.isOver() || gameState.value.isLeveling()) 0f else 1f, animationSpec = tween(durationMillis = 100))
     val topBarOffset = animateDpAsState(targetValue = if (gameState.value.isOver()) (-200).dp else 0.dp, animationSpec = tween(durationMillis = 2000))
-    val scoreBoardOffset = animateDpAsState(targetValue = if (gameState.value.isOver()) (-100).dp else (-1000).dp, animationSpec = tween(durationMillis = 500))
+    val scoreBoardOffset = animateDpAsState(targetValue = if (gameState.value.isOver()) (-100).dp else -screenHeightDp-200.dp, animationSpec = tween(durationMillis = 500))
     val showTopScore = remember{ mutableStateOf(false) }
     val daggerHit = remember{ mutableStateOf(false) }
     val hitOffset = animateFloatAsState(targetValue = if (daggerHit.value) 20f else 0f, animationSpec = tween(durationMillis = if (!daggerHit.value) 100 else 0))
@@ -97,7 +97,7 @@ fun GameScreen(navController: NavHostController, gameData: GameData) {
         }
     }
     LaunchedEffect(fruitHit.value) {
-        delay(500)
+        delay(700)
         fruitCount.value += fruitHit.value
         fruitHit.value = 0
 //        gameData.saveFruitCount(fruitCount.value)

@@ -34,20 +34,20 @@ fun LandingScreen(navController: NavHostController) {
         DrawLogo(modifier = Modifier
             .align(Alignment.Center)
             .size(300.dp)
-            .offset(y = -screenHeight.times(0.25f) - logoOffset.value)
+            .offset(y = -screenHeightDp.times(0.25f) - logoOffset.value)
         )
         DrawDagger(modifier = Modifier
             .size(140.dp)
-            .offset(y = screenHeight.times(0.03f))
+            .offset(y = screenHeightDp.times(0.03f))
         )
-        DrawButton(text = "PLAY", offsetY = screenHeight.times(0.22f)) {
+        DrawButton(text = "PLAY", offsetY = screenHeightDp.times(0.22f)) {
             if (SystemClock.elapsedRealtime() - lastClickTime > 2000L) {
                 gameReset()
                 navController.navigate("game_screen")
                 lastClickTime = SystemClock.elapsedRealtime()
             }
         }
-        DrawShopButton(offsetY = screenHeight.times(0.35f)) {
+        DrawShopButton(offsetY = screenHeightDp.times(0.35f)) {
             if (SystemClock.elapsedRealtime() - lastClickTime > 2000L) {
                 navController.navigate("shop_screen")
                 lastClickTime = SystemClock.elapsedRealtime()
