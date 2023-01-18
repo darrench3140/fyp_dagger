@@ -4,8 +4,11 @@ import android.util.Log
 import android.view.MotionEvent
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
@@ -16,10 +19,16 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.darren.mygame.*
 import com.darren.mygame.R
-import com.darren.mygame.states.*
+import com.darren.mygame.states.DaggerState
+import com.darren.mygame.states.FruitState
+import com.darren.mygame.states.RemainingDaggerState
+import com.darren.mygame.states.SpinnerState
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, DelicateCoroutinesApi::class)
 @Composable
 fun GameScreen(navController: NavHostController, gameData: GameData) {
     //Animations
@@ -50,7 +59,7 @@ fun GameScreen(navController: NavHostController, gameData: GameData) {
     val spinnerState = remember { SpinnerState(spinner, cover, spinSpeed, uiAlpha, hitAlpha, hitOffset) }
     val remainingDaggerState = remember { RemainingDaggerState(remainingDagger, remainingDaggers, uiAlpha) }
     val fruitState = remember { FruitState(fruit, fruitCrack, spinSpeed, uiAlpha, hitOffset, fruitHit)}
-    val lastScore = remember{ mutableStateOf(0) }
+
     // game animation controller coroutine
     LaunchedEffect(true) {
         animation.animateTo(
@@ -60,7 +69,15 @@ fun GameScreen(navController: NavHostController, gameData: GameData) {
     }
     // game state handling for important events
     LaunchedEffect(gameState.value) {
-        if (gameState.value.isReset()) {
+        if (gameState.value.isWipe()) {
+            gameLevel.value = 1
+            GlobalScope.launch {
+                delay(500)
+                gameScore.value = 0
+                fruitGained.value = 0
+            }
+            gameState.value.setReset()
+        } else if (gameState.value.isReset()) {
             LevelUtil.updateLevelInfo(randomSpeed, clockwise, spinSpeed, minSpeed, maxSpeed, remainingDaggers)
             spinSpeed.value *= if(clockwise.value) 1f else -1f
             spinner.value = spinnerUtil.value.getRandomSpinner()
@@ -74,7 +91,6 @@ fun GameScreen(navController: NavHostController, gameData: GameData) {
             delay(700)
             gameState.value.setReset()
         } else if (gameState.value.isOver()) {
-            lastScore.value = gameScore.value
             if (maxScore.value < gameScore.value) {
                 maxScore.value = gameScore.value
                 gameData.saveMaxScore(maxScore.value)
@@ -98,10 +114,12 @@ fun GameScreen(navController: NavHostController, gameData: GameData) {
     }
     LaunchedEffect(fruitHit.value) {
         fruitCount.value += fruitHit.value
+        fruitGained.value += fruitHit.value
         fruitHit.value = 0
         gameData.saveFruitCount(fruitCount.value)
     }
 
+    //UI
     DrawBackground()
     Canvas(modifier = Modifier
         .fillMaxSize()
@@ -129,20 +147,12 @@ fun GameScreen(navController: NavHostController, gameData: GameData) {
         spinnerState.draw(this)
         remainingDaggerState.draw(this)
     }
-
     //Top Bar
     DrawTopBar(topBarOffset)
     DrawTopFruit()
-
     //Score Board
-    DrawScoreBoard(navController, scoreBoardOffset, showTopScore, lastScore)
+    DrawScoreBoard(navController, scoreBoardOffset, showTopScore)
 }
 
 fun DrawScope.midX(): Float { return ((size.width) / 2) }
 fun DrawScope.midY(): Float { return ((size.height) / 2) }
-
-fun gameReset() {
-    gameScore.value = 0
-    gameLevel.value = 1
-    gameState.value.setReset()
-}

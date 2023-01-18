@@ -18,6 +18,7 @@ val gameLevel: MutableState<Int> = mutableStateOf(1)
 //Game Data (Permanent)
 val maxScore : MutableState<Int> = mutableStateOf(0)
 val fruitCount : MutableState<Int> = mutableStateOf(0)
+val fruitGained : MutableState<Int> = mutableStateOf(0)
 val purchasedCount : MutableState<Int> = mutableStateOf(1)
 //Utils
 val spinnerUtil = mutableStateOf(SpinnerUtil())

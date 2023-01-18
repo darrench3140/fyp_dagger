@@ -26,7 +26,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.darren.mygame.screens.gameReset
 import kotlinx.coroutines.delay
 
 val myFont = FontFamily(Font(R.font.nineteenth))
@@ -63,6 +62,21 @@ fun DrawLogo(modifier: Modifier, alpha: Float = 1f) {
         painter = painterResource(id = R.drawable.logo),
         contentDescription = "logo",
         alpha = alpha
+    )
+}
+
+@Composable
+fun DrawSparkle(offsetX: Dp, offsetY: Dp, scale: Float) {
+    LaunchedEffect(scale) {
+
+    }
+    Image(
+        painter = painterResource(id = R.drawable.sparkle),
+        contentDescription = "sparkles",
+        modifier = Modifier
+            .size(20.dp)
+            .offset(x = offsetX, y = -screenHeightDp.times(0.25f) + offsetY)
+            .scale(scale),
     )
 }
 
@@ -177,7 +191,6 @@ fun DrawScoreBoard(
     navController: NavHostController,
     scoreBoardOffset: State<Dp>,
     showTopScore: MutableState<Boolean>,
-    lastScore: MutableState<Int>
 ) {
     var lastClickTime by remember { mutableStateOf(0L) }
     Box(modifier = Modifier
@@ -202,15 +215,29 @@ fun DrawScoreBoard(
         )
         Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
             Text(
-                text = "SCORE",
-                fontSize = 30.sp,
+                text = "SCORE (MAX: ${maxScore.value})",
+                fontSize = 20.sp,
                 color = Color(0xFFFFB26B),
                 fontFamily = myFont,
                 fontWeight = FontWeight.Bold,
             )
             Text(
-                text = lastScore.value.toString(),
-                fontSize = 60.sp,
+                text = gameScore.value.toString(),
+                fontSize = 40.sp,
+                color = Color(0xFFF1F6F5),
+                fontFamily = myFont,
+                fontWeight = FontWeight.Bold,
+            )
+            Text(
+                text = "\n\nREWARD",
+                fontSize = 20.sp,
+                color = Color(0xFFFFB26B),
+                fontFamily = myFont,
+                fontWeight = FontWeight.Bold,
+            )
+            Text(
+                text = fruitGained.value.toString(),
+                fontSize = 40.sp,
                 color = Color(0xFFF1F6F5),
                 fontFamily = myFont,
                 fontWeight = FontWeight.Bold,
@@ -219,7 +246,7 @@ fun DrawScoreBoard(
         DrawButton(text = "RESTART", offsetY = screenHeightDp.div(3.12222f)) { //screenHeight 843 -> offset 270
             if (SystemClock.elapsedRealtime() - lastClickTime > 2000L) {
                 lastClickTime = SystemClock.elapsedRealtime()
-                gameReset()
+                gameState.value.setWipe()
                 showTopScore.value = false
             }
         }
@@ -347,7 +374,6 @@ fun DrawShopItem(id: Int, pinkBoxID: MutableState<Int>, greenBoxID: MutableState
             .align(Alignment.Center)
             .size(size.div(1.10667f))
             .rotate(45f), daggerID = if (id <= purchasedCount.value) daggerUtil.value.getDaggerResource(id) else daggerUtil.value.getLockedResource(id))
-
         Image(
             painter = painterResource(id = R.drawable.shop_pink_box),
             contentDescription = "selected_dagger",
@@ -363,6 +389,15 @@ fun DrawShopItem(id: Int, pinkBoxID: MutableState<Int>, greenBoxID: MutableState
                 .align(Alignment.Center)
                 .size(size),
             alpha = if (id == greenBoxID.value) 1f else 0f
+        )
+        Image(
+            painter = painterResource(id = R.drawable.lock),
+            contentDescription = "locked",
+            modifier = Modifier
+                .align(Alignment.Center)
+                .size(size)
+                .offset(x = size.div(4), y = size.div(4)),
+            alpha = if (id > purchasedCount.value + 1) 1f else 0f
         )
     }
 }

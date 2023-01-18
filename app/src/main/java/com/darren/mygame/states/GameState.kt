@@ -4,6 +4,7 @@ import com.darren.mygame.gameState
 
 data class GameState(private val status: Status = Status.RESET) {
     enum class Status {
+        WIPE,
         RESET,
         RUNNING,
         SHOOTING,
@@ -12,6 +13,7 @@ data class GameState(private val status: Status = Status.RESET) {
         OVER,
     }
 
+    fun isWipe() = status == Status.WIPE
     fun isReset() = status == Status.RESET
     fun isRunning() = status == Status.RUNNING
     fun isShooting() = status == Status.SHOOTING
@@ -19,6 +21,7 @@ data class GameState(private val status: Status = Status.RESET) {
     fun isLosing() = status == Status.LOSING
     fun isOver() = status == Status.OVER
 
+    fun setWipe() { gameState.value = GameState(Status.WIPE)}
     fun setReset() { gameState.value = GameState(Status.RESET) }
     fun setRunning() { gameState.value = GameState(Status.RUNNING) }
     fun setShooting() { gameState.value = GameState(Status.SHOOTING) }

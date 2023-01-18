@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.graphics.Color
+import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import androidx.compose.runtime.*
@@ -15,6 +16,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -51,7 +53,8 @@ object GameSetUpUtil {
 
     @Composable
     fun SetGameMode(gameData: GameData, mode: String) {
-        LaunchedEffect(mode) {
+        LaunchedEffect(true) {
+            delay(1000)
             when (mode) {
                 "god" -> {
                     gameData.saveFruitCount(999)
@@ -65,7 +68,9 @@ object GameSetUpUtil {
                     gameData.saveDaggerInUseID(1)
                 }
                 "rich" -> {
-                    gameData.saveFruitCount(fruitCount.value + 500)
+                    fruitCount.value += 500
+                    gameData.saveFruitCount(fruitCount.value)
+
                 }
             }
         }
