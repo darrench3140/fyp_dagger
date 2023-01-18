@@ -41,7 +41,7 @@ fun GameScreen(navController: NavHostController, gameData: GameData) {
     val maxSpeed = remember{ mutableStateOf(0) }
     val remainingDaggers = remember{ mutableStateOf(0) }
     //Game Resources
-    val spinner = remember{ mutableStateOf(spinnerUtil.getRandomSpinner()) }
+    val spinner = remember{ mutableStateOf(spinnerUtil.value.getRandomSpinner()) }
     val cover = ImageBitmap.imageResource(id = R.drawable.spinner0)
     val remainingDagger = ImageBitmap.imageResource(id = R.drawable.remaining_dagger)
     val fruit = ImageBitmap.imageResource(id = R.drawable.fruit)
@@ -49,7 +49,7 @@ fun GameScreen(navController: NavHostController, gameData: GameData) {
     val daggerState = remember { DaggerState(spinSpeed, remainingDaggers, uiAlpha2, hitOffset) }
     val spinnerState = remember { SpinnerState(spinner, cover, spinSpeed, uiAlpha, hitAlpha, hitOffset) }
     val remainingDaggerState = remember { RemainingDaggerState(remainingDagger, remainingDaggers, uiAlpha) }
-    val fruitState = remember { FruitState(fruit, fruitCrack, spinSpeed, uiAlpha, hitOffset)}
+    val fruitState = remember { FruitState(fruit, fruitCrack, spinSpeed, uiAlpha, hitOffset, fruitHit)}
     val lastScore = remember{ mutableStateOf(0) }
     // game animation controller coroutine
     LaunchedEffect(true) {
@@ -63,7 +63,7 @@ fun GameScreen(navController: NavHostController, gameData: GameData) {
         if (gameState.value.isReset()) {
             LevelUtil.updateLevelInfo(randomSpeed, clockwise, spinSpeed, minSpeed, maxSpeed, remainingDaggers)
             spinSpeed.value *= if(clockwise.value) 1f else -1f
-            spinner.value = spinnerUtil.getRandomSpinner()
+            spinner.value = spinnerUtil.value.getRandomSpinner()
             val rotationList = daggerState.reset()
             fruitState.reset(rotationList)
             spinnerState.reset()
@@ -97,10 +97,9 @@ fun GameScreen(navController: NavHostController, gameData: GameData) {
         }
     }
     LaunchedEffect(fruitHit.value) {
-        delay(700)
         fruitCount.value += fruitHit.value
         fruitHit.value = 0
-//        gameData.saveFruitCount(fruitCount.value)
+        gameData.saveFruitCount(fruitCount.value)
     }
 
     DrawBackground()
@@ -119,9 +118,7 @@ fun GameScreen(navController: NavHostController, gameData: GameData) {
         if (gameState.value.isShooting() || gameState.value.isLeveling()) {
             daggerState.shoot {
                 daggerHit.value = true
-                fruitState.checkCollision {
-                    fruitHit.value += 1
-                }
+                fruitState.hit()
             }
         } else if (gameState.value.isLosing()) {
             spinSpeed.value = 0f

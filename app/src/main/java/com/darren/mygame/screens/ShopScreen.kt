@@ -11,11 +11,28 @@ import androidx.navigation.NavHostController
 import com.darren.mygame.*
 
 @Composable
-fun ShopScreen(navController: NavHostController) {
+fun ShopScreen(navController: NavHostController, gameData: GameData) {
 
-    val pinkBoxID = remember { mutableStateOf(daggerUtil.getDaggerInUseID()) }
+    val pinkBoxID = remember { mutableStateOf(daggerUtil.value.getDaggerInUseID()) }
     val greenBoxID = remember { mutableStateOf(0) }
+    val purchaseAction = remember{ mutableStateOf(false) }
     var lastClickTime by remember { mutableStateOf(0L) }
+
+    LaunchedEffect(purchaseAction.value) {
+        if (purchaseAction.value) {
+            purchasedCount.value++
+            fruitCount.value -= (greenBoxID.value - 1) * 15
+            pinkBoxID.value = greenBoxID.value
+            greenBoxID.value = 0
+            gameData.saveFruitCount(fruitCount.value)
+            gameData.savePurchasedCount(purchasedCount.value)
+            purchaseAction.value = false
+        }
+    }
+    LaunchedEffect(pinkBoxID.value) {
+        daggerUtil.value.setDaggerInUseID(pinkBoxID.value)
+        gameData.saveDaggerInUseID(pinkBoxID.value)
+    }
 
     DrawBackground()
     DrawTopFruit()
@@ -31,7 +48,7 @@ fun ShopScreen(navController: NavHostController) {
             .align(Alignment.Center)
             .offset(y = -screenHeightDp.times(0.3f))
             .size(screenWidthDp.div(2.935f))
-            .rotate(50f), daggerUtil.getDaggerResource(pinkBoxID.value))
+            .rotate(50f), daggerUtil.value.getDaggerResource(pinkBoxID.value))
         DrawShopBanner(-screenHeightDp.times(0.1f))
         Column( //4x4 Grid
             modifier = Modifier
@@ -54,12 +71,17 @@ fun ShopScreen(navController: NavHostController) {
                 }
             }
         }
+        ShopPurchaseButton(offsetY = screenHeightDp.div(2.4086f), greenBoxID) { price ->
+            if (greenBoxID.value == purchasedCount.value + 1 && fruitCount.value >= price) {
+                purchaseAction.value = true
+            }
+        }
     }
 }
 
 /* [Resizable]
     eg: screenWidth 411, screenHeight 843
     box size = 340, row height = (340 - 8) /4 = 83, spotlight dagger size = 140, spotlight = 180, item dagger = 75
-    shop banner = 340 : 40
+    shop banner = 340 : 40, shop purchase button = offset 350dp
     scale factor approximately equals: 411/340 = 1.2088f
  */

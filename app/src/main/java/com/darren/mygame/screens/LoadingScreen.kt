@@ -16,6 +16,7 @@ import androidx.navigation.NavHostController
 import com.darren.mygame.DrawBackground
 import com.darren.mygame.DrawLogo
 import com.darren.mygame.DrawSword
+import com.darren.mygame.screenHeightDp
 import kotlinx.coroutines.delay
 
 @Composable
@@ -23,10 +24,10 @@ fun LoadingScreen(navController: NavHostController) {
     var showSword by remember { mutableStateOf(false) }
     var showLogo by remember { mutableStateOf(false) }
     var moveLogo by remember { mutableStateOf(false) }
-    val swordAnim = animateFloatAsState(targetValue = if(showSword) 0.6f else 0f, animationSpec = tween(durationMillis = 3000))
+    val swordAnim = animateFloatAsState(targetValue = if(showSword) 0.6f else 0f, animationSpec = tween(durationMillis = 2500))
     val logoAlphaAnim = animateFloatAsState(targetValue = if(showLogo) 1f else 0f, animationSpec = tween(durationMillis = 2000))
     val logoMoveAnim = animateDpAsState(
-        targetValue = if(moveLogo) (-180).dp else 130.dp,
+        targetValue = if(moveLogo) -screenHeightDp.times(0.25f) else 130.dp,
         animationSpec = tween(durationMillis = 2000, easing = Easing { fraction ->
         val n1 = 7.5625f
         val d1 = 2.75f
@@ -49,8 +50,8 @@ fun LoadingScreen(navController: NavHostController) {
         showSword = true
         delay(2000)
         showLogo = true
-        delay(1000)
         showSword = false
+        delay(1000)
         moveLogo = true
         delay(2100)
         navController.popBackStack()

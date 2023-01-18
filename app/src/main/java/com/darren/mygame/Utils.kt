@@ -52,15 +52,21 @@ object GameSetUpUtil {
     @Composable
     fun SetGameMode(gameData: GameData, mode: String) {
         LaunchedEffect(mode) {
-            if (mode == "god") {
-                gameData.saveFruitCount(999)
-                gameData.savePurchasedCount(16)
-                gameData.saveDaggerInUseID(16)
-            } else if (mode == "reset") {
-                gameData.saveFruitCount(0)
-                gameData.saveMaxScore(0)
-                gameData.savePurchasedCount(1)
-                gameData.saveDaggerInUseID(1)
+            when (mode) {
+                "god" -> {
+                    gameData.saveFruitCount(999)
+                    gameData.savePurchasedCount(16)
+                    gameData.saveDaggerInUseID(16)
+                }
+                "reset" -> {
+                    gameData.saveFruitCount(0)
+                    gameData.saveMaxScore(0)
+                    gameData.savePurchasedCount(1)
+                    gameData.saveDaggerInUseID(1)
+                }
+                "rich" -> {
+                    gameData.saveFruitCount(fruitCount.value + 500)
+                }
             }
         }
     }
@@ -151,7 +157,7 @@ data class SpinnerUtil(val totalSpinners: Int = 16) {
 data class DaggerUtil(val totalDaggers: Int = 16) {
     private val daggerList: MutableList<ImageBitmap> = emptyList<ImageBitmap>().toMutableList()
     private val lockedList: MutableList<ImageBitmap> = emptyList<ImageBitmap>().toMutableList()
-    private var daggerInUseID: Int = 0
+    private var daggerInUseID = 0
     @Composable
     fun Init(daggerToUse: Int) {
         daggerList.clear()
@@ -162,9 +168,9 @@ data class DaggerUtil(val totalDaggers: Int = 16) {
     }
     fun setDaggerInUseID(daggerID: Int) { daggerInUseID = daggerID }
     fun getDaggerInUseID() = daggerInUseID
-    fun getDaggerResource(daggerID: Int = daggerInUseID) = getDagger(daggerID)
+    fun getDaggerResource(daggerID: Int = daggerInUseID): Int = getDagger(daggerID)
     fun getLockedResource(daggerID: Int) = getLocked(daggerID)
-    fun getDaggerBitmap(daggerID: Int = daggerInUseID) = daggerList[daggerID - 1]
+    fun getDaggerBitmap(daggerID: Int = daggerInUseID): ImageBitmap = daggerList[daggerID - 1]
     fun getRandomDagger() = daggerList[(0 until totalDaggers).random()]
 
     private fun getDagger(id: Int): Int {

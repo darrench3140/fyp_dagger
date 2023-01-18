@@ -10,17 +10,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.darren.mygame.screens.*
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
-
-var screenHeightDp: Dp = 0.dp
-var screenWidthDp: Dp = 0.dp
-var screenHeightInt: Int = 0
-var screenWidthInt: Int = 0
 
 class MainActivity : ComponentActivity() {
 
@@ -42,17 +36,17 @@ class MainActivity : ComponentActivity() {
             val context = LocalContext.current
             val gameData = GameSetUpUtil.loadSettings(context)
 
-            // 3 gameModes, "god" "reset" "normal"
+            // available gameModes, "god" "reset" "normal" "rich"
             GameSetUpUtil.SetGameMode(gameData, mode = "normal")
 
             val savedDaggerInUseID = gameData.getDaggerInUseID.collectAsState(initial = 1)
-            daggerUtil.Init(savedDaggerInUseID.value)
-            spinnerUtil.Init()
+            daggerUtil.value.Init(savedDaggerInUseID.value)
+            spinnerUtil.value.Init()
 
             val navController = rememberAnimatedNavController()
             AnimatedNavHost(
                 navController = navController,
-                startDestination = "landing_screen"
+                startDestination = "loading_screen"
             ) {
                 composable(
                     route = "loading_screen",
@@ -86,7 +80,7 @@ class MainActivity : ComponentActivity() {
                     enterTransition = { slideIntoContainer(AnimatedContentScope.SlideDirection.Up, animationSpec = tween(500)) },
                     popExitTransition = { slideOutOfContainer(AnimatedContentScope.SlideDirection.Down, animationSpec = tween(500, 500))}
                 ) {
-                    ShopScreen(navController)
+                    ShopScreen(navController, gameData)
                 }
             }
         }

@@ -36,7 +36,7 @@ data class DaggerState(
     fun reset(): List<Float> {
         daggerList.clear()
         currentDagger = Dagger()
-        val randomDagger = daggerUtil.getRandomDagger()
+        val randomDagger = daggerUtil.value.getRandomDagger()
         val rotationList: MutableList<Float> = emptyList<Float>().toMutableList()
         (1..gameLevel.value+1).forEach{ _ ->
             val dagger = Dagger(randomDagger)
@@ -114,7 +114,7 @@ data class DaggerState(
         }
     }
 
-    data class Dagger(val image: ImageBitmap = daggerUtil.getDaggerBitmap()) {
+    data class Dagger(val image: ImageBitmap = daggerUtil.value.getDaggerBitmap()) {
         var rotation = 0f
         var translation: Float = 700f
     }

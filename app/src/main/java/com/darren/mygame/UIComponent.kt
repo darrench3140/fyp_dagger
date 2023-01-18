@@ -1,6 +1,7 @@
 package com.darren.mygame
 
 import android.os.SystemClock
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -20,6 +21,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -65,7 +67,7 @@ fun DrawLogo(modifier: Modifier, alpha: Float = 1f) {
 }
 
 @Composable
-fun DrawDagger(modifier: Modifier, daggerID: Int = daggerUtil.getDaggerResource()) {
+fun DrawDagger(modifier: Modifier, daggerID: Int = daggerUtil.value.getDaggerResource()) {
     Image(
         modifier = modifier.size(100.dp),
         painter = painterResource(id = daggerID),
@@ -158,7 +160,7 @@ fun DrawTopFruit() {
             fontSize = 30.sp,
             fontWeight = FontWeight.Bold,
             fontFamily = myFont,
-            color = Color(0xFFF1F6F5),
+            color = Color(0xFFFFB26B),
         )
         Image(
             painter = painterResource(id = R.drawable.fruit_crack),
@@ -311,11 +313,12 @@ fun DrawShopBanner(offset: Dp) {
                 .size(screenWidthDp.div(1.2088f), screenWidthDp.div(10.2748f))
         )
         Text(
-            text = "Dagger Shop",
-            fontSize = 30.sp,
+            text = "Dagger  Shop",
+            fontSize = 25.sp,
             color = Color(0xFFF1F6F5),
             fontFamily = myFont,
             fontWeight = FontWeight.Bold,
+            letterSpacing = 0.8.sp,
             modifier = Modifier.align(Alignment.Center)
         )
     }
@@ -335,7 +338,6 @@ fun DrawShopItem(id: Int, pinkBoxID: MutableState<Int>, greenBoxID: MutableState
                     if (id <= purchasedCount.value) {
                         greenBoxID.value = 0
                         pinkBoxID.value = id
-                        daggerUtil.setDaggerInUseID(id)
                     } else {
                         greenBoxID.value = id
                     }
@@ -344,7 +346,7 @@ fun DrawShopItem(id: Int, pinkBoxID: MutableState<Int>, greenBoxID: MutableState
         DrawDagger(modifier = Modifier
             .align(Alignment.Center)
             .size(size.div(1.10667f))
-            .rotate(45f), daggerID = if (id <= purchasedCount.value) daggerUtil.getDaggerResource(id) else daggerUtil.getLockedResource(id))
+            .rotate(45f), daggerID = if (id <= purchasedCount.value) daggerUtil.value.getDaggerResource(id) else daggerUtil.value.getLockedResource(id))
 
         Image(
             painter = painterResource(id = R.drawable.shop_pink_box),
@@ -362,5 +364,60 @@ fun DrawShopItem(id: Int, pinkBoxID: MutableState<Int>, greenBoxID: MutableState
                 .size(size),
             alpha = if (id == greenBoxID.value) 1f else 0f
         )
+    }
+}
+
+@Composable
+fun ShopPurchaseButton(offsetY: Dp, greenBoxID: MutableState<Int>, onClick: (Int) -> Unit) {
+    val btnOffset = animateDpAsState(targetValue = if (greenBoxID.value != 0) offsetY else screenHeightDp, animationSpec = tween(500))
+    val price = remember{ mutableStateOf(0) }
+
+    LaunchedEffect(greenBoxID.value) {
+        if (greenBoxID.value != 0) price.value = ((greenBoxID.value - 1) * 15)
+    }
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .offset(y = btnOffset.value)) {
+        Image(
+            painter = painterResource(id = R.drawable.button1),
+            contentDescription = "purchase button",
+            modifier = Modifier
+                .align(Alignment.Center)
+                .size(200.dp, 64.58.dp)
+                .clickable { onClick(price.value) }
+        )
+        Row(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .size(200.dp, 64.58.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.End
+        ) {
+            Spacer(modifier = Modifier.weight(0.3f))
+            Text(
+                text = "BUY",
+                fontSize = 30.sp,
+                color = Color(0xFFF1F6F5),
+                fontFamily = myFont,
+                fontWeight = FontWeight.Bold,
+            )
+            Spacer(modifier = Modifier.weight(0.3f))
+            Text(
+                text = price.value.toString(),
+                modifier = Modifier.weight(0.3f),
+                fontSize = 20.sp,
+                color = Color(0xFFF1F6F5),
+                fontFamily = myFont,
+                textAlign = TextAlign.End
+            )
+            Image(
+                painter = painterResource(id = R.drawable.fruit_crack),
+                contentDescription = "fruit",
+                modifier = Modifier
+                    .size(23.dp)
+                    .weight(0.2f)
+            )
+            Spacer(modifier = Modifier.weight(0.2f))
+        }
     }
 }

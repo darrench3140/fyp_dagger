@@ -1,6 +1,5 @@
 package com.darren.mygame.states
 
-import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.ui.graphics.ImageBitmap
@@ -17,7 +16,7 @@ import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
 
-data class FruitState(val image: ImageBitmap, val image_crack: ImageBitmap, val spinSpeed: MutableState<Float>, val uiAlpha: State<Float>, val hitOffset: State<Float>) {
+data class FruitState(val image: ImageBitmap, val image_crack: ImageBitmap, val spinSpeed: MutableState<Float>, val uiAlpha: State<Float>, val hitOffset: State<Float>, val fruitHit: MutableState<Int>) {
     private val imgWidth = 56
     private val imgHeight = 56
     private val imgSize = IntSize(imgWidth, imgHeight)
@@ -27,8 +26,16 @@ data class FruitState(val image: ImageBitmap, val image_crack: ImageBitmap, val 
 
     fun reset(rotationList: List<Float>) {
         fruitList.clear()
-        completedFruitList.clear()
-        (1..(1..4).random()).forEach { _ ->
+        // 40% chance 0, 20% chance 1 or 2, 10% chance 3 or 4
+        var noOfFruit = (0 until 10).random()
+        noOfFruit = when (noOfFruit) {
+            in (0..3) -> return
+            in (4..5) -> 1
+            in (6..7) -> 2
+            8 -> 3
+            else -> 4
+        }
+        (1..noOfFruit).forEach { _ ->
             var rotation: Float
             run { while (true) {
                 rotation = (20..339).random().toFloat()
@@ -42,19 +49,18 @@ data class FruitState(val image: ImageBitmap, val image_crack: ImageBitmap, val 
         }
     }
 
-    fun checkCollision(fruitHit: () -> Unit) {
-        val remove: MutableList<Fruit> = emptyList<Fruit>().toMutableList()
+    fun hit() { //check collision of fruit
+        val removeList: MutableList<Fruit> = emptyList<Fruit>().toMutableList()
         fruitList.forEach{ fruit ->
             val degree = abs(fruit.rotation % 360)
             if (degree in 0f..rotationMargin || degree in (360f-rotationMargin)..360f) {
-                remove.add(fruit) //so that multiple fruit being hit can be handled correctly
+                removeList.add(fruit) //so that multiple fruit being hit can be handled correctly
                 if (fruit.rotation < 0) fruit.rotation = 360 - abs(fruit.rotation % 360)
                 else fruit.rotation = abs(fruit.rotation % 360)
                 completedFruitList.add(fruit)
-                fruitHit()
             }
         }
-        remove.forEach{ fruit -> fruitList.remove(fruit) }
+        removeList.forEach{ fruit -> fruitList.remove(fruit) }
     }
 
     fun draw(drawScope: DrawScope) {
@@ -79,6 +85,7 @@ data class FruitState(val image: ImageBitmap, val image_crack: ImageBitmap, val 
                 )
             }
         }
+        val removeList: MutableList<Fruit> = emptyList<Fruit>().toMutableList()
         completedFruitList.forEach{ fruit ->
             withTransform({
                 translate(0f + fruit.transX, -250f + fruit.transY)
@@ -96,14 +103,20 @@ data class FruitState(val image: ImageBitmap, val image_crack: ImageBitmap, val 
                 )
             }
             if (fruit.rotation % 360 in (160f..300f)) {
-                val rotation = 160f
-                val transX = ((screenWidthInt - 20.dp.toPx()) - (screenWidthInt/2 - 285*sin(180 - rotation))) / 20
-                val transY = ((screenHeightInt/2 - 250 - 285 * cos(180 - rotation)) - (45.dp.toPx())) / 20
-                Log.d("game", "rotation: ${rotation}, $transX, $transY")
+                val rotation = fruit.rotation % 360
+                val transX = ((screenWidthInt - 20.dp.toPx()) - (screenWidthInt/2 - 285*abs(sin(180 - rotation)))) / 20
+                val transY = ((screenHeightInt/2 - 250 - 285 * abs(cos(180 - rotation))) - (45.dp.toPx())) / 20
                 fruit.transX += transX
                 fruit.transY -= transY
+                if (fruit.transX > (screenWidthInt/2 - 20.dp.toPx())) {
+                    removeList.add(fruit)
+                }
             } else fruit.rotation += 10
             if (fruit.scale > 0.5f) fruit.scale *= 0.95f
+        }
+        removeList.forEach{ fruit ->
+            completedFruitList.remove(fruit)
+            fruitHit.value++
         }
     }
 
