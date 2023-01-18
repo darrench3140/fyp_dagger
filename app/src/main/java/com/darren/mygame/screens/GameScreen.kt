@@ -55,7 +55,8 @@ fun GameScreen(navController: NavHostController, gameData: GameData) {
     val remainingDagger = ImageBitmap.imageResource(id = R.drawable.remaining_dagger)
     val fruit = ImageBitmap.imageResource(id = R.drawable.fruit)
     val fruitCrack = ImageBitmap.imageResource(id = R.drawable.fruit_crack)
-    val daggerState = remember { DaggerState(spinSpeed, remainingDaggers, uiAlpha2, hitOffset) }
+    val sparkle = ImageBitmap.imageResource(id = R.drawable.sparkle)
+    val daggerState = remember { DaggerState(spinSpeed, remainingDaggers, uiAlpha2, hitOffset, sparkle) }
     val spinnerState = remember { SpinnerState(spinner, cover, spinSpeed, uiAlpha, hitAlpha, hitOffset) }
     val remainingDaggerState = remember { RemainingDaggerState(remainingDagger, remainingDaggers, uiAlpha) }
     val fruitState = remember { FruitState(fruit, fruitCrack, spinSpeed, uiAlpha, hitOffset, fruitHit)}

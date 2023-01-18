@@ -19,6 +19,7 @@ import kotlinx.coroutines.delay
 fun LandingScreen(navController: NavHostController) {
     val moveUp = remember { mutableStateOf(false) }
     val logoOffset = animateDpAsState(targetValue = if(moveUp.value) 10.dp else 0.dp, animationSpec = tween(durationMillis = 1000))
+    val sparkleAnim = remember { mutableStateOf(1) }
     var lastClickTime by remember { mutableStateOf(0L) }
     LaunchedEffect(true) { //Logo Anim
         while(true) {
@@ -29,7 +30,10 @@ fun LandingScreen(navController: NavHostController) {
         }
     }
     LaunchedEffect(true) {
-
+        while(true) {
+            delay(500)
+            sparkleAnim.value = (sparkleAnim.value + 1) % 2
+        }
     }
     DrawBackground()
     DrawTopFruit()
@@ -39,11 +43,8 @@ fun LandingScreen(navController: NavHostController) {
             .size(300.dp)
             .offset(y = -screenHeightDp.times(0.25f) - logoOffset.value)
         )
-        DrawSparkle(offsetX = 80.dp, offsetY = 60.dp, scale = 1f)
-        DrawSparkle(offsetX = 60.dp, offsetY = 80.dp, scale = 1f)
-        DrawSparkle(offsetX = 110.dp, offsetY = 80.dp, scale = 1f)
-        DrawSparkle(offsetX = 130.dp, offsetY = 40.dp, scale = 1f)
-        DrawSparkle(offsetX = 85.dp, offsetY = 70.dp, scale = 1f)
+        DrawSparkle(id = 0, sparkleAnim)
+        DrawSparkle(id = 1, sparkleAnim)
         DrawDagger(modifier = Modifier
             .size(140.dp)
             .offset(y = screenHeightDp.times(0.03f))

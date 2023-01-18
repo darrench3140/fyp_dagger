@@ -1,6 +1,7 @@
 package com.darren.mygame
 
 import android.os.SystemClock
+import android.util.Log
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -66,9 +67,15 @@ fun DrawLogo(modifier: Modifier, alpha: Float = 1f) {
 }
 
 @Composable
-fun DrawSparkle(offsetX: Dp, offsetY: Dp, scale: Float) {
-    LaunchedEffect(scale) {
-
+fun DrawSparkle(id: Int, sparkleAnim: MutableState<Int>) {
+    val scale = animateFloatAsState(targetValue = if (sparkleAnim.value == id) 1f else 0f, animationSpec = tween(500))
+    var offsetX by remember { mutableStateOf(0.dp) }
+    var offsetY by remember { mutableStateOf(0.dp) }
+    LaunchedEffect(sparkleAnim.value == id) {
+        if (sparkleAnim.value == id) {
+            offsetX = (60..140).random().dp
+            offsetY = (50..80).random().dp
+        }
     }
     Image(
         painter = painterResource(id = R.drawable.sparkle),
@@ -76,7 +83,7 @@ fun DrawSparkle(offsetX: Dp, offsetY: Dp, scale: Float) {
         modifier = Modifier
             .size(20.dp)
             .offset(x = offsetX, y = -screenHeightDp.times(0.25f) + offsetY)
-            .scale(scale),
+            .scale(scale.value),
     )
 }
 
