@@ -1,4 +1,4 @@
-package com.darren.mygame.states
+package com.darren.fyp_dagger.states
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State

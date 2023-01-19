@@ -1,4 +1,4 @@
-package com.darren.mygame.screens
+package com.darren.fyp_dagger.screens
 
 import android.os.SystemClock
 import androidx.compose.foundation.layout.*
@@ -8,7 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.darren.mygame.*
+import com.darren.fyp_dagger.*
 
 @Composable
 fun ShopScreen(navController: NavHostController, gameData: GameData) {

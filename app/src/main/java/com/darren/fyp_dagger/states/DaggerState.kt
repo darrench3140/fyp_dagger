@@ -1,4 +1,4 @@
-package com.darren.mygame.states
+package com.darren.fyp_dagger.states
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
@@ -7,12 +7,12 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
-import com.darren.mygame.daggerUtil
-import com.darren.mygame.gameLevel
-import com.darren.mygame.gameScore
-import com.darren.mygame.gameState
-import com.darren.mygame.screens.midX
-import com.darren.mygame.screens.midY
+import com.darren.fyp_dagger.daggerUtil
+import com.darren.fyp_dagger.gameLevel
+import com.darren.fyp_dagger.gameScore
+import com.darren.fyp_dagger.gameState
+import com.darren.fyp_dagger.screens.midX
+import com.darren.fyp_dagger.screens.midY
 import kotlin.math.abs
 
 data class DaggerState(

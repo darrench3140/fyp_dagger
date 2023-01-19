@@ -1,4 +1,4 @@
-package com.darren.mygame.screens
+package com.darren.fyp_dagger.screens
 
 import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.animateDpAsState
@@ -13,10 +13,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.darren.mygame.DrawBackground
-import com.darren.mygame.DrawLogo
-import com.darren.mygame.DrawSword
-import com.darren.mygame.screenHeightDp
+import com.darren.fyp_dagger.DrawBackground
+import com.darren.fyp_dagger.DrawLogo
+import com.darren.fyp_dagger.DrawSword
+import com.darren.fyp_dagger.screenHeightDp
 import kotlinx.coroutines.delay
 
 @Composable

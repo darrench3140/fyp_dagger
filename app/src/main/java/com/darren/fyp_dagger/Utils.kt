@@ -1,16 +1,19 @@
-package com.darren.mygame
+package com.darren.fyp_dagger
 
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
+import android.content.pm.PackageManager
 import android.graphics.Color
-import android.util.Log
 import android.view.View
 import android.view.WindowManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.imageResource
+import androidx.core.content.ContextCompat
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -109,6 +112,24 @@ object OrientationUtil {
         is Activity -> this
         is ContextWrapper -> baseContext.findActivity()
         else -> null
+    }
+}
+
+object PermissionUtil {
+
+    private val hasCameraPermission = mutableStateOf(false)
+
+    fun hasPermission() = hasCameraPermission.value
+
+    @Composable
+    fun RequestCameraPermission(context: Context) {
+        hasCameraPermission.value = ContextCompat.checkSelfPermission(context, android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+        val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            hasCameraPermission.value = granted
+        }
+        LaunchedEffect(true) {
+            if (!hasCameraPermission.value) launcher.launch(android.Manifest.permission.CAMERA)
+        }
     }
 }
 

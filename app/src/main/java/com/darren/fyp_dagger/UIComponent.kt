@@ -1,6 +1,13 @@
-package com.darren.mygame
+package com.darren.fyp_dagger
 
 import android.os.SystemClock
+import android.util.Log
+import android.util.Size
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.Preview
+import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.view.PreviewView
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -17,18 +24,82 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
+import com.google.mlkit.vision.face.FaceDetection
+import com.google.mlkit.vision.face.FaceDetectorOptions
 import kotlinx.coroutines.delay
+import java.util.concurrent.Executors
 
-val myFont = FontFamily(Font(R.font.nineteenth))
+@Composable
+fun DrawCamera(leftP: MutableState<Float>, rightP: MutableState<Float>, smileP : MutableState<Float>) {
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val context = LocalContext.current
+    val cameraProviderFuture = remember { ProcessCameraProvider.getInstance(context) }
+    val cameraExecutor = remember { Executors.newSingleThreadExecutor() }
+    val lensFacing = remember { mutableStateOf(CameraSelector.LENS_FACING_BACK) }
+    val faceDetector = remember {
+        FaceDetection.getClient(
+            FaceDetectorOptions.Builder()
+                .setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_NONE)
+                .setContourMode(FaceDetectorOptions.CONTOUR_MODE_ALL)
+                .setClassificationMode(FaceDetectorOptions.CLASSIFICATION_MODE_ALL)
+                .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
+                .build())
+    }
+    if (PermissionUtil.hasPermission()) {
+        AndroidView(
+            modifier = Modifier
+                .size(200.dp)
+                .offset(x = screenWidthDp.div(3), y = screenHeightDp.div(3))
+                .rotate(-90f),
+            factory = { ctx ->
+                val previewView = PreviewView(ctx).apply {
+                    implementationMode = PreviewView.ImplementationMode.COMPATIBLE
+                }
+                cameraProviderFuture.addListener({
+                    val cameraProvider = cameraProviderFuture.get()
+                    val preview = Preview.Builder().build().also {
+                        it.setSurfaceProvider(previewView.surfaceProvider)
+                    }
+                    val cameraSelector = CameraSelector.Builder()
+                        .requireLensFacing(lensFacing.value)
+                        .build()
+                    val imageAnalysis = ImageAnalysis.Builder()
+                        .setTargetResolution(Size(previewView.width, previewView.height))
+                        .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                        .build().also {
+                            it.setAnalyzer(
+                                cameraExecutor,
+                                FaceDetectionAnalyzer(faceDetector, lensFacing, leftP, rightP, smileP)
+                            )
+                        }
+                    try {
+                        cameraProvider.unbindAll()
+                        cameraProvider.bindToLifecycle(
+                            lifecycleOwner,
+                            cameraSelector,
+                            preview,
+                            imageAnalysis
+                        )
+                    } catch (exc: Exception) {
+                        Log.e("game", "camera preview failed", exc)
+                    }
+                }, ContextCompat.getMainExecutor(ctx))
+                previewView
+            }
+        )
+    }
+}
 
 @Composable
 fun DrawBackground() {
@@ -96,13 +167,13 @@ fun DrawDagger(modifier: Modifier, daggerID: Int = daggerUtil.value.getDaggerRes
 }
 
 @Composable
-fun DrawButton(text: String, offsetX: Dp = 0.dp, offsetY: Dp = 0.dp, onClick: () -> Unit) {
+fun DrawButton(text: String, offsetX: Dp = 0.dp, offsetY: Dp = 0.dp, id: Int = R.drawable.button,onClick: () -> Unit) {
     Box(modifier = Modifier
         .fillMaxSize()
         .offset(offsetX, offsetY)
     ) {
         Image(
-            painter = painterResource(id = R.drawable.button),
+            painter = painterResource(id = id),
             contentDescription = "button",
             modifier = Modifier
                 .align(Alignment.Center)

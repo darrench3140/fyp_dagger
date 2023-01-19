@@ -1,4 +1,4 @@
-package com.darren.mygame.screens
+package com.darren.fyp_dagger.screens
 
 import android.util.Log
 import android.view.MotionEvent
@@ -17,12 +17,12 @@ import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.darren.mygame.*
-import com.darren.mygame.R
-import com.darren.mygame.states.DaggerState
-import com.darren.mygame.states.FruitState
-import com.darren.mygame.states.RemainingDaggerState
-import com.darren.mygame.states.SpinnerState
+import com.darren.fyp_dagger.*
+import com.darren.fyp_dagger.R
+import com.darren.fyp_dagger.states.DaggerState
+import com.darren.fyp_dagger.states.FruitState
+import com.darren.fyp_dagger.states.RemainingDaggerState
+import com.darren.fyp_dagger.states.SpinnerState
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -73,7 +73,7 @@ fun GameScreen(navController: NavHostController, gameData: GameData) {
         if (gameState.value.isWipe()) {
             gameLevel.value = 1
             GlobalScope.launch {
-                delay(500)
+                delay(100)
                 gameScore.value = 0
                 fruitGained.value = 0
             }

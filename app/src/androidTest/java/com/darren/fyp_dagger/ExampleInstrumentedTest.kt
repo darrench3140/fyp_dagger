@@ -1,4 +1,4 @@
-package com.darren.mygame
+package com.darren.fyp_dagger
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

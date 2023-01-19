@@ -1,4 +1,4 @@
-package com.darren.mygame.states
+package com.darren.fyp_dagger.states
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
@@ -7,8 +7,8 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
-import com.darren.mygame.screens.midX
-import com.darren.mygame.screens.midY
+import com.darren.fyp_dagger.screens.midX
+import com.darren.fyp_dagger.screens.midY
 
 data class SpinnerState(
     val image: MutableState<ImageBitmap>,

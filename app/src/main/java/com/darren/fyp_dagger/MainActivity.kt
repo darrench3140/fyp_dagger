@@ -1,4 +1,4 @@
-package com.darren.mygame
+package com.darren.fyp_dagger
 
 import android.content.pm.ActivityInfo
 import android.os.Bundle
@@ -6,12 +6,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import com.darren.mygame.screens.*
+import com.darren.fyp_dagger.screens.*
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
@@ -23,19 +23,17 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 //        val splashScreen = installSplashScreen()
         StatusBarUtil.transparentStatusBar(this)
-
         setContent {
-            OrientationUtil.LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
-
+            // Initialization
             val configuration = LocalConfiguration.current
+            val context = LocalContext.current
             screenHeightDp = configuration.screenHeightDp.dp
             screenWidthDp = configuration.screenWidthDp.dp
             screenHeightInt = with(LocalDensity.current) { screenHeightDp.toPx().toInt() }
             screenWidthInt = with(LocalDensity.current) { screenWidthDp.toPx().toInt() }
-
-            val context = LocalContext.current
+            OrientationUtil.LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+            PermissionUtil.RequestCameraPermission(context)
             val gameData = GameSetUpUtil.loadSettings(context)
-
             // available gameModes, "god" "reset" "normal" "rich"
             GameSetUpUtil.SetGameMode(gameData, mode = "normal")
 
@@ -43,10 +41,11 @@ class MainActivity : ComponentActivity() {
             daggerUtil.value.Init(savedDaggerInUseID.value)
             spinnerUtil.value.Init()
 
+            // Navigation
             val navController = rememberAnimatedNavController()
             AnimatedNavHost(
                 navController = navController,
-                startDestination = "loading_screen"
+                startDestination = "landing_screen"
             ) {
                 composable(
                     route = "loading_screen",
