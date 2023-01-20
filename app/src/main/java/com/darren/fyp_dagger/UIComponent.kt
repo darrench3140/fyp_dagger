@@ -41,7 +41,7 @@ import kotlinx.coroutines.delay
 import java.util.concurrent.Executors
 
 @Composable
-fun DrawCamera(leftP: MutableState<Float>, rightP: MutableState<Float>, smileP : MutableState<Float>) {
+fun DrawCamera() {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
     val cameraProviderFuture = remember { ProcessCameraProvider.getInstance(context) }
@@ -53,51 +53,54 @@ fun DrawCamera(leftP: MutableState<Float>, rightP: MutableState<Float>, smileP :
                 .setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_NONE)
                 .setContourMode(FaceDetectorOptions.CONTOUR_MODE_ALL)
                 .setClassificationMode(FaceDetectorOptions.CLASSIFICATION_MODE_ALL)
-                .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
+                .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_ACCURATE)
                 .build())
     }
     if (PermissionUtil.hasPermission()) {
-        AndroidView(
-            modifier = Modifier
-                .size(200.dp)
-                .offset(x = screenWidthDp.div(3), y = screenHeightDp.div(3))
-                .rotate(-90f),
-            factory = { ctx ->
-                val previewView = PreviewView(ctx).apply {
-                    implementationMode = PreviewView.ImplementationMode.COMPATIBLE
-                }
-                cameraProviderFuture.addListener({
-                    val cameraProvider = cameraProviderFuture.get()
-                    val preview = Preview.Builder().build().also {
-                        it.setSurfaceProvider(previewView.surfaceProvider)
+        Box(modifier = Modifier.fillMaxSize()) {
+            AndroidView(
+                modifier = Modifier
+                    .size(150.dp)
+                    .align(Alignment.BottomEnd)
+                    .offset(x = (-20).dp, y = (-20).dp)
+                    .rotate(-90f),
+                factory = { ctx ->
+                    val previewView = PreviewView(ctx).apply {
+                        implementationMode = PreviewView.ImplementationMode.COMPATIBLE
                     }
-                    val cameraSelector = CameraSelector.Builder()
-                        .requireLensFacing(lensFacing.value)
-                        .build()
-                    val imageAnalysis = ImageAnalysis.Builder()
-                        .setTargetResolution(Size(previewView.width, previewView.height))
-                        .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                        .build().also {
-                            it.setAnalyzer(
-                                cameraExecutor,
-                                FaceDetectionAnalyzer(faceDetector, lensFacing, leftP, rightP, smileP)
-                            )
+                    cameraProviderFuture.addListener({
+                        val cameraProvider = cameraProviderFuture.get()
+                        val preview = Preview.Builder().setTargetResolution(Size(400, 400)).build().also {
+                            it.setSurfaceProvider(previewView.surfaceProvider)
                         }
-                    try {
-                        cameraProvider.unbindAll()
-                        cameraProvider.bindToLifecycle(
-                            lifecycleOwner,
-                            cameraSelector,
-                            preview,
-                            imageAnalysis
-                        )
-                    } catch (exc: Exception) {
-                        Log.e("game", "camera preview failed", exc)
-                    }
-                }, ContextCompat.getMainExecutor(ctx))
-                previewView
-            }
-        )
+                        val cameraSelector = CameraSelector.Builder()
+                            .requireLensFacing(lensFacing.value)
+                            .build()
+                        val imageAnalysis = ImageAnalysis.Builder()
+                            .setTargetResolution(Size(previewView.width, previewView.height))
+                            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                            .build().also {
+                                it.setAnalyzer(
+                                    cameraExecutor,
+                                    FaceDetectionAnalyzer(faceDetector, lensFacing)
+                                )
+                            }
+                        try {
+                            cameraProvider.unbindAll()
+                            cameraProvider.bindToLifecycle(
+                                lifecycleOwner,
+                                cameraSelector,
+                                preview,
+                                imageAnalysis
+                            )
+                        } catch (exc: Exception) {
+                            Log.e("game", "camera preview failed", exc)
+                        }
+                    }, ContextCompat.getMainExecutor(ctx))
+                    previewView
+                }
+            )
+        }
     }
 }
 
@@ -167,6 +170,43 @@ fun DrawDagger(modifier: Modifier, daggerID: Int = daggerUtil.value.getDaggerRes
 }
 
 @Composable
+fun DrawFruit(modifier: Modifier) {
+    Image(
+        painter = painterResource(id = R.drawable.fruit_crack),
+        contentDescription = "fruit",
+        modifier = modifier
+    )
+}
+
+@Composable
+fun DrawGameModeItem(buttonText: String, descriptionText: String, rewardText: String, offsetY: Dp, onClick: () -> Unit) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        DrawButton(text = buttonText, offsetY = offsetY, id = R.drawable.button1) {
+            onClick()
+        }
+        DrawFruit(modifier = Modifier.align(Alignment.Center).offset(x = 90.dp, y = offsetY))
+        DrawFruit(modifier = Modifier.align(Alignment.Center).offset(x = (-90).dp, y = offsetY))
+        DrawFruit(modifier = Modifier.align(Alignment.Center).offset(x = 120.dp, y = offsetY).scale(2f))
+        Text(
+            text = rewardText,
+            fontSize = 25.sp,
+            color = Color(0xFFFEC868),
+            fontFamily = myFont,
+            modifier = Modifier.align(Alignment.Center).offset(x = 150.dp, y = offsetY)
+        )
+        Text(
+            text = descriptionText,
+            fontSize = 18.sp,
+            color = white,
+            fontFamily = myFont,
+            modifier = Modifier
+                .align(Alignment.Center)
+                .offset(y = offsetY + 45.dp)
+        )
+    }
+}
+
+@Composable
 fun DrawButton(text: String, offsetX: Dp = 0.dp, offsetY: Dp = 0.dp, id: Int = R.drawable.button,onClick: () -> Unit) {
     Box(modifier = Modifier
         .fillMaxSize()
@@ -181,13 +221,12 @@ fun DrawButton(text: String, offsetX: Dp = 0.dp, offsetY: Dp = 0.dp, id: Int = R
                 .clickable { onClick() }
         )
         Text(
-            modifier = Modifier
-                .align(Alignment.Center),
             text = text,
             fontSize = 35.sp,
-            color = Color(0xFFF1F6F5),
+            color = white,
             fontFamily = myFont,
             fontWeight = FontWeight.Bold,
+            modifier = Modifier.align(Alignment.Center)
         )
     }
 }
@@ -223,7 +262,7 @@ fun DrawTopBar(topBarOffset: State<Dp>) {
             fontSize = 30.sp,
             fontWeight = FontWeight.Bold,
             fontFamily = myFont,
-            color = Color(0xFFFFB26B),
+            color = yellow,
         )
         Spacer(modifier = Modifier.weight(0.2f))
         Text(
@@ -231,7 +270,7 @@ fun DrawTopBar(topBarOffset: State<Dp>) {
             fontSize = 30.sp,
             fontFamily = myFont,
             fontWeight = FontWeight.Bold,
-            color = Color(0xFFF1F6F5)
+            color = white
         )
         Spacer(modifier = Modifier.weight(0.5f))
     }
@@ -251,7 +290,7 @@ fun DrawTopFruit() {
             fontSize = 30.sp,
             fontWeight = FontWeight.Bold,
             fontFamily = myFont,
-            color = Color(0xFFFFB26B),
+            color = yellow,
         )
         Image(
             painter = painterResource(id = R.drawable.fruit_crack),
@@ -294,28 +333,28 @@ fun DrawScoreBoard(
             Text(
                 text = "SCORE (MAX: ${maxScore.value})",
                 fontSize = 20.sp,
-                color = Color(0xFFFFB26B),
+                color = yellow,
                 fontFamily = myFont,
                 fontWeight = FontWeight.Bold,
             )
             Text(
                 text = gameScore.value.toString(),
                 fontSize = 40.sp,
-                color = Color(0xFFF1F6F5),
+                color = white,
                 fontFamily = myFont,
                 fontWeight = FontWeight.Bold,
             )
             Text(
                 text = "\n\nREWARD",
                 fontSize = 20.sp,
-                color = Color(0xFFFFB26B),
+                color = yellow,
                 fontFamily = myFont,
                 fontWeight = FontWeight.Bold,
             )
             Text(
                 text = fruitGained.value.toString(),
                 fontSize = 40.sp,
-                color = Color(0xFFF1F6F5),
+                color = white,
                 fontFamily = myFont,
                 fontWeight = FontWeight.Bold,
             )
@@ -364,6 +403,7 @@ fun DrawShopButton(offsetY: Dp, onClick: () -> Unit) {
         )
     }
 }
+
 @Composable
 fun DrawShopLight(lightAlpha: State<Float> = mutableStateOf(1f), rotation: Float) {
     Box(modifier = Modifier.fillMaxSize()) {
@@ -419,7 +459,7 @@ fun DrawShopBanner(offset: Dp) {
         Text(
             text = "Dagger  Shop",
             fontSize = 25.sp,
-            color = Color(0xFFF1F6F5),
+            color = white,
             fontFamily = myFont,
             fontWeight = FontWeight.Bold,
             letterSpacing = 0.8.sp,
@@ -509,7 +549,7 @@ fun ShopPurchaseButton(offsetY: Dp, greenBoxID: MutableState<Int>, onClick: (Int
             Text(
                 text = "BUY",
                 fontSize = 30.sp,
-                color = Color(0xFFF1F6F5),
+                color = white,
                 fontFamily = myFont,
                 fontWeight = FontWeight.Bold,
             )
@@ -518,7 +558,7 @@ fun ShopPurchaseButton(offsetY: Dp, greenBoxID: MutableState<Int>, onClick: (Int
                 text = price.value.toString(),
                 modifier = Modifier.weight(0.3f),
                 fontSize = 20.sp,
-                color = Color(0xFFF1F6F5),
+                color = white,
                 fontFamily = myFont,
                 textAlign = TextAlign.End
             )

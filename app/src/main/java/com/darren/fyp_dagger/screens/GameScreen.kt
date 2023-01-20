@@ -60,8 +60,9 @@ fun GameScreen(navController: NavHostController, gameData: GameData) {
     val spinnerState = remember { SpinnerState(spinner, cover, spinSpeed, uiAlpha, hitAlpha, hitOffset) }
     val remainingDaggerState = remember { RemainingDaggerState(remainingDagger, remainingDaggers, uiAlpha) }
     val fruitState = remember { FruitState(fruit, fruitCrack, spinSpeed, uiAlpha, hitOffset, fruitHit)}
+    val showCamera = remember { mutableStateOf(false) }
 
-    // game animation controller coroutine
+    // game animation and camera controller coroutine
     LaunchedEffect(true) {
         animation.animateTo(
             targetValue = 1f,
@@ -77,6 +78,7 @@ fun GameScreen(navController: NavHostController, gameData: GameData) {
                 gameScore.value = 0
                 fruitGained.value = 0
             }
+            if ((!gameMode.value.isTap() && !randomMode.value) || (randomMode.value)) showCamera.value = true
             gameState.value.setReset()
         } else if (gameState.value.isReset()) {
             LevelUtil.updateLevelInfo(randomSpeed, clockwise, spinSpeed, minSpeed, maxSpeed, remainingDaggers)
@@ -92,10 +94,25 @@ fun GameScreen(navController: NavHostController, gameData: GameData) {
             delay(700)
             gameState.value.setReset()
         } else if (gameState.value.isOver()) {
+            showCamera.value = false
             if (maxScore.value < gameScore.value) {
                 maxScore.value = gameScore.value
                 gameData.saveMaxScore(maxScore.value)
                 showTopScore.value = true
+            }
+        }
+    }
+    // Crazy Mode Handling
+    LaunchedEffect(randomMode.value) {
+        if (randomMode.value) {
+            while(true) {
+                when ((1..3).random()) {
+                    1 -> if (!gameMode.value.isTap()) gameMode.value.setTap() else gameMode.value.setSmile()
+                    2 -> if (!gameMode.value.isSmile()) gameMode.value.setSmile() else gameMode.value.setBlink()
+                    3 -> if (!gameMode.value.isBlink()) gameMode.value.setBlink() else gameMode.value.setTap()
+                }
+                Log.d("game", "current: ${gameMode.value}")
+                delay((1..6).random() * 1000L)
             }
         }
     }
@@ -113,6 +130,7 @@ fun GameScreen(navController: NavHostController, gameData: GameData) {
             daggerHit.value = false
         }
     }
+    // hit fruit
     LaunchedEffect(fruitHit.value) {
         fruitCount.value += fruitHit.value
         fruitGained.value += fruitHit.value
@@ -125,13 +143,16 @@ fun GameScreen(navController: NavHostController, gameData: GameData) {
     Canvas(modifier = Modifier
         .fillMaxSize()
         .pointerInteropFilter {
-            when (it.action) {
-                MotionEvent.ACTION_UP -> {
-                    if (gameState.value.isRunning()) gameState.value.setShooting()
+            if (gameMode.value.isTap()) {
+                when (it.action) {
+                    MotionEvent.ACTION_UP -> {
+                        if (gameState.value.isRunning()) gameState.value.setShooting()
+                    }
                 }
             }
             true
-        }) {
+        }
+    ) {
         animation.value //use to maintain animation loop
 
         if (gameState.value.isShooting() || gameState.value.isLeveling()) {
@@ -151,6 +172,8 @@ fun GameScreen(navController: NavHostController, gameData: GameData) {
     //Top Bar
     DrawTopBar(topBarOffset)
     DrawTopFruit()
+    //Camera
+    if (showCamera.value) DrawCamera()
     //Score Board
     DrawScoreBoard(navController, scoreBoardOffset, showTopScore)
 }

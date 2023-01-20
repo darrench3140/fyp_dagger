@@ -4,15 +4,20 @@ import android.os.SystemClock
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.darren.fyp_dagger.*
-import com.darren.fyp_dagger.R
 import kotlinx.coroutines.delay
 
 @Composable
@@ -41,9 +46,11 @@ fun LandingScreen(navController: NavHostController) {
 
     DrawBackground()
     DrawTopFruit()
+    //Main Landing Screen
     Box(modifier = Modifier
         .fillMaxSize()
-        .alpha(landingScreenAlpha.value), contentAlignment = Alignment.Center) {
+        .alpha(landingScreenAlpha.value)
+        .offset(y = screenHeightDp + 20.dp - levelMenuOffset.value), contentAlignment = Alignment.Center) {
         DrawLogo(modifier = Modifier
             .align(Alignment.Center)
             .size(300.dp)
@@ -68,33 +75,58 @@ fun LandingScreen(navController: NavHostController) {
             }
         }
     }
+    //Game Mode Screen
     Box(modifier = Modifier
         .fillMaxSize()
         .offset(y = levelMenuOffset.value)) 
     {
-        DrawButton(text = "Easy", offsetY = -screenHeightDp * 0.15f, id = R.drawable.button1) {
+        Text(
+            text = "GAME MODE",
+            fontSize = 40.sp,
+            color = white,
+            fontFamily = myFont,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier
+                .align(Alignment.Center)
+                .offset(y = -screenHeightDp * 0.3f)
+        )
+        DrawGameModeItem(buttonText = "Easy", descriptionText = "CONTROL: TAP", rewardText = "x1", offsetY = -screenHeightDp * 0.2f) {
             if (SystemClock.elapsedRealtime() - lastClickTime > 500L) {
+                randomMode.value = false
+                gameMode.value.setTap()
                 gameState.value.setWipe()
                 navController.navigate("game_screen")
                 lastClickTime = SystemClock.elapsedRealtime()
             }
         }
-        DrawButton(text = "Normal", id = R.drawable.button1) {
-
+        DrawGameModeItem(buttonText = "Normal", descriptionText = "CONTROL: SMILE", rewardText = "x2", offsetY = -screenHeightDp * 0.05f) {
+            if (SystemClock.elapsedRealtime() - lastClickTime > 500L) {
+                randomMode.value = false
+                gameMode.value.setSmile()
+                gameState.value.setWipe()
+                navController.navigate("game_screen")
+                lastClickTime = SystemClock.elapsedRealtime()
+            }
         }
-        DrawButton(text = "Hard", offsetY = screenHeightDp * 0.15f, id = R.drawable.button1) {
-
+        DrawGameModeItem(buttonText = "Hard", descriptionText = "CONTROL: BLINK", rewardText = "x3", offsetY = screenHeightDp * 0.1f) {
+            if (SystemClock.elapsedRealtime() - lastClickTime > 500L) {
+                randomMode.value = false
+                gameMode.value.setBlink()
+                gameState.value.setWipe()
+                navController.navigate("game_screen")
+                lastClickTime = SystemClock.elapsedRealtime()
+            }
         }
-        DrawButton(text = "Crazy", offsetY = screenHeightDp * 0.3f, id = R.drawable.button1) {
-
+        DrawGameModeItem(buttonText = "Crazy", descriptionText = "CONTROL: RANDOM", rewardText = "x4", offsetY = screenHeightDp * 0.25f) {
+            if (SystemClock.elapsedRealtime() - lastClickTime > 500L) {
+                randomMode.value = true
+                gameState.value.setWipe()
+                navController.navigate("game_screen")
+                lastClickTime = SystemClock.elapsedRealtime()
+            }
         }
         DrawReturnButton(offsetY = (-50).dp) {
             showLevelMenu.value = false
         }
     }
-    val use = remember { mutableStateOf(false) }
-    val leftEyeProbability = remember { mutableStateOf(0f) }
-    val rightEyeProbability = remember { mutableStateOf(0f) }
-    val smileProbability = remember { mutableStateOf(0f) }
-//    DrawCamera(leftEyeProbability, rightEyeProbability, smileProbability)
 }

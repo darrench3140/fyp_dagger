@@ -1,5 +1,6 @@
 package com.darren.fyp_dagger.states
 
+import com.darren.fyp_dagger.gameMode
 import com.darren.fyp_dagger.gameState
 
 data class GameState(private val status: Status = Status.RESET) {
@@ -28,4 +29,21 @@ data class GameState(private val status: Status = Status.RESET) {
     fun setLeveling() { gameState.value = GameState(Status.LEVELING) }
     fun setLosing() { gameState.value = GameState(Status.LOSING) }
     fun setOver() { gameState.value = GameState(Status.OVER) }
+}
+
+data class GameMode(private val mode: Mode = Mode.TAP) {
+
+    enum class Mode {
+        TAP,
+        SMILE,
+        BLINK
+    }
+
+    fun isTap() = mode == Mode.TAP
+    fun isSmile() = mode == Mode.SMILE
+    fun isBlink() = mode == Mode.BLINK
+
+    fun setTap() { gameMode.value = GameMode(Mode.TAP) }
+    fun setSmile() { gameMode.value = GameMode(Mode.SMILE) }
+    fun setBlink() { gameMode.value = GameMode(Mode.BLINK) }
 }
