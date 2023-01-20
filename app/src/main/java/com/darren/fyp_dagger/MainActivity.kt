@@ -57,10 +57,12 @@ class MainActivity : ComponentActivity() {
                     route = "landing_screen",
                     enterTransition = { when (initialState.destination.route) {
                         "game_screen" -> slideIntoContainer(AnimatedContentScope.SlideDirection.Right, animationSpec = tween(500))
+                        "settings_screen" -> slideIntoContainer(AnimatedContentScope.SlideDirection.Left, animationSpec = tween(500))
                         else -> fadeIn(animationSpec = tween(500))
                     }},
                     exitTransition = { when (targetState.destination.route) {
                         "game_screen" -> slideOutOfContainer(AnimatedContentScope.SlideDirection.Left, animationSpec = tween(500))
+                        "settings_screen" -> slideOutOfContainer(AnimatedContentScope.SlideDirection.Right, animationSpec = tween(500))
                         else -> fadeOut(animationSpec = tween(100, 500))
                     }}
                 ) {
@@ -80,6 +82,13 @@ class MainActivity : ComponentActivity() {
                     popExitTransition = { slideOutOfContainer(AnimatedContentScope.SlideDirection.Down, animationSpec = tween(500, 500))}
                 ) {
                     ShopScreen(navController, gameData)
+                }
+                composable(
+                    route = "settings_screen",
+                    enterTransition = { slideIntoContainer(AnimatedContentScope.SlideDirection.Right, animationSpec = tween(500)) },
+                    popExitTransition = { slideOutOfContainer(AnimatedContentScope.SlideDirection.Left, animationSpec = tween(500))}
+                ) {
+                    Settings(navController, gameData)
                 }
             }
         }

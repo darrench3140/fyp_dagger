@@ -72,13 +72,14 @@ fun GameScreen(navController: NavHostController, gameData: GameData) {
     // game state handling for important events
     LaunchedEffect(gameState.value) {
         if (gameState.value.isWipe()) {
+            cameraReady.value = false
             gameLevel.value = 1
             GlobalScope.launch {
                 delay(100)
                 gameScore.value = 0
                 fruitGained.value = 0
             }
-            if ((!gameMode.value.isTap() && !randomMode.value) || (randomMode.value)) showCamera.value = true
+            showCamera.value = !gameMode.value.isTap() || gameDifficulty.value == 3
             gameState.value.setReset()
         } else if (gameState.value.isReset()) {
             LevelUtil.updateLevelInfo(randomSpeed, clockwise, spinSpeed, minSpeed, maxSpeed, remainingDaggers)
@@ -94,7 +95,6 @@ fun GameScreen(navController: NavHostController, gameData: GameData) {
             delay(700)
             gameState.value.setReset()
         } else if (gameState.value.isOver()) {
-            showCamera.value = false
             if (maxScore.value < gameScore.value) {
                 maxScore.value = gameScore.value
                 gameData.saveMaxScore(maxScore.value)
@@ -102,25 +102,51 @@ fun GameScreen(navController: NavHostController, gameData: GameData) {
             }
         }
     }
-    // Crazy Mode Handling
-    LaunchedEffect(randomMode.value) {
-        if (randomMode.value) {
+    // Special Handling for blink and crazy mode
+    LaunchedEffect(gameDifficulty.value) {
+        if (gameDifficulty.value == 3) { // Crazy Mode Handling
+            while(true) {
+                when ((1..5).random()) {
+                    1 -> if (!gameMode.value.isTap()) gameMode.value.setTap() else gameMode.value.setSmile()
+                    2 -> if (!gameMode.value.isSmile()) gameMode.value.setSmile() else gameMode.value.setLeft()
+                    3 -> if (!gameMode.value.isLeft()) gameMode.value.setLeft() else gameMode.value.setRight()
+                    4 -> if (!gameMode.value.isRight()) gameMode.value.setRight() else gameMode.value.setBoth()
+                    5 -> if (!gameMode.value.isBoth()) gameMode.value.setBoth() else gameMode.value.setTap()
+                }
+                delay((3..7).random() * 1000L)
+            }
+        } else if (gameDifficulty.value == 2) {
             while(true) {
                 when ((1..3).random()) {
-                    1 -> if (!gameMode.value.isTap()) gameMode.value.setTap() else gameMode.value.setSmile()
-                    2 -> if (!gameMode.value.isSmile()) gameMode.value.setSmile() else gameMode.value.setBlink()
-                    3 -> if (!gameMode.value.isBlink()) gameMode.value.setBlink() else gameMode.value.setTap()
+                    1 -> if (!gameMode.value.isLeft()) gameMode.value.setLeft() else gameMode.value.setRight()
+                    2 -> if (!gameMode.value.isRight()) gameMode.value.setRight() else gameMode.value.setBoth()
+                    3 -> if (!gameMode.value.isBoth()) gameMode.value.setBoth() else gameMode.value.setLeft()
                 }
-                Log.d("game", "current: ${gameMode.value}")
-                delay((1..6).random() * 1000L)
+                delay((3..7).random() * 1000L)
             }
         }
+    }
+    // Smile Control
+    LaunchedEffect(gameMode.value.isSmile() && smileP.value > 0.5f) {
+        if (gameMode.value.isSmile() && smileP.value > 0.5f && gameState.value.isRunning()) gameState.value.setShooting()
+    }
+    // Left Eye Control
+    LaunchedEffect(gameMode.value.isLeft() && leftP.value < 0.2f && rightP.value > 0.5) {
+        if (gameMode.value.isLeft() && leftP.value < 0.2f && rightP.value > 0.5 && gameState.value.isRunning()) gameState.value.setShooting()
+    }
+    // Right Eye Control
+    LaunchedEffect(gameMode.value.isRight() && rightP.value < 0.2f && leftP.value > 0.5) {
+        if (gameMode.value.isRight() && rightP.value < 0.2f && leftP.value > 0.5 && gameState.value.isRunning()) gameState.value.setShooting()
+    }
+    // Both Eye Control
+    LaunchedEffect(gameMode.value.isBoth() && leftP.value < 0.2f && rightP.value < 0.2f) {
+        if (gameMode.value.isBoth() && leftP.value < 0.2f && rightP.value < 0.2f && gameState.value.isRunning()) gameState.value.setShooting()
     }
     // spin speed controller coroutine
     LaunchedEffect(randomSpeed.value) {
         while(randomSpeed.value) {
             spinSpeed.value = (minSpeed.value..maxSpeed.value).random().toFloat() * (if(clockwise.value) 1 else -1)
-            delay(2000)
+            delay((1..6).random() * 500L)
         }
     }
     // hit animation
@@ -173,7 +199,8 @@ fun GameScreen(navController: NavHostController, gameData: GameData) {
     DrawTopBar(topBarOffset)
     DrawTopFruit()
     //Camera
-    if (showCamera.value) DrawCamera()
+    DrawCamera(showCamera)
+    DrawControllerIcons()
     //Score Board
     DrawScoreBoard(navController, scoreBoardOffset, showTopScore)
 }

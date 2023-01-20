@@ -14,10 +14,13 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
@@ -41,7 +44,7 @@ import kotlinx.coroutines.delay
 import java.util.concurrent.Executors
 
 @Composable
-fun DrawCamera() {
+fun DrawCamera(showCamera: MutableState<Boolean>) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
     val cameraProviderFuture = remember { ProcessCameraProvider.getInstance(context) }
@@ -56,21 +59,28 @@ fun DrawCamera() {
                 .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_ACCURATE)
                 .build())
     }
-    if (PermissionUtil.hasPermission()) {
+    if (PermissionUtil.hasPermission() && showCamera.value) {
+        val cameraAlpha = animateFloatAsState(targetValue = if (gameState.value.isOver()) 0f else 1f, animationSpec = tween(500))
+        val cameraOffset = animateDpAsState(targetValue = if (!cameraReady.value) screenWidthDp else 0.dp, animationSpec = if (cameraReady.value) tween(500) else tween(0))
         Box(modifier = Modifier.fillMaxSize()) {
             AndroidView(
                 modifier = Modifier
-                    .size(150.dp)
+                    .size(130.dp)
                     .align(Alignment.BottomEnd)
-                    .offset(x = (-20).dp, y = (-20).dp)
-                    .rotate(-90f),
+                    .offset((-25).dp + cameraOffset.value, (-25).dp)
+                    .rotate(-90f)
+                    .clip(CircleShape)
+                    .scale(1.5f)
+                    .alpha(cameraAlpha.value),
                 factory = { ctx ->
                     val previewView = PreviewView(ctx).apply {
                         implementationMode = PreviewView.ImplementationMode.COMPATIBLE
                     }
                     cameraProviderFuture.addListener({
                         val cameraProvider = cameraProviderFuture.get()
-                        val preview = Preview.Builder().setTargetResolution(Size(400, 400)).build().also {
+                        val preview = Preview.Builder()
+                            .build()
+                            .also {
                             it.setSurfaceProvider(previewView.surfaceProvider)
                         }
                         val cameraSelector = CameraSelector.Builder()
@@ -99,6 +109,31 @@ fun DrawCamera() {
                     }, ContextCompat.getMainExecutor(ctx))
                     previewView
                 }
+            )
+        }
+    }
+}
+
+@Composable
+fun DrawControllerIcons() {
+    val iconAlpha = animateFloatAsState(targetValue = if (gameState.value.isOver() || gameState.value.isWipe() || !cameraReady.value) 0f else 1f, animationSpec = if (!gameState.value.isWipe()) tween(1000) else tween(0))
+    if (gameDifficulty.value >= 2) {
+        Box(modifier = Modifier.fillMaxSize().alpha(iconAlpha.value)) {
+            Image( //Left Eye
+                painter = painterResource(id = if (gameMode.value.isLeft() || gameMode.value.isBoth()) R.drawable.eye_close else R.drawable.eye_open),
+                contentDescription = "left eye icon",
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .offset(x = (-30).dp, y = 40.dp),
+                alpha = if (gameMode.value.isLeft() || gameMode.value.isBoth()) 1f else 0.7f
+            )
+            Image( //Right Eye
+                painter = painterResource(id = if (gameMode.value.isRight() || gameMode.value.isBoth()) R.drawable.eye_close else R.drawable.eye_open),
+                contentDescription = "right eye icon",
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .offset(x = 30.dp, y = 40.dp),
+                alpha = if (gameMode.value.isRight() || gameMode.value.isBoth()) 1f else 0.7f
             )
         }
     }
@@ -184,15 +219,24 @@ fun DrawGameModeItem(buttonText: String, descriptionText: String, rewardText: St
         DrawButton(text = buttonText, offsetY = offsetY, id = R.drawable.button1) {
             onClick()
         }
-        DrawFruit(modifier = Modifier.align(Alignment.Center).offset(x = 90.dp, y = offsetY))
-        DrawFruit(modifier = Modifier.align(Alignment.Center).offset(x = (-90).dp, y = offsetY))
-        DrawFruit(modifier = Modifier.align(Alignment.Center).offset(x = 120.dp, y = offsetY).scale(2f))
+        DrawFruit(modifier = Modifier
+            .align(Alignment.Center)
+            .offset(x = 90.dp, y = offsetY))
+        DrawFruit(modifier = Modifier
+            .align(Alignment.Center)
+            .offset(x = (-90).dp, y = offsetY))
+        DrawFruit(modifier = Modifier
+            .align(Alignment.Center)
+            .offset(x = 120.dp, y = offsetY)
+            .scale(2f))
         Text(
             text = rewardText,
             fontSize = 25.sp,
             color = Color(0xFFFEC868),
             fontFamily = myFont,
-            modifier = Modifier.align(Alignment.Center).offset(x = 150.dp, y = offsetY)
+            modifier = Modifier
+                .align(Alignment.Center)
+                .offset(x = 150.dp, y = offsetY)
         )
         Text(
             text = descriptionText,
@@ -298,6 +342,21 @@ fun DrawTopFruit() {
             modifier = Modifier
                 .size(30.dp)
                 .offset(x = (-20).dp)
+        )
+    }
+}
+
+@Composable
+fun DrawSettingsIcon(onClick: () -> Unit) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        Image(
+            painter = painterResource(id = R.drawable.settings),
+            contentDescription = "settings",
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .size(20.dp)
+                .offset(25.dp, 40.dp)
+                .clickable { onClick() }
         )
     }
 }

@@ -46,6 +46,9 @@ fun LandingScreen(navController: NavHostController) {
 
     DrawBackground()
     DrawTopFruit()
+    DrawSettingsIcon {
+        navController.navigate("settings_screen")
+    }
     //Main Landing Screen
     Box(modifier = Modifier
         .fillMaxSize()
@@ -92,7 +95,7 @@ fun LandingScreen(navController: NavHostController) {
         )
         DrawGameModeItem(buttonText = "Easy", descriptionText = "CONTROL: TAP", rewardText = "x1", offsetY = -screenHeightDp * 0.2f) {
             if (SystemClock.elapsedRealtime() - lastClickTime > 500L) {
-                randomMode.value = false
+                gameDifficulty.value = 0
                 gameMode.value.setTap()
                 gameState.value.setWipe()
                 navController.navigate("game_screen")
@@ -101,7 +104,7 @@ fun LandingScreen(navController: NavHostController) {
         }
         DrawGameModeItem(buttonText = "Normal", descriptionText = "CONTROL: SMILE", rewardText = "x2", offsetY = -screenHeightDp * 0.05f) {
             if (SystemClock.elapsedRealtime() - lastClickTime > 500L) {
-                randomMode.value = false
+                gameDifficulty.value = 1
                 gameMode.value.setSmile()
                 gameState.value.setWipe()
                 navController.navigate("game_screen")
@@ -110,8 +113,7 @@ fun LandingScreen(navController: NavHostController) {
         }
         DrawGameModeItem(buttonText = "Hard", descriptionText = "CONTROL: BLINK", rewardText = "x3", offsetY = screenHeightDp * 0.1f) {
             if (SystemClock.elapsedRealtime() - lastClickTime > 500L) {
-                randomMode.value = false
-                gameMode.value.setBlink()
+                gameDifficulty.value = 2
                 gameState.value.setWipe()
                 navController.navigate("game_screen")
                 lastClickTime = SystemClock.elapsedRealtime()
@@ -119,7 +121,7 @@ fun LandingScreen(navController: NavHostController) {
         }
         DrawGameModeItem(buttonText = "Crazy", descriptionText = "CONTROL: RANDOM", rewardText = "x4", offsetY = screenHeightDp * 0.25f) {
             if (SystemClock.elapsedRealtime() - lastClickTime > 500L) {
-                randomMode.value = true
+                gameDifficulty.value = 3
                 gameState.value.setWipe()
                 navController.navigate("game_screen")
                 lastClickTime = SystemClock.elapsedRealtime()

@@ -36,14 +36,20 @@ data class GameMode(private val mode: Mode = Mode.TAP) {
     enum class Mode {
         TAP,
         SMILE,
-        BLINK
+        LEFT,
+        RIGHT,
+        BOTH
     }
 
     fun isTap() = mode == Mode.TAP
     fun isSmile() = mode == Mode.SMILE
-    fun isBlink() = mode == Mode.BLINK
+    fun isLeft() = mode == Mode.LEFT
+    fun isRight() = mode == Mode.RIGHT
+    fun isBoth() = mode == Mode.BOTH
 
     fun setTap() { gameMode.value = GameMode(Mode.TAP) }
     fun setSmile() { gameMode.value = GameMode(Mode.SMILE) }
-    fun setBlink() { gameMode.value = GameMode(Mode.BLINK) }
+    fun setLeft() { gameMode.value = GameMode(Mode.LEFT) }
+    fun setRight() { gameMode.value = GameMode(Mode.RIGHT) }
+    fun setBoth() { gameMode.value = GameMode(Mode.BOTH) }
 }
