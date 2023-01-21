@@ -54,9 +54,9 @@ fun DrawCamera(showCamera: MutableState<Boolean>) {
         FaceDetection.getClient(
             FaceDetectorOptions.Builder()
                 .setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_NONE)
-                .setContourMode(FaceDetectorOptions.CONTOUR_MODE_ALL)
+                .setContourMode(FaceDetectorOptions.CONTOUR_MODE_NONE)
                 .setClassificationMode(FaceDetectorOptions.CLASSIFICATION_MODE_ALL)
-                .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_ACCURATE)
+                .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
                 .build())
     }
     if (PermissionUtil.hasPermission() && showCamera.value) {
@@ -79,6 +79,7 @@ fun DrawCamera(showCamera: MutableState<Boolean>) {
                     cameraProviderFuture.addListener({
                         val cameraProvider = cameraProviderFuture.get()
                         val preview = Preview.Builder()
+                            .setTargetResolution(Size(previewView.width, previewView.height))
                             .build()
                             .also {
                             it.setSurfaceProvider(previewView.surfaceProvider)
@@ -89,12 +90,8 @@ fun DrawCamera(showCamera: MutableState<Boolean>) {
                         val imageAnalysis = ImageAnalysis.Builder()
                             .setTargetResolution(Size(previewView.width, previewView.height))
                             .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                            .build().also {
-                                it.setAnalyzer(
-                                    cameraExecutor,
-                                    FaceDetectionAnalyzer(faceDetector, lensFacing)
-                                )
-                            }
+                            .build()
+                        imageAnalysis.setAnalyzer(cameraExecutor, FaceDetectionAnalyzer(faceDetector, lensFacing))
                         try {
                             cameraProvider.unbindAll()
                             cameraProvider.bindToLifecycle(
@@ -118,23 +115,35 @@ fun DrawCamera(showCamera: MutableState<Boolean>) {
 fun DrawControllerIcons() {
     val iconAlpha = animateFloatAsState(targetValue = if (gameState.value.isOver() || gameState.value.isWipe() || !cameraReady.value) 0f else 1f, animationSpec = if (!gameState.value.isWipe()) tween(1000) else tween(0))
     if (gameDifficulty.value >= 2) {
-        Box(modifier = Modifier.fillMaxSize().alpha(iconAlpha.value)) {
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .alpha(iconAlpha.value)) {
             Image( //Left Eye
-                painter = painterResource(id = if (gameMode.value.isLeft() || gameMode.value.isBoth()) R.drawable.eye_close else R.drawable.eye_open),
+                painter = painterResource(id = R.drawable.eye_open),
                 contentDescription = "left eye icon",
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .offset(x = (-30).dp, y = 40.dp),
-                alpha = if (gameMode.value.isLeft() || gameMode.value.isBoth()) 1f else 0.7f
+                modifier = Modifier.align(Alignment.Center).size(50.dp).offset(x = (-30).dp, y = 50.dp),
+                alpha = if (gameMode.value.isLeft() || gameMode.value.isBoth()) 1f else 0.5f
             )
             Image( //Right Eye
-                painter = painterResource(id = if (gameMode.value.isRight() || gameMode.value.isBoth()) R.drawable.eye_close else R.drawable.eye_open),
+                painter = painterResource(id = R.drawable.eye_open),
                 contentDescription = "right eye icon",
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .offset(x = 30.dp, y = 40.dp),
-                alpha = if (gameMode.value.isRight() || gameMode.value.isBoth()) 1f else 0.7f
+                modifier = Modifier.align(Alignment.Center).size(50.dp).offset(x = 30.dp, y = 50.dp),
+                alpha = if (gameMode.value.isRight() || gameMode.value.isBoth()) 1f else 0.5f
             )
+            if (gameDifficulty.value > 2) {
+                Image( //Smile
+                    painter = painterResource(id = R.drawable.smile),
+                    contentDescription = "smile icon",
+                    modifier = Modifier.align(Alignment.Center).size(50.dp).offset(x = (-30).dp, y = 110.dp),
+                    alpha = if (gameMode.value.isSmile()) 1f else 0.5f
+                )
+                Image(
+                    painter = painterResource(id = R.drawable.tap),
+                    contentDescription = "tap icon",
+                    modifier = Modifier.align(Alignment.Center).size(50.dp).offset(x = 30.dp, y = 110.dp),
+                    alpha = if (gameMode.value.isTap()) 1f else 0.5f
+                )
+            }
         }
     }
 }
