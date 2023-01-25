@@ -22,14 +22,24 @@ import com.darren.fyp_dagger.states.DaggerState
 import com.darren.fyp_dagger.states.FruitState
 import com.darren.fyp_dagger.states.RemainingDaggerState
 import com.darren.fyp_dagger.states.SpinnerState
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalComposeUiApi::class, DelicateCoroutinesApi::class)
 @Composable
 fun GameScreen(navController: NavHostController, gameData: GameData) {
+    //UI
+    DrawBackground()
+    GameConsole(navController, gameData)
+    //Top Bar
+    DrawTopBar()
+    DrawTopFruit()
+    //Camera
+    DrawCamera()
+    DrawControllerIcons()
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun GameConsole(navController: NavHostController, gameData: GameData) {
     //Animations
     val animation = remember{ Animatable(initialValue = 0f) }
     val uiAlpha = animateFloatAsState(targetValue = if(gameState.value.isOver() || gameState.value.isLeveling()) 0f else 1f, animationSpec = tween(durationMillis = 500))
@@ -38,7 +48,8 @@ fun GameScreen(navController: NavHostController, gameData: GameData) {
     val daggerHit = remember{ mutableStateOf(false) }
     val hitOffset = animateFloatAsState(targetValue = if (daggerHit.value) 20f else 0f, animationSpec = tween(durationMillis = if (!daggerHit.value) 100 else 0))
     val hitAlpha = animateFloatAsState(targetValue = if (daggerHit.value) 0.6f else 0f, animationSpec = tween(durationMillis = if (!daggerHit.value) 10 else 0))
-    val fruitHit = remember{ mutableStateOf(0) }
+    val updateFruit = remember{ mutableStateOf(0) }
+
     //Game Settings
     val randomSpeed = remember{ mutableStateOf(false) }
     val clockwise = remember{ mutableStateOf(false) }
@@ -46,6 +57,7 @@ fun GameScreen(navController: NavHostController, gameData: GameData) {
     val minSpeed = remember{ mutableStateOf(0) }
     val maxSpeed = remember{ mutableStateOf(0) }
     val remainingDaggers = remember{ mutableStateOf(0) }
+
     //Game Resources
     val spinner = remember{ mutableStateOf(spinnerUtil.value.getRandomSpinner()) }
     val cover = ImageBitmap.imageResource(id = R.drawable.spinner0)
@@ -56,8 +68,7 @@ fun GameScreen(navController: NavHostController, gameData: GameData) {
     val daggerState = remember { DaggerState(spinSpeed, remainingDaggers, uiAlpha2, hitOffset, sparkle) }
     val spinnerState = remember { SpinnerState(spinner, cover, spinSpeed, uiAlpha, hitAlpha, hitOffset) }
     val remainingDaggerState = remember { RemainingDaggerState(remainingDagger, remainingDaggers, uiAlpha) }
-    val fruitState = remember { FruitState(fruit, fruitCrack, spinSpeed, uiAlpha, hitOffset, fruitHit)}
-    val showCamera = remember { mutableStateOf(false) }
+    val fruitState = remember { FruitState(fruit, fruitCrack, spinSpeed, uiAlpha, hitOffset, updateFruit)}
 
     // game animation and camera controller coroutine
     LaunchedEffect(true) {
@@ -71,11 +82,9 @@ fun GameScreen(navController: NavHostController, gameData: GameData) {
         if (gameState.value.isWipe()) {
             cameraReady.value = false
             gameLevel.value = 1
-            GlobalScope.launch {
-                delay(100)
-                gameScore.value = 0
-                fruitGained.value = 0
-            }
+            delay(100) //Delay for score board scores to show longer
+            gameScore.value = 0
+            fruitGained.value = 0
             showCamera.value = gameDifficulty.value > 0
             gameState.value.setReset()
         } else if (gameState.value.isReset()) {
@@ -89,10 +98,21 @@ fun GameScreen(navController: NavHostController, gameData: GameData) {
             Log.d("game", "[Level Information]\nlevel: ${gameLevel.value}\nrandomSpeed: ${randomSpeed.value}\nspinSpeed: ${spinSpeed.value}\nminSpeed: ${minSpeed.value}\nmaxSpeed: ${maxSpeed.value}\nnumberOfDaggers: ${remainingDaggers.value}")
         } else if (gameState.value.isLeveling()) {
             gameLevel.value++
+            var loopCnt = when (gameDifficulty.value) {
+                1 -> 4
+                2 -> 6
+                3 -> 8
+                else -> 0
+            }
+            while(loopCnt > 0) {
+                fruitState.addBonusFruit()
+                delay(100)
+                loopCnt--
+            }
             delay(700)
             gameState.value.setReset()
         } else if (gameState.value.isOver()) {
-            if (maxScore.value < gameScore.value) {
+            if (maxScore.value <= gameScore.value) {
                 maxScore.value = gameScore.value
                 gameData.saveMaxScore(maxScore.value)
                 showTopScore.value = true
@@ -154,15 +174,10 @@ fun GameScreen(navController: NavHostController, gameData: GameData) {
         }
     }
     // hit fruit
-    LaunchedEffect(fruitHit.value) {
-        fruitCount.value += fruitHit.value
-        fruitGained.value += fruitHit.value
-        fruitHit.value = 0
+    LaunchedEffect(updateFruit.value) {
         gameData.saveFruitCount(fruitCount.value)
     }
 
-    //UI
-    DrawBackground()
     Canvas(modifier = Modifier
         .fillMaxSize()
         .pointerInteropFilter {
@@ -177,7 +192,6 @@ fun GameScreen(navController: NavHostController, gameData: GameData) {
         }
     ) {
         animation.value //use to maintain animation loop
-
         if (gameState.value.isShooting() || gameState.value.isLeveling()) {
             daggerState.shoot {
                 daggerHit.value = true
@@ -192,12 +206,6 @@ fun GameScreen(navController: NavHostController, gameData: GameData) {
         spinnerState.draw(this)
         remainingDaggerState.draw(this)
     }
-    //Top Bar
-    DrawTopBar()
-    DrawTopFruit()
-    //Camera
-    DrawCamera(showCamera)
-    DrawControllerIcons()
     //Score Board
     DrawScoreBoard(navController, showTopScore)
 }

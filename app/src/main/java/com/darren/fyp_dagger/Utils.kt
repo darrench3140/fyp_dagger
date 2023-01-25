@@ -135,13 +135,19 @@ object PermissionUtil {
 
 object LevelUtil {
     fun updateLevelInfo(randomSpeed: MutableState<Boolean>, clockwise: MutableState<Boolean>, spinSpeed: MutableState<Float>, minSpeed: MutableState<Int>, maxSpeed: MutableState<Int>, remainingDaggers: MutableState<Int>) {
+        val minusFactor = when (gameDifficulty.value) {
+            1 -> 1
+            2 -> 1
+            3 -> 2
+            else -> 0
+        }
         val level = gameLevel.value
         clockwise.value = (0..1).random() == 1
         randomSpeed.value = level >= 3
-        spinSpeed.value = (2..5).random().toFloat()
-        minSpeed.value = ((1+level/4)..(3+level/4)).random()
-        maxSpeed.value = ((5+level/4)..(7+level/4)).random()
-        remainingDaggers.value = level / 2 + (5..7).random()
+        spinSpeed.value = (2..4).random().toFloat()
+        minSpeed.value = ((2+level/4)..(3+level/4)).random() - minusFactor
+        maxSpeed.value = ((4+level/4)..(6+level/4)).random() - minusFactor
+        remainingDaggers.value = level / 2 + (5..7).random() - minusFactor
     }
 }
 

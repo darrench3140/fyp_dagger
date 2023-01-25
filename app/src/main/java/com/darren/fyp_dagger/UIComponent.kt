@@ -44,7 +44,7 @@ import kotlinx.coroutines.delay
 import java.util.concurrent.Executors
 
 @Composable
-fun DrawCamera(showCamera: MutableState<Boolean>) {
+fun DrawCamera() {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
     val cameraProviderFuture = remember { ProcessCameraProvider.getInstance(context) }
@@ -268,6 +268,22 @@ fun DrawGameModeItem(buttonText: String, descriptionText: String, rewardText: St
                 .align(Alignment.Center)
                 .offset(y = offsetY + 45.dp)
         )
+        if (buttonText != "Easy") {
+            Text(
+                text = "+ Level Up Bonus: " + when(buttonText) {
+                    "Normal" -> "4"
+                    "Hard" -> "6"
+                    else -> "8"
+                },
+                fontSize = 15.sp,
+                color = white,
+                fontFamily = myFont,
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .offset(y = offsetY + 65.dp)
+            )
+            DrawFruit(modifier = Modifier.align(Alignment.Center).size(15.dp).offset(x = 75.dp, y = offsetY + 65.dp))
+        }
     }
 }
 

@@ -17,6 +17,7 @@ val gameDifficulty: MutableState<Int> = mutableStateOf(0)
 val gameScore: MutableState<Int> = mutableStateOf(0)
 val gameLevel: MutableState<Int> = mutableStateOf(1)
 val cameraReady: MutableState<Boolean> = mutableStateOf(false)
+val showCamera: MutableState<Boolean> = mutableStateOf(false)
 
 //Game Data (Permanent)
 val maxScore : MutableState<Int> = mutableStateOf(0)

@@ -8,6 +8,8 @@ import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import com.darren.fyp_dagger.fruitCount
+import com.darren.fyp_dagger.fruitGained
 import com.darren.fyp_dagger.screenHeightInt
 import com.darren.fyp_dagger.screenWidthInt
 import com.darren.fyp_dagger.screens.midX
@@ -16,7 +18,7 @@ import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
 
-data class FruitState(val image: ImageBitmap, val image_crack: ImageBitmap, val spinSpeed: MutableState<Float>, val uiAlpha: State<Float>, val hitOffset: State<Float>, val fruitHit: MutableState<Int>) {
+data class FruitState(val image: ImageBitmap, val image_crack: ImageBitmap, val spinSpeed: MutableState<Float>, val uiAlpha: State<Float>, val hitOffset: State<Float>, val updateFruit: MutableState<Int>) {
     private val imgWidth = 56
     private val imgHeight = 56
     private val imgSize = IntSize(imgWidth, imgHeight)
@@ -61,6 +63,10 @@ data class FruitState(val image: ImageBitmap, val image_crack: ImageBitmap, val 
             }
         }
         removeList.forEach{ fruit -> fruitList.remove(fruit) }
+    }
+
+    fun addBonusFruit() {
+        completedFruitList.add(Fruit((160..179).random().toFloat(), false))
     }
 
     fun draw(drawScope: DrawScope) {
@@ -115,12 +121,14 @@ data class FruitState(val image: ImageBitmap, val image_crack: ImageBitmap, val 
             if (fruit.scale > 0.5f) fruit.scale *= 0.95f
         }
         removeList.forEach{ fruit ->
+            fruitCount.value++
+            if (fruit.updateGained) fruitGained.value++
             completedFruitList.remove(fruit)
-            fruitHit.value++
+            updateFruit.value++
         }
     }
 
-    data class Fruit(var rotation: Float) {
+    data class Fruit(var rotation: Float, var updateGained: Boolean = true) {
         var transX: Float = 0f
         var transY: Float = 0f
         var scale: Float = 1f
