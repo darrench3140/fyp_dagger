@@ -35,7 +35,7 @@ class MainActivity : ComponentActivity() {
             PermissionUtil.RequestCameraPermission(context)
             val gameData = GameSetUpUtil.loadSettings(context)
             // available gameModes, "god" "reset" "normal" "rich"
-            GameSetUpUtil.SetGameMode(gameData, mode = "normal")
+            GameSetUpUtil.SetGameMode(gameData, mode = "reset")
 
             val savedDaggerInUseID = gameData.getDaggerInUseID.collectAsState(initial = 1)
             daggerUtil.value.Init(savedDaggerInUseID.value)

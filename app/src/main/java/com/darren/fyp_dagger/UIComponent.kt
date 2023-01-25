@@ -113,34 +113,46 @@ fun DrawCamera(showCamera: MutableState<Boolean>) {
 
 @Composable
 fun DrawControllerIcons() {
-    val iconAlpha = animateFloatAsState(targetValue = if (gameState.value.isOver() || gameState.value.isWipe() || !cameraReady.value) 0f else 1f, animationSpec = if (!gameState.value.isWipe()) tween(1000) else tween(0))
     if (gameDifficulty.value >= 2) {
+        val iconAlpha = animateFloatAsState(targetValue = if (gameState.value.isOver() || gameState.value.isWipe() || !cameraReady.value) 0f else 1f, animationSpec = if (!gameState.value.isWipe()) tween(1000) else tween(0))
         Box(modifier = Modifier
             .fillMaxSize()
             .alpha(iconAlpha.value)) {
             Image( //Left Eye
                 painter = painterResource(id = R.drawable.eye_open),
                 contentDescription = "left eye icon",
-                modifier = Modifier.align(Alignment.Center).size(50.dp).offset(x = (-30).dp, y = 50.dp),
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .size(50.dp)
+                    .offset(x = (-30).dp, y = 60.dp),
                 alpha = if (gameMode.value.isLeft() || gameMode.value.isBoth()) 1f else 0.5f
             )
             Image( //Right Eye
                 painter = painterResource(id = R.drawable.eye_open),
                 contentDescription = "right eye icon",
-                modifier = Modifier.align(Alignment.Center).size(50.dp).offset(x = 30.dp, y = 50.dp),
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .size(50.dp)
+                    .offset(x = 30.dp, y = 60.dp),
                 alpha = if (gameMode.value.isRight() || gameMode.value.isBoth()) 1f else 0.5f
             )
             if (gameDifficulty.value > 2) {
                 Image( //Smile
                     painter = painterResource(id = R.drawable.smile),
                     contentDescription = "smile icon",
-                    modifier = Modifier.align(Alignment.Center).size(50.dp).offset(x = (-30).dp, y = 110.dp),
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .size(50.dp)
+                        .offset(x = (-30).dp, y = 120.dp),
                     alpha = if (gameMode.value.isSmile()) 1f else 0.5f
                 )
                 Image(
                     painter = painterResource(id = R.drawable.tap),
                     contentDescription = "tap icon",
-                    modifier = Modifier.align(Alignment.Center).size(50.dp).offset(x = 30.dp, y = 110.dp),
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .size(50.dp)
+                        .offset(x = 30.dp, y = 120.dp),
                     alpha = if (gameMode.value.isTap()) 1f else 0.5f
                 )
             }
@@ -301,7 +313,8 @@ fun DrawReturnButton(offsetX: Dp = 50.dp, offsetY: Dp = 0.dp, onClick: () -> Uni
 }
 
 @Composable
-fun DrawTopBar(topBarOffset: State<Dp>) {
+fun DrawTopBar() {
+    val topBarOffset = animateDpAsState(targetValue = if (gameState.value.isOver()) (-200).dp else 0.dp, animationSpec = tween(durationMillis = 2000))
     Row(
         Modifier
             .fillMaxSize()
@@ -363,7 +376,7 @@ fun DrawSettingsIcon(onClick: () -> Unit) {
             contentDescription = "settings",
             modifier = Modifier
                 .align(Alignment.TopStart)
-                .size(20.dp)
+                .size(45.dp)
                 .offset(25.dp, 40.dp)
                 .clickable { onClick() }
         )
@@ -373,10 +386,12 @@ fun DrawSettingsIcon(onClick: () -> Unit) {
 @Composable
 fun DrawScoreBoard(
     navController: NavHostController,
-    scoreBoardOffset: State<Dp>,
     showTopScore: MutableState<Boolean>,
 ) {
     var lastClickTime by remember { mutableStateOf(0L) }
+    val stickerAlpha = animateFloatAsState(targetValue = if (showTopScore.value) 1f else 0f, animationSpec = tween(500, 500))
+    val stickerScale = animateFloatAsState(targetValue = if (showTopScore.value) 1f else 1.5f, animationSpec = tween(1000, 500))
+    val scoreBoardOffset = animateDpAsState(targetValue = if (gameState.value.isOver()) (-100).dp else -screenHeightDp-200.dp, animationSpec = tween(durationMillis = 500))
     Box(modifier = Modifier
         .fillMaxSize()
         .offset(y = scoreBoardOffset.value)
@@ -390,12 +405,13 @@ fun DrawScoreBoard(
         )
         Image(
             painter = painterResource(id = R.drawable.top_score),
-            contentDescription = "top_score",
+            contentDescription = "top score sticker",
             modifier = Modifier
                 .align(Alignment.CenterEnd)
                 .offset(x = (-5).dp, y = 100.dp)
-                .size(130.dp),
-            alpha = if(showTopScore.value) 1f else 0f
+                .size(130.dp)
+                .scale(stickerScale.value),
+            alpha = stickerAlpha.value
         )
         Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
             Text(
@@ -580,7 +596,7 @@ fun DrawShopItem(id: Int, pinkBoxID: MutableState<Int>, greenBoxID: MutableState
             contentDescription = "locked",
             modifier = Modifier
                 .align(Alignment.Center)
-                .size(size)
+                .size(size.div(2.5f))
                 .offset(x = size.div(4), y = size.div(4)),
             alpha = if (id > purchasedCount.value + 1) 1f else 0f
         )

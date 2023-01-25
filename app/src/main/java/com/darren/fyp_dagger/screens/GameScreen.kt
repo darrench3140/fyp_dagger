@@ -15,7 +15,6 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.res.imageResource
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.darren.fyp_dagger.*
 import com.darren.fyp_dagger.R
@@ -35,8 +34,6 @@ fun GameScreen(navController: NavHostController, gameData: GameData) {
     val animation = remember{ Animatable(initialValue = 0f) }
     val uiAlpha = animateFloatAsState(targetValue = if(gameState.value.isOver() || gameState.value.isLeveling()) 0f else 1f, animationSpec = tween(durationMillis = 500))
     val uiAlpha2 = animateFloatAsState(targetValue = if(gameState.value.isOver() || gameState.value.isLeveling()) 0f else 1f, animationSpec = tween(durationMillis = 100))
-    val topBarOffset = animateDpAsState(targetValue = if (gameState.value.isOver()) (-200).dp else 0.dp, animationSpec = tween(durationMillis = 2000))
-    val scoreBoardOffset = animateDpAsState(targetValue = if (gameState.value.isOver()) (-100).dp else -screenHeightDp-200.dp, animationSpec = tween(durationMillis = 500))
     val showTopScore = remember{ mutableStateOf(false) }
     val daggerHit = remember{ mutableStateOf(false) }
     val hitOffset = animateFloatAsState(targetValue = if (daggerHit.value) 20f else 0f, animationSpec = tween(durationMillis = if (!daggerHit.value) 100 else 0))
@@ -79,7 +76,7 @@ fun GameScreen(navController: NavHostController, gameData: GameData) {
                 gameScore.value = 0
                 fruitGained.value = 0
             }
-            showCamera.value = !gameMode.value.isTap() || gameDifficulty.value == 3
+            showCamera.value = gameDifficulty.value > 0
             gameState.value.setReset()
         } else if (gameState.value.isReset()) {
             LevelUtil.updateLevelInfo(randomSpeed, clockwise, spinSpeed, minSpeed, maxSpeed, remainingDaggers)
@@ -196,13 +193,13 @@ fun GameScreen(navController: NavHostController, gameData: GameData) {
         remainingDaggerState.draw(this)
     }
     //Top Bar
-    DrawTopBar(topBarOffset)
+    DrawTopBar()
     DrawTopFruit()
     //Camera
     DrawCamera(showCamera)
     DrawControllerIcons()
     //Score Board
-    DrawScoreBoard(navController, scoreBoardOffset, showTopScore)
+    DrawScoreBoard(navController, showTopScore)
 }
 
 fun DrawScope.midX(): Float { return ((size.width) / 2) }
