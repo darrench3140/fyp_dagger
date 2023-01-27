@@ -106,7 +106,7 @@ fun GameConsole(navController: NavHostController, gameData: GameData) {
             }
             while(loopCnt > 0) {
                 fruitState.addBonusFruit()
-                delay(100)
+                delay(200)
                 loopCnt--
             }
             delay(700)

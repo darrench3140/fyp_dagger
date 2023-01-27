@@ -98,7 +98,7 @@ data class DaggerState(
 
     private fun DrawScope.drawCanvas() {
         // Current Dagger
-        drawDagger(currentDagger, currentDagger.translation, 0f, if (uiAlpha.value == 0f) 0f else 1f)
+        drawDagger(currentDagger, currentDagger.translation, 0f, if (uiAlpha.value == 0f && !gameState.value.isLeveling()) 0f else 1f)
 
         // Daggers on the wood
         daggerList.forEach{ dagger ->
