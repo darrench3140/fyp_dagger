@@ -8,17 +8,16 @@ import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import com.darren.fyp_dagger.fruitCount
-import com.darren.fyp_dagger.fruitGained
-import com.darren.fyp_dagger.screenHeightInt
-import com.darren.fyp_dagger.screenWidthInt
+import com.darren.fyp_dagger.*
 import com.darren.fyp_dagger.screens.midX
 import com.darren.fyp_dagger.screens.midY
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.withLock
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
 
-data class FruitState(val image: ImageBitmap, val image_crack: ImageBitmap, val spinSpeed: MutableState<Float>, val uiAlpha: State<Float>, val hitOffset: State<Float>, val updateFruit: MutableState<Int>) {
+data class FruitState(val image: ImageBitmap, val image_crack: ImageBitmap, val spinSpeed: MutableState<Float>, val uiAlpha: State<Float>, val hitOffset: State<Float>, val gameData: GameData) {
     private val imgWidth = 56
     private val imgHeight = 56
     private val imgSize = IntSize(imgWidth, imgHeight)
@@ -121,10 +120,14 @@ data class FruitState(val image: ImageBitmap, val image_crack: ImageBitmap, val 
             if (fruit.scale > 0.5f) fruit.scale *= 0.95f
         }
         removeList.forEach{ fruit ->
-            fruitCount.value++
-            if (fruit.updateGained) fruitGained.value++
-            completedFruitList.remove(fruit)
-            updateFruit.value++
+            runBlocking {
+                mutex.withLock { //Mutex Lock to protect critical region
+                    fruitCount.value++
+                    if (fruit.updateGained) fruitGained.value++
+                    completedFruitList.remove(fruit)
+                    gameData.saveFruitCount(fruitCount.value)
+                }
+            }
         }
     }
 

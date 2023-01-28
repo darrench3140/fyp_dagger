@@ -104,27 +104,33 @@ fun LandingScreen(navController: NavHostController) {
         }
         DrawGameModeItem(buttonText = "Normal", descriptionText = "CONTROL: SMILE", rewardText = "x2", offsetY = -screenHeightDp * 0.05f) {
             if (SystemClock.elapsedRealtime() - lastClickTime > 500L) {
-                gameDifficulty.value = 1
-                gameMode.value.setSmile()
-                gameState.value.setWipe()
-                navController.navigate("game_screen")
-                lastClickTime = SystemClock.elapsedRealtime()
+                if (PermissionUtil.hasPermission()) {
+                    gameDifficulty.value = 1
+                    gameMode.value.setSmile()
+                    gameState.value.setWipe()
+                    navController.navigate("game_screen")
+                    lastClickTime = SystemClock.elapsedRealtime()
+                } else PermissionUtil.requestCameraPermission()
             }
         }
         DrawGameModeItem(buttonText = "Hard", descriptionText = "CONTROL: BLINK", rewardText = "x3", offsetY = screenHeightDp * 0.1f) {
             if (SystemClock.elapsedRealtime() - lastClickTime > 500L) {
-                gameDifficulty.value = 2
-                gameState.value.setWipe()
-                navController.navigate("game_screen")
-                lastClickTime = SystemClock.elapsedRealtime()
+                if (PermissionUtil.hasPermission()) {
+                    gameDifficulty.value = 2
+                    gameState.value.setWipe()
+                    navController.navigate("game_screen")
+                    lastClickTime = SystemClock.elapsedRealtime()
+                } else PermissionUtil.requestCameraPermission()
             }
         }
         DrawGameModeItem(buttonText = "Crazy", descriptionText = "CONTROL: RANDOM", rewardText = "x4", offsetY = screenHeightDp * 0.25f) {
             if (SystemClock.elapsedRealtime() - lastClickTime > 500L) {
-                gameDifficulty.value = 3
-                gameState.value.setWipe()
-                navController.navigate("game_screen")
-                lastClickTime = SystemClock.elapsedRealtime()
+                if (PermissionUtil.hasPermission()) {
+                    gameDifficulty.value = 3
+                    gameState.value.setWipe()
+                    navController.navigate("game_screen")
+                    lastClickTime = SystemClock.elapsedRealtime()
+                } else PermissionUtil.requestCameraPermission()
             }
         }
         DrawReturnButton(offsetY = (-50).dp) {

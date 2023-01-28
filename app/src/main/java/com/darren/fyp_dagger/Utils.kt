@@ -5,8 +5,10 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.util.Log
 import android.view.View
 import android.view.WindowManager
+import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.*
@@ -19,7 +21,6 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -43,22 +44,10 @@ class GameData(private val context: Context) {
 
 object GameSetUpUtil {
     @Composable
-    fun loadSettings(context: Context): GameData {
+    fun loadSettings(context: Context, gameMode: String): GameData {
         val gameData = GameData(context)
-        val savedMaxScore = gameData.getMaxScore.collectAsState(initial = 0)
-        val savedFruitCount = gameData.getFruitCount.collectAsState(initial = 0)
-        val savedPurchasedCount = gameData.getPurchasedCount.collectAsState(initial = 1)
-        maxScore.value = savedMaxScore.value
-        fruitCount.value = savedFruitCount.value
-        purchasedCount.value = savedPurchasedCount.value
-        return gameData
-    }
-
-    @Composable
-    fun SetGameMode(gameData: GameData, mode: String) {
         LaunchedEffect(true) {
-            delay(1000)
-            when (mode) {
+            when (gameMode) {
                 "god" -> {
                     gameData.saveFruitCount(999)
                     gameData.savePurchasedCount(16)
@@ -71,12 +60,20 @@ object GameSetUpUtil {
                     gameData.saveDaggerInUseID(1)
                 }
                 "rich" -> {
-                    fruitCount.value += 500
-                    gameData.saveFruitCount(fruitCount.value)
-
+                    gameData.saveFruitCount(1000)
                 }
             }
         }
+        val savedMaxScore = gameData.getMaxScore.collectAsState(initial = 0)
+        val savedFruitCount = gameData.getFruitCount.collectAsState(initial = 0)
+        val savedPurchasedCount = gameData.getPurchasedCount.collectAsState(initial = 1)
+        val savedDaggerInUseID = gameData.getDaggerInUseID.collectAsState(initial = 1)
+        maxScore.value = savedMaxScore.value
+        fruitCount.value = savedFruitCount.value
+        purchasedCount.value = savedPurchasedCount.value
+        daggerUtil.value.Init(savedDaggerInUseID.value)
+        spinnerUtil.value.Init()
+        return gameData
     }
 }
 
@@ -118,18 +115,24 @@ object OrientationUtil {
 object PermissionUtil {
 
     private val hasCameraPermission = mutableStateOf(false)
+    private lateinit var launcher: ManagedActivityResultLauncher<String, Boolean>
 
     fun hasPermission() = hasCameraPermission.value
 
     @Composable
-    fun RequestCameraPermission(context: Context) {
+    fun Initialize(context: Context) {
         hasCameraPermission.value = ContextCompat.checkSelfPermission(context, android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
-        val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
             hasCameraPermission.value = granted
         }
         LaunchedEffect(true) {
             if (!hasCameraPermission.value) launcher.launch(android.Manifest.permission.CAMERA)
         }
+    }
+
+    fun requestCameraPermission() {
+        Log.d("game", "request camera perm")
+        launcher.launch(android.Manifest.permission.CAMERA)
     }
 }
 
@@ -189,20 +192,20 @@ data class SpinnerUtil(val totalSpinners: Int = 16) {
 data class DaggerUtil(val totalDaggers: Int = 16) {
     private val daggerList: MutableList<ImageBitmap> = emptyList<ImageBitmap>().toMutableList()
     private val lockedList: MutableList<ImageBitmap> = emptyList<ImageBitmap>().toMutableList()
-    private var daggerInUseID = 0
+    private val daggerInUseID: MutableState<Int> = mutableStateOf(0)
     @Composable
     fun Init(daggerToUse: Int) {
         daggerList.clear()
         lockedList.clear()
-        daggerInUseID = daggerToUse
+        daggerInUseID.value = daggerToUse
         (1..totalDaggers).forEach{ daggerList.add(ImageBitmap.imageResource(id = getDagger(it))) }
         (1..totalDaggers).forEach{ lockedList.add(ImageBitmap.imageResource(id = getLocked(it)))}
     }
-    fun setDaggerInUseID(daggerID: Int) { daggerInUseID = daggerID }
+    fun setDaggerInUseID(daggerID: Int) { daggerInUseID.value = daggerID }
     fun getDaggerInUseID() = daggerInUseID
-    fun getDaggerResource(daggerID: Int = daggerInUseID): Int = getDagger(daggerID)
+    fun getDaggerResource(daggerID: Int = daggerInUseID.value): Int = getDagger(daggerID)
     fun getLockedResource(daggerID: Int) = getLocked(daggerID)
-    fun getDaggerBitmap(daggerID: Int = daggerInUseID): ImageBitmap = daggerList[daggerID - 1]
+    fun getDaggerBitmap(daggerID: Int = daggerInUseID.value): ImageBitmap = daggerList[daggerID - 1]
     fun getRandomDagger() = daggerList[(0 until totalDaggers).random()]
 
     private fun getDagger(id: Int): Int {

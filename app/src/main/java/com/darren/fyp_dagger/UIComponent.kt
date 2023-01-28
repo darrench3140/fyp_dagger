@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
+import com.darren.fyp_dagger.states.FruitState
 import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetectorOptions
 import kotlinx.coroutines.delay
@@ -236,7 +237,9 @@ fun DrawFruit(modifier: Modifier) {
 
 @Composable
 fun DrawGameModeItem(buttonText: String, descriptionText: String, rewardText: String, offsetY: Dp, onClick: () -> Unit) {
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .alpha(if (buttonText != "Easy" && !PermissionUtil.hasPermission()) 0.5f else 1f)) {
         DrawButton(text = buttonText, offsetY = offsetY, id = R.drawable.button1) {
             onClick()
         }
@@ -282,16 +285,20 @@ fun DrawGameModeItem(buttonText: String, descriptionText: String, rewardText: St
                     .align(Alignment.Center)
                     .offset(y = offsetY + 65.dp)
             )
-            DrawFruit(modifier = Modifier.align(Alignment.Center).size(15.dp).offset(x = 75.dp, y = offsetY + 65.dp))
+            DrawFruit(modifier = Modifier
+                .align(Alignment.Center)
+                .size(15.dp)
+                .offset(x = 75.dp, y = offsetY + 65.dp))
         }
     }
 }
 
 @Composable
-fun DrawButton(text: String, offsetX: Dp = 0.dp, offsetY: Dp = 0.dp, id: Int = R.drawable.button,onClick: () -> Unit) {
+fun DrawButton(text: String, offsetX: Dp = 0.dp, offsetY: Dp = 0.dp, id: Int = R.drawable.button, alpha: State<Float> = mutableStateOf(1f), onClick: () -> Unit) {
     Box(modifier = Modifier
         .fillMaxSize()
         .offset(offsetX, offsetY)
+        .alpha(alpha.value)
     ) {
         Image(
             painter = painterResource(id = id),
@@ -299,7 +306,7 @@ fun DrawButton(text: String, offsetX: Dp = 0.dp, offsetY: Dp = 0.dp, id: Int = R
             modifier = Modifier
                 .align(Alignment.Center)
                 .scale(2.5f)
-                .clickable { onClick() }
+                .clickable { if (alpha.value == 1f) onClick() }
         )
         Text(
             text = text,
@@ -313,17 +320,18 @@ fun DrawButton(text: String, offsetX: Dp = 0.dp, offsetY: Dp = 0.dp, id: Int = R
 }
 
 @Composable
-fun DrawReturnButton(offsetX: Dp = 50.dp, offsetY: Dp = 0.dp, onClick: () -> Unit) {
+fun DrawReturnButton(offsetX: Dp = 50.dp, offsetY: Dp = 0.dp, alpha: State<Float> = mutableStateOf(1f), onClick: () -> Unit) {
     Box(modifier = Modifier
         .fillMaxSize()
-        .offset(offsetX, offsetY)) {
+        .offset(offsetX, offsetY)
+        .alpha(alpha.value)) {
         Image(
             painter = painterResource(id = R.drawable.return_button),
             contentDescription = "return menu",
             modifier = Modifier
                 .align(Alignment.BottomStart)
                 .scale(2.5f)
-                .clickable { onClick() }
+                .clickable { if (alpha.value == 1f) onClick() }
         )
     }
 }
@@ -402,12 +410,52 @@ fun DrawSettingsIcon(onClick: () -> Unit) {
 @Composable
 fun DrawScoreBoard(
     navController: NavHostController,
-    showTopScore: MutableState<Boolean>,
+    fruitState: FruitState,
 ) {
     var lastClickTime by remember { mutableStateOf(0L) }
     val stickerAlpha = animateFloatAsState(targetValue = if (showTopScore.value) 1f else 0f, animationSpec = tween(500, 500))
     val stickerScale = animateFloatAsState(targetValue = if (showTopScore.value) 1f else 1.5f, animationSpec = tween(1000, 500))
+    val showMulText = remember { mutableStateOf(false) }
+    val mulTextAlpha = animateFloatAsState(targetValue = if (showMulText.value) 1f else 0f, animationSpec = tween(500))
+    val mulTextScale = animateFloatAsState(targetValue = if (showMulText.value) 1f else 1.5f, animationSpec = tween(1000))
+    val scaleRewardText = remember { mutableStateOf(false) }
+    val rewardTextScale = animateFloatAsState(targetValue = if (scaleRewardText.value) 1.5f else 1f, animationSpec = tween(500))
     val scoreBoardOffset = animateDpAsState(targetValue = if (gameState.value.isOver()) (-100).dp else -screenHeightDp-200.dp, animationSpec = tween(durationMillis = 500))
+
+    val buttonAlpha = animateFloatAsState(targetValue = if (showScoreBoardButton.value) 1f else 0f, animationSpec = tween(500))
+
+    LaunchedEffect(gameState.value.isOver()) {
+        if (gameState.value.isOver() && !showScoreBoardButton.value) {
+            var mulFactor = when(gameDifficulty.value) {
+                1 -> 2
+                2 -> 3
+                3 -> 4
+                else -> 1
+            }
+            if (mulFactor != 1 && fruitGained.value != 0) {
+                delay(700)
+                showMulText.value = true
+                delay(1000)
+                scaleRewardText.value = true
+                delay(500)
+                mulFactor = fruitGained.value * (mulFactor - 1)
+                fruitGained.value += mulFactor
+                showMulText.value = false
+                delay(500)
+                scaleRewardText.value = false
+                while(mulFactor > 0) {
+                    fruitState.addBonusFruit()
+                    delay(100)
+                    mulFactor--
+                }
+            }
+            showScoreBoardButton.value = true
+        } else {
+            showMulText.value = false
+            scaleRewardText.value = false
+        }
+    }
+
     Box(modifier = Modifier
         .fillMaxSize()
         .offset(y = scoreBoardOffset.value)
@@ -451,39 +499,56 @@ fun DrawScoreBoard(
                 fontFamily = myFont,
                 fontWeight = FontWeight.Bold,
             )
-            Text(
-                text = fruitGained.value.toString(),
-                fontSize = 40.sp,
-                color = white,
-                fontFamily = myFont,
-                fontWeight = FontWeight.Bold,
-            )
-        }
-        DrawButton(text = "RESTART", offsetY = screenHeightDp.div(3.12222f)) { //screenHeight 843 -> offset 270
-            if (SystemClock.elapsedRealtime() - lastClickTime > 2000L) {
-                lastClickTime = SystemClock.elapsedRealtime()
-                gameState.value.setWipe()
-                showTopScore.value = false
+            Row {
+                Spacer(modifier = Modifier.weight(0.5f))
+                Text(
+                    text = fruitGained.value.toString(),
+                    fontSize = 40.sp,
+                    color = white,
+                    fontFamily = myFont,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.scale(rewardTextScale.value)
+                )
+                Text(
+                    text = when(gameDifficulty.value) { 1 -> "x2"; 2 -> "x3"; 3 -> "x4"; else -> ""},
+                    fontSize = 25.sp,
+                    color = white,
+                    fontFamily = myFont,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .weight(0.5f)
+                        .scale(mulTextScale.value)
+                        .alpha(mulTextAlpha.value)
+                        .offset(x = 10.dp)
+                )
             }
         }
-        DrawShopButton(offsetY = screenHeightDp.div(2.2784f)) { //screenHeight 843 -> offset 370
-            if (SystemClock.elapsedRealtime() - lastClickTime > 2000L) {
-                lastClickTime = SystemClock.elapsedRealtime()
-                navController.navigate("shop_screen")
+        Box(modifier = Modifier.alpha(buttonAlpha.value)) {
+            DrawButton(text = "RESTART", offsetY = screenHeightDp.div(3.12222f), alpha = buttonAlpha) { //screenHeight 843 -> offset 270
+                if (SystemClock.elapsedRealtime() - lastClickTime > 2000L) {
+                    lastClickTime = SystemClock.elapsedRealtime()
+                    gameState.value.setWipe()
+                }
             }
-        }
-        DrawReturnButton(offsetY = 50.dp) {
-            if (SystemClock.elapsedRealtime() - lastClickTime > 2000L) {
-                lastClickTime = SystemClock.elapsedRealtime()
-                navController.popBackStack()
+            DrawShopButton(offsetY = screenHeightDp.div(2.2784f), alpha = buttonAlpha) { //screenHeight 843 -> offset 370
+                if (SystemClock.elapsedRealtime() - lastClickTime > 2000L) {
+                    lastClickTime = SystemClock.elapsedRealtime()
+                    navController.navigate("shop_screen")
+                }
+            }
+            DrawReturnButton(offsetY = 50.dp, alpha = buttonAlpha) {
+                if (SystemClock.elapsedRealtime() - lastClickTime > 2000L) {
+                    lastClickTime = SystemClock.elapsedRealtime()
+                    navController.popBackStack()
+                }
             }
         }
     }
 }
 
 @Composable
-fun DrawShopButton(offsetY: Dp, onClick: () -> Unit) {
-    Box(modifier = Modifier.fillMaxSize()) {
+fun DrawShopButton(offsetY: Dp, alpha: State<Float> = mutableStateOf(1f), onClick: () -> Unit) {
+    Box(modifier = Modifier.fillMaxSize().alpha(alpha.value)) {
         Image(
             painter = painterResource(id = R.drawable.shop_button_bg),
             contentDescription = "shop_bg",
@@ -491,7 +556,7 @@ fun DrawShopButton(offsetY: Dp, onClick: () -> Unit) {
                 .align(Alignment.Center)
                 .size(55.dp)
                 .offset(y = offsetY)
-                .clickable { onClick() }
+                .clickable { if (alpha.value == 1f) onClick() }
         )
         Image(
             painter = painterResource(id = R.drawable.shop_button_fg),

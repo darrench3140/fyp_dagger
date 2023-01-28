@@ -22,8 +22,9 @@ fun Settings(navController: NavController, gameData: GameData) {
 Camera settings:
     rotation
     position
+    scale
 Facial Detection Sensitivity:
-    Eye blink probability
+    Left right Eye blink probability
     Smiling probability
 
  */

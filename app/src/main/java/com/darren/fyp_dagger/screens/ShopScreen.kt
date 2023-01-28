@@ -13,17 +13,13 @@ import com.darren.fyp_dagger.*
 @Composable
 fun ShopScreen(navController: NavHostController, gameData: GameData) {
 
-    val pinkBoxID = remember { mutableStateOf(daggerUtil.value.getDaggerInUseID()) }
+    val pinkBoxID = remember { mutableStateOf(daggerUtil.value.getDaggerInUseID().value) }
     val greenBoxID = remember { mutableStateOf(0) }
     val purchaseAction = remember{ mutableStateOf(false) }
     var lastClickTime by remember { mutableStateOf(0L) }
 
     LaunchedEffect(purchaseAction.value) {
         if (purchaseAction.value) {
-            purchasedCount.value++
-            fruitCount.value -= (greenBoxID.value - 1) * 15
-            pinkBoxID.value = greenBoxID.value
-            greenBoxID.value = 0
             gameData.saveFruitCount(fruitCount.value)
             gameData.savePurchasedCount(purchasedCount.value)
             purchaseAction.value = false
@@ -73,6 +69,10 @@ fun ShopScreen(navController: NavHostController, gameData: GameData) {
         }
         ShopPurchaseButton(offsetY = screenHeightDp.div(2.4086f), greenBoxID) { price ->
             if (greenBoxID.value == purchasedCount.value + 1 && fruitCount.value >= price) {
+                purchasedCount.value++
+                fruitCount.value -= (greenBoxID.value - 1) * 15
+                pinkBoxID.value = greenBoxID.value
+                greenBoxID.value = 0
                 purchaseAction.value = true
             }
         }

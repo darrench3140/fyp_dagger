@@ -44,11 +44,9 @@ fun GameConsole(navController: NavHostController, gameData: GameData) {
     val animation = remember{ Animatable(initialValue = 0f) }
     val uiAlpha = animateFloatAsState(targetValue = if(gameState.value.isOver() || gameState.value.isLeveling()) 0f else 1f, animationSpec = tween(durationMillis = 500))
     val uiAlpha2 = animateFloatAsState(targetValue = if(gameState.value.isOver() || gameState.value.isLeveling()) 0f else 1f, animationSpec = tween(durationMillis = 100))
-    val showTopScore = remember{ mutableStateOf(false) }
     val daggerHit = remember{ mutableStateOf(false) }
     val hitOffset = animateFloatAsState(targetValue = if (daggerHit.value) 20f else 0f, animationSpec = tween(durationMillis = if (!daggerHit.value) 100 else 0))
     val hitAlpha = animateFloatAsState(targetValue = if (daggerHit.value) 0.6f else 0f, animationSpec = tween(durationMillis = if (!daggerHit.value) 10 else 0))
-    val updateFruit = remember{ mutableStateOf(0) }
 
     //Game Settings
     val randomSpeed = remember{ mutableStateOf(false) }
@@ -68,7 +66,7 @@ fun GameConsole(navController: NavHostController, gameData: GameData) {
     val daggerState = remember { DaggerState(spinSpeed, remainingDaggers, uiAlpha2, hitOffset, sparkle) }
     val spinnerState = remember { SpinnerState(spinner, cover, spinSpeed, uiAlpha, hitAlpha, hitOffset) }
     val remainingDaggerState = remember { RemainingDaggerState(remainingDagger, remainingDaggers, uiAlpha) }
-    val fruitState = remember { FruitState(fruit, fruitCrack, spinSpeed, uiAlpha, hitOffset, updateFruit)}
+    val fruitState = remember { FruitState(fruit, fruitCrack, spinSpeed, uiAlpha, hitOffset, gameData)}
 
     // game animation and camera controller coroutine
     LaunchedEffect(true) {
@@ -80,12 +78,13 @@ fun GameConsole(navController: NavHostController, gameData: GameData) {
     // game state handling for important events
     LaunchedEffect(gameState.value) {
         if (gameState.value.isWipe()) {
-            cameraReady.value = false
             gameLevel.value = 1
+            cameraReady.value = false
+            showScoreBoardButton.value = false
             delay(100) //Delay for score board scores to show longer
+            showTopScore.value = false
             gameScore.value = 0
             fruitGained.value = 0
-            showCamera.value = gameDifficulty.value > 0
             gameState.value.setReset()
         } else if (gameState.value.isReset()) {
             LevelUtil.updateLevelInfo(randomSpeed, clockwise, spinSpeed, minSpeed, maxSpeed, remainingDaggers)
@@ -106,13 +105,13 @@ fun GameConsole(navController: NavHostController, gameData: GameData) {
             }
             while(loopCnt > 0) {
                 fruitState.addBonusFruit()
-                delay(200)
+                delay(100)
                 loopCnt--
             }
-            delay(700)
+            delay(500)
             gameState.value.setReset()
         } else if (gameState.value.isOver()) {
-            if (maxScore.value <= gameScore.value) {
+            if (maxScore.value < gameScore.value) {
                 maxScore.value = gameScore.value
                 gameData.saveMaxScore(maxScore.value)
                 showTopScore.value = true
@@ -121,6 +120,7 @@ fun GameConsole(navController: NavHostController, gameData: GameData) {
     }
     // Special Handling for blink and crazy mode
     LaunchedEffect(gameDifficulty.value) {
+        showCamera.value = gameDifficulty.value > 0
         if (gameDifficulty.value == 3) { // Crazy Mode Handling
             while(true) {
                 when ((1..5).random()) {
@@ -130,6 +130,7 @@ fun GameConsole(navController: NavHostController, gameData: GameData) {
                     4 -> if (!gameMode.value.isRight()) gameMode.value.setRight() else gameMode.value.setBoth()
                     5 -> if (!gameMode.value.isBoth()) gameMode.value.setBoth() else gameMode.value.setTap()
                 }
+                gameMode.value.setTap()
                 delay((3..7).random() * 1000L)
             }
         } else if (gameDifficulty.value == 2) {
@@ -173,10 +174,6 @@ fun GameConsole(navController: NavHostController, gameData: GameData) {
             daggerHit.value = false
         }
     }
-    // hit fruit
-    LaunchedEffect(updateFruit.value) {
-        gameData.saveFruitCount(fruitCount.value)
-    }
 
     Canvas(modifier = Modifier
         .fillMaxSize()
@@ -207,7 +204,7 @@ fun GameConsole(navController: NavHostController, gameData: GameData) {
         remainingDaggerState.draw(this)
     }
     //Score Board
-    DrawScoreBoard(navController, showTopScore)
+    DrawScoreBoard(navController, fruitState)
 }
 
 fun DrawScope.midX(): Float { return ((size.width) / 2) }

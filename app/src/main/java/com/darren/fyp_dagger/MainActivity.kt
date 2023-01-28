@@ -25,21 +25,17 @@ class MainActivity : ComponentActivity() {
         StatusBarUtil.transparentStatusBar(this)
         setContent {
             // Initialization
-            val configuration = LocalConfiguration.current
             val context = LocalContext.current
+            val configuration = LocalConfiguration.current
             screenHeightDp = configuration.screenHeightDp.dp
             screenWidthDp = configuration.screenWidthDp.dp
             screenHeightInt = with(LocalDensity.current) { screenHeightDp.toPx().toInt() }
             screenWidthInt = with(LocalDensity.current) { screenWidthDp.toPx().toInt() }
             OrientationUtil.LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
-            PermissionUtil.RequestCameraPermission(context)
-            val gameData = GameSetUpUtil.loadSettings(context)
-            // available gameModes, "god" "reset" "normal" "rich"
-            GameSetUpUtil.SetGameMode(gameData, mode = "normal")
+            PermissionUtil.Initialize(context)
 
-            val savedDaggerInUseID = gameData.getDaggerInUseID.collectAsState(initial = 1)
-            daggerUtil.value.Init(savedDaggerInUseID.value)
-            spinnerUtil.value.Init()
+            // available gameModes, "god" "reset" "normal" "rich"
+            val gameData = GameSetUpUtil.loadSettings(context, gameMode = "normal")
 
             // Navigation
             val navController = rememberAnimatedNavController()
