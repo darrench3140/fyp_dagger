@@ -1,6 +1,5 @@
-package com.darren.fyp_dagger
+package com.darren.fyp_dagger.utils
 
-import android.util.Log
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy

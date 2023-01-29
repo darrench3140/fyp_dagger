@@ -1,4 +1,4 @@
-package com.darren.fyp_dagger
+package com.darren.fyp_dagger.utils
 
 import android.os.SystemClock
 import android.util.Log
@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
+import com.darren.fyp_dagger.R
 import com.darren.fyp_dagger.states.FruitState
 import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetectorOptions
@@ -50,7 +51,6 @@ fun DrawCamera() {
     val context = LocalContext.current
     val cameraProviderFuture = remember { ProcessCameraProvider.getInstance(context) }
     val cameraExecutor = remember { Executors.newSingleThreadExecutor() }
-    val lensFacing = remember { mutableStateOf(CameraSelector.LENS_FACING_BACK) }
     val faceDetector = remember {
         FaceDetection.getClient(
             FaceDetectorOptions.Builder()
@@ -273,11 +273,7 @@ fun DrawGameModeItem(buttonText: String, descriptionText: String, rewardText: St
         )
         if (buttonText != "Easy") {
             Text(
-                text = "+ Level Up Bonus: " + when(buttonText) {
-                    "Normal" -> "4"
-                    "Hard" -> "6"
-                    else -> "8"
-                },
+                text = "+ Level Up Bonus: " + when(buttonText) { "Normal" -> "2"; "Hard" -> "3"; else -> "5" },
                 fontSize = 15.sp,
                 color = white,
                 fontFamily = myFont,

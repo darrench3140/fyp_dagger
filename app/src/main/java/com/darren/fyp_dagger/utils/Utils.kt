@@ -1,4 +1,4 @@
-package com.darren.fyp_dagger
+package com.darren.fyp_dagger.utils
 
 import android.app.Activity
 import android.content.Context
@@ -21,6 +21,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.darren.fyp_dagger.R
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -42,9 +43,9 @@ class GameData(private val context: Context) {
     suspend fun savePurchasedCount(count: Int) { context.dataStore.edit { it[PURCHASED_COUNT] = count }}
 }
 
-object GameSetUpUtil {
+object GameUtil {
     @Composable
-    fun loadSettings(context: Context, gameMode: String): GameData {
+    fun loadData(context: Context, gameMode: String): GameData {
         val gameData = GameData(context)
         LaunchedEffect(true) {
             when (gameMode) {
@@ -74,6 +75,22 @@ object GameSetUpUtil {
         daggerUtil.value.Init(savedDaggerInUseID.value)
         spinnerUtil.value.Init()
         return gameData
+    }
+
+    fun updateLevelInfo(randomSpeed: MutableState<Boolean>, clockwise: MutableState<Boolean>, spinSpeed: MutableState<Float>, minSpeed: MutableState<Int>, maxSpeed: MutableState<Int>, remainingDaggers: MutableState<Int>) {
+        val minusFactor = when (gameDifficulty.value) {
+            1 -> 1
+            2 -> 1
+            3 -> 2
+            else -> 0
+        }
+        val level = gameLevel.value
+        clockwise.value = (0..1).random() == 1
+        randomSpeed.value = level >= 3
+        spinSpeed.value = (2..4).random().toFloat()
+        minSpeed.value = ((2+level/4)..(3+level/4)).random()
+        maxSpeed.value = ((4+level/4)..(6+level/4)).random()
+        remainingDaggers.value = level / 2 + (5..7).random() - minusFactor
     }
 }
 
@@ -133,24 +150,6 @@ object PermissionUtil {
     fun requestCameraPermission() {
         Log.d("game", "request camera perm")
         launcher.launch(android.Manifest.permission.CAMERA)
-    }
-}
-
-object LevelUtil {
-    fun updateLevelInfo(randomSpeed: MutableState<Boolean>, clockwise: MutableState<Boolean>, spinSpeed: MutableState<Float>, minSpeed: MutableState<Int>, maxSpeed: MutableState<Int>, remainingDaggers: MutableState<Int>) {
-        val minusFactor = when (gameDifficulty.value) {
-            1 -> 1
-            2 -> 1
-            3 -> 2
-            else -> 0
-        }
-        val level = gameLevel.value
-        clockwise.value = (0..1).random() == 1
-        randomSpeed.value = level >= 3
-        spinSpeed.value = (2..4).random().toFloat()
-        minSpeed.value = ((2+level/4)..(3+level/4)).random() - minusFactor
-        maxSpeed.value = ((4+level/4)..(6+level/4)).random() - minusFactor
-        remainingDaggers.value = level / 2 + (5..7).random() - minusFactor
     }
 }
 

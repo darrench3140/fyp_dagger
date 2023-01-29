@@ -7,12 +7,12 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
-import com.darren.fyp_dagger.daggerUtil
-import com.darren.fyp_dagger.gameLevel
-import com.darren.fyp_dagger.gameScore
-import com.darren.fyp_dagger.gameState
 import com.darren.fyp_dagger.screens.midX
 import com.darren.fyp_dagger.screens.midY
+import com.darren.fyp_dagger.utils.daggerUtil
+import com.darren.fyp_dagger.utils.gameLevel
+import com.darren.fyp_dagger.utils.gameScore
+import com.darren.fyp_dagger.utils.gameState
 import kotlin.math.abs
 
 data class DaggerState(

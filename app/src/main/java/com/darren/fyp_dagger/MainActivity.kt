@@ -12,6 +12,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.darren.fyp_dagger.screens.*
+import com.darren.fyp_dagger.utils.*
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
@@ -35,7 +36,7 @@ class MainActivity : ComponentActivity() {
             PermissionUtil.Initialize(context)
 
             // available gameModes, "god" "reset" "normal" "rich"
-            val gameData = GameSetUpUtil.loadSettings(context, gameMode = "normal")
+            val gameData = GameUtil.loadData(context, gameMode = "normal")
 
             // Navigation
             val navController = rememberAnimatedNavController()

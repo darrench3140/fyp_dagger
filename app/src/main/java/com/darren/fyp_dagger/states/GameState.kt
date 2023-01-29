@@ -1,7 +1,7 @@
 package com.darren.fyp_dagger.states
 
-import com.darren.fyp_dagger.gameMode
-import com.darren.fyp_dagger.gameState
+import com.darren.fyp_dagger.utils.gameMode
+import com.darren.fyp_dagger.utils.gameState
 
 data class GameState(private val status: Status = Status.RESET) {
     enum class Status {

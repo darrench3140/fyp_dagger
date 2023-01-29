@@ -22,6 +22,7 @@ import com.darren.fyp_dagger.states.DaggerState
 import com.darren.fyp_dagger.states.FruitState
 import com.darren.fyp_dagger.states.RemainingDaggerState
 import com.darren.fyp_dagger.states.SpinnerState
+import com.darren.fyp_dagger.utils.*
 import kotlinx.coroutines.delay
 
 @Composable
@@ -87,7 +88,7 @@ fun GameConsole(navController: NavHostController, gameData: GameData) {
             fruitGained.value = 0
             gameState.value.setReset()
         } else if (gameState.value.isReset()) {
-            LevelUtil.updateLevelInfo(randomSpeed, clockwise, spinSpeed, minSpeed, maxSpeed, remainingDaggers)
+            GameUtil.updateLevelInfo(randomSpeed, clockwise, spinSpeed, minSpeed, maxSpeed, remainingDaggers)
             spinSpeed.value *= if(clockwise.value) 1f else -1f
             spinner.value = spinnerUtil.value.getRandomSpinner()
             val rotationList = daggerState.reset()
@@ -97,12 +98,7 @@ fun GameConsole(navController: NavHostController, gameData: GameData) {
             Log.d("game", "[Level Information]\nlevel: ${gameLevel.value}\nrandomSpeed: ${randomSpeed.value}\nspinSpeed: ${spinSpeed.value}\nminSpeed: ${minSpeed.value}\nmaxSpeed: ${maxSpeed.value}\nnumberOfDaggers: ${remainingDaggers.value}")
         } else if (gameState.value.isLeveling()) {
             gameLevel.value++
-            var loopCnt = when (gameDifficulty.value) {
-                1 -> 4
-                2 -> 6
-                3 -> 8
-                else -> 0
-            }
+            var loopCnt = when (gameDifficulty.value) { 1 -> 2; 2 -> 3; 3 -> 5; else -> 0 }
             while(loopCnt > 0) {
                 fruitState.addBonusFruit()
                 delay(100)

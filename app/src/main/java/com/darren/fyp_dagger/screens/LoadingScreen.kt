@@ -13,10 +13,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.darren.fyp_dagger.DrawBackground
-import com.darren.fyp_dagger.DrawLogo
-import com.darren.fyp_dagger.DrawSword
-import com.darren.fyp_dagger.screenHeightDp
+import com.darren.fyp_dagger.utils.DrawBackground
+import com.darren.fyp_dagger.utils.DrawLogo
+import com.darren.fyp_dagger.utils.DrawSword
+import com.darren.fyp_dagger.utils.screenHeightDp
 import kotlinx.coroutines.delay
 
 @Composable
