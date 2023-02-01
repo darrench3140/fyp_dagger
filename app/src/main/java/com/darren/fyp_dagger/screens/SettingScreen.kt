@@ -33,7 +33,7 @@ fun Settings(navController: NavController, gameData: GameData) {
                 .offset(y = -screenHeightDp.times(0.3f))
                 .size(screenWidthDp.div(4.935f))
         )
-        val sections = listOf("Camera", "Facial Detection")
+        val sections = listOf("Facial Detection", "Camera")
         Box(modifier = Modifier
             .align(Alignment.Center)
             .offset(y = screenHeightDp.times(0.13f))
@@ -71,7 +71,13 @@ fun Settings(navController: NavController, gameData: GameData) {
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.align(Alignment.CenterStart).padding(30.dp, 0.dp, 0.dp, 0.dp)
                             )
+                            if (settingsItem.type == SettingsUtil.Type.Switch) {
+//                                Switch()
+                            } else if (settingsItem.type == SettingsUtil.Type.Slider) {
 
+                            } else if (settingsItem.type == SettingsUtil.Type.Button) {
+
+                            }
                         }
                     }
                 }
@@ -102,7 +108,7 @@ object SettingsUtil {
             "Camera" -> {
                 return listOf(
                     SettingsItem(
-                        title = "Show Camera",
+                        title = "Show Camera in Game",
                         type = Type.Switch,
                     ),
                     SettingsItem(
@@ -148,7 +154,19 @@ object SettingsUtil {
                     SettingsItem(
                         title = "Left Eye Sensitivity",
                         type = Type.Slider,
-                        description = "Higher sensitivity allows less eye blinking motion",
+                        description = "Increasing it allows less eye blinking motion",
+                        interval = 0.1f
+                    ),
+                    SettingsItem(
+                        title = "Right Eye Sensitivity",
+                        type = Type.Slider,
+                        description = "Increasing it allows less eye blinking motion",
+                        interval = 0.1f
+                    ),
+                    SettingsItem(
+                        title = "Smiling Sensitivity",
+                        type = Type.Slider,
+                        description = "Decreasing it allows less smiling motion",
                         interval = 0.1f
                     )
                 )
