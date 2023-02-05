@@ -1,22 +1,20 @@
 package com.darren.fyp_dagger.screens
 
 import android.util.Log
-import android.view.MotionEvent
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.input.pointer.pointerInteropFilter
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.imageResource
 import androidx.navigation.NavHostController
-import com.darren.fyp_dagger.*
 import com.darren.fyp_dagger.R
 import com.darren.fyp_dagger.states.DaggerState
 import com.darren.fyp_dagger.states.FruitState
@@ -38,7 +36,6 @@ fun GameScreen(navController: NavHostController, gameData: GameData) {
     DrawControllerIcons()
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun GameConsole(navController: NavHostController, gameData: GameData) {
     //Animations
@@ -173,15 +170,14 @@ fun GameConsole(navController: NavHostController, gameData: GameData) {
 
     Canvas(modifier = Modifier
         .fillMaxSize()
-        .pointerInteropFilter {
+        .pointerInput(Unit) {
             if (gameMode.value.isTap()) {
-                when (it.action) {
-                    MotionEvent.ACTION_UP -> {
+                detectTapGestures(
+                    onTap = {
                         if (gameState.value.isRunning()) gameState.value.setShooting()
                     }
-                }
+                )
             }
-            true
         }
     ) {
         animation.value //use to maintain animation loop
