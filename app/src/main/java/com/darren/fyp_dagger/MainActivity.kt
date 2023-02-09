@@ -34,6 +34,7 @@ class MainActivity : ComponentActivity() {
             screenWidthInt = with(LocalDensity.current) { screenWidthDp.toPx().toInt() }
             OrientationUtil.LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
             PermissionUtil.Initialize(context)
+            settingsUtil.value.initializeSettings()
 
             // available gameModes, "god" "reset" "normal" "rich"
             val gameData = GameUtil.loadData(context, gameMode = "normal")

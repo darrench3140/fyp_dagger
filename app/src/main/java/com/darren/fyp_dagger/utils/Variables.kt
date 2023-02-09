@@ -9,6 +9,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.darren.fyp_dagger.R
+import com.darren.fyp_dagger.screens.SettingsUtil
 import com.darren.fyp_dagger.states.GameMode
 import com.darren.fyp_dagger.states.GameState
 import kotlinx.coroutines.sync.Mutex
@@ -37,6 +38,7 @@ val lensFacing : MutableState<Int> = mutableStateOf(CameraSelector.LENS_FACING_B
 //Utils
 val spinnerUtil = mutableStateOf(SpinnerUtil())
 val daggerUtil = mutableStateOf(DaggerUtil())
+val settingsUtil = mutableStateOf(SettingsUtil())
 
 //Variables
 val mutex = Mutex()

@@ -1,5 +1,6 @@
 package com.darren.fyp_dagger.screens
 
+import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -9,11 +10,9 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.Slider
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -48,8 +47,8 @@ fun Settings(navController: NavController, gameData: GameData) {
         val sections = listOf("Facial Detection", "Camera")
         Box(modifier = Modifier
             .align(Alignment.Center)
-            .offset(y = screenHeightDp.times(0.13f))
-            .size(screenWidthDp, screenHeightDp.times(0.6f))
+            .offset(y = screenHeightDp.times(0.16f) - 45.dp)
+            .size(screenWidthDp - 10.dp, screenHeightDp.times(0.68f) - 90.dp)
             ) {
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(5.dp),
@@ -70,7 +69,7 @@ fun Settings(navController: NavController, gameData: GameData) {
                             )
                         }
                     }
-                    val sectionItems = SettingsUtil.getSectionItems(section)
+                    val sectionItems = settingsUtil.value.getSectionItems(section)
                     items(items = sectionItems) { settingsItem ->
                         Box(modifier = Modifier
                             .size(screenWidthDp, 100.dp)
@@ -81,16 +80,32 @@ fun Settings(navController: NavController, gameData: GameData) {
                                 color = white,
                                 fontFamily = myFont,
                                 fontWeight = FontWeight.Bold,
-                                modifier = Modifier.align(Alignment.CenterStart).padding(30.dp, 0.dp, 0.dp, 0.dp)
+                                modifier = Modifier
+                                    .align(Alignment.CenterStart)
+                                    .padding(30.dp, 0.dp, 0.dp, 0.dp)
                             )
                             when (settingsItem.type) {
                                 SettingsUtil.Type.Switch -> {
-                                    Switch2 {
-
+                                    DrawSwitch(settingsItem.onText, settingsItem.offText, settingsItem.switchOn) { switchOn->
+                                        Log.d("game", "$switchOn")
                                     }
                                 }
                                 SettingsUtil.Type.Slider -> {
-
+                                    Slider(
+                                        modifier = Modifier.width(screenWidthDp.times(0.8f)).align(Alignment.Center).offset(y = 25.dp),
+                                        value = settingsItem.value.value,
+                                        onValueChange = { settingsItem.value.value = it },
+                                        valueRange = settingsItem.min..settingsItem.max,
+                                        steps = ((settingsItem.max - settingsItem.min) / settingsItem.interval).toInt() - 1
+                                    )
+                                    Text(
+                                        text = ((settingsItem.value.value / settingsItem.interval).toInt() * settingsItem.interval).toString(),
+                                        fontSize = 20.sp,
+                                        color = white,
+                                        fontFamily = myFont,
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier.align(Alignment.CenterEnd).offset(x = (-30).dp)
+                                    )
                                 }
                                 SettingsUtil.Type.Button -> {
 
@@ -108,19 +123,19 @@ fun Settings(navController: NavController, gameData: GameData) {
 }
 
 @Composable
-fun Switch2(
+fun DrawSwitch(
     checkedText: String = "ON",
     uncheckedText: String = "OFF",
-    onClick: () -> Unit
+    switchON: MutableState<Boolean>,
+    onClick: (Boolean) -> Unit
 ) {
-    val switchON = remember { mutableStateOf(true) }
     val checkedTrackColor by remember { mutableStateOf(Color(0xFF35898F)) }
     val uncheckedTrackColor by remember { mutableStateOf(Color(0xFFe0e0e0)) }
     val animatePosition = animateFloatAsState(
         targetValue = if (switchON.value) with(LocalDensity.current) { 26.dp.toPx() }
         else with(LocalDensity.current) { 10.dp.toPx() }
     )
-    Box(modifier = Modifier.size(screenWidthDp, screenHeightDp.times(0.6f))) {
+    Box(modifier = Modifier.size(screenWidthDp, 100.dp)) {
         Canvas(
             modifier = Modifier
                 .align(Alignment.CenterEnd)
@@ -131,6 +146,7 @@ fun Switch2(
                     detectTapGestures(
                         onTap = {
                             switchON.value = !switchON.value
+                            onClick(switchON.value)
                         }
                     )
                 }
@@ -155,114 +171,118 @@ fun Switch2(
             color = white,
             fontFamily = myFont,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.align(Alignment.CenterEnd).padding(0.dp, 65.dp, 30.dp, 0.dp)
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .padding(0.dp, 65.dp, 30.dp, 0.dp)
         )
     }
 }
 
-object SettingsUtil {
+data class SettingsUtil(var initialized: Boolean = false) {
+    private val cameraSettings: MutableList<SettingsItem> = emptyList<SettingsItem>().toMutableList()
+    private val facialSettings: MutableList<SettingsItem> = emptyList<SettingsItem>().toMutableList()
+
     enum class Type {
         Button,
         Slider,
         Switch
     }
+
     data class SettingsItem(
         var title: String,
         var type: Type,
-        var value: Number = 0,
-        var description: String = "",
-        var interval: Number = 0,
-        var range: IntRange = 0..1,
-    )
-    fun getSectionItems(section: String): List<SettingsItem> {
-        when (section) {
-            "Camera" -> {
-                return listOf(
-                    SettingsItem(
-                        title = "Show Camera in Game",
-                        type = Type.Switch,
-                    ),
-                    SettingsItem(
-                        title = "Rotation",
-                        type = Type.Slider,
-                        description = "Modify the rotation of camera",
-                        interval = 90,
-                        range = 0..360
-                    ),
-                    SettingsItem(
-                        title = "Outer Scale",
-                        type = Type.Slider,
-                        description = "Modify the outer scale of camera",
-                        interval = 0.1f,
-                        range = 1..2
-                    ),
-                    SettingsItem(
-                        title = "Inner Scale",
-                        type = Type.Slider,
-                        description = "Modify the inner scale of camera",
-                        interval = 0.1f,
-                        range = 1..2
-                    ),
-                    SettingsItem(
-                        title = "Facing",
-                        type = Type.Switch,
-                        description = "Set the Facing of camera"
-                    ),
-                    SettingsItem(
-                        title = "Position",
-                        type = Type.Button,
-                        description = "Click to modify the position of camera to be placed"
-                    ),
-                    SettingsItem(
-                        title = "Permission",
-                        type = Type.Button,
-                        description = "Click to enter permission settings of this app"
-                    )
-                )
-            }
-            "Facial Detection" -> {
-                return listOf(
-                    SettingsItem(
-                        title = "Left Eye Sensitivity",
-                        type = Type.Slider,
-                        description = "Increasing it allows less eye blinking motion",
-                        interval = 0.1f
-                    ),
-                    SettingsItem(
-                        title = "Right Eye Sensitivity",
-                        type = Type.Slider,
-                        description = "Increasing it allows less eye blinking motion",
-                        interval = 0.1f
-                    ),
-                    SettingsItem(
-                        title = "Smiling Sensitivity",
-                        type = Type.Slider,
-                        description = "Decreasing it allows less smiling motion",
-                        interval = 0.1f
-                    )
-                )
-            }
-            else -> {
-                return listOf()
-            }
+        //slider
+        var interval: Float = 0f,
+        var min: Float = 0f, var max: Float = 0f,
+        //Switch
+        var onText: String = "On", var offText: String = "Off",
+    ) {
+        val value = mutableStateOf(0f)
+        val switchOn = mutableStateOf(false)
+        //button
+        fun onClick() {
+
         }
     }
+
+    fun getSectionItems(section: String): List<SettingsItem> {
+        return when(section) {
+            "Camera" -> cameraSettings
+            "Facial Detection" -> facialSettings
+            else -> emptyList()
+        }
+    }
+
+    fun initializeSettings() {
+        cameraSettings.clear()
+        facialSettings.clear()
+        cameraSettings.add(SettingsItem(
+            title = "Show Camera in Game",
+            type = Type.Switch,
+            onText = "Yes", offText = "No"
+        ))
+        cameraSettings.add(SettingsItem(
+            title = "Rotation",
+            type = Type.Slider,
+            interval = 90f, min = 0f, max = 360f
+        ))
+        cameraSettings.add(SettingsItem(
+            title = "Outer Scale",
+            type = Type.Slider,
+            interval = 0.1f, min = 0.5f, max = 2f
+        ))
+        cameraSettings.add(SettingsItem(
+            title = "Inner Scale",
+            type = Type.Slider,
+            interval = 0.1f, min = 0.5f, max = 2f
+        ))
+        cameraSettings.add(SettingsItem(
+            title = "Facing",
+            type = Type.Switch,
+            onText = "Front", offText = "Back"
+        ))
+        cameraSettings.add(SettingsItem(
+            title = "Position",
+            type = Type.Button,
+        ))
+        cameraSettings.add(SettingsItem(
+            title = "Permission",
+            type = Type.Button,
+        ))
+        facialSettings.add(SettingsItem(
+            title = "Left Eye Sensitivity",
+            type = Type.Slider,
+            interval = 0.1f, min = 0f, max = 1f
+        ))
+        facialSettings.add(SettingsItem(
+            title = "Right Eye Sensitivity",
+            type = Type.Slider,
+            interval = 0.1f, min = 0f, max = 1f
+        ))
+        facialSettings.add(SettingsItem(
+            title = "Smiling Sensitivity",
+            type = Type.Slider,
+            interval = 0.1f, min = 0f, max = 1f
+        ))
+        initialized = true
+    }
+
 }
 
 /*
 Camera settings:
     show camera (switch)
-    rotation (slider)
-    outer scale (slider)
-    inner scale (slider)
+    rotation (slider) 0 - 360
+    outer scale (float slider) 1 - 2
+    inner scale (float slider) 1 - 2
     facing (switch)
     position (button -> then drag)
     get permission (button)
 Facial Detection Sensitivity:
-    Left Eye sensitivity (slider)
-    right Eye sensitivity (slider)
-    Smiling sensitivity (slider)
+    Left Eye sensitivity (float slider) 0 - 1
+    right Eye sensitivity (float slider) 0 - 1
+    Smiling sensitivity (float slider) 0 - 1
 General:
-    sound (slider)
-    exit button
+    sound (slider) 0 - 100
+    exit (button)
  */
