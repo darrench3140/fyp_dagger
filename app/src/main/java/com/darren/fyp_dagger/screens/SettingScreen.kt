@@ -99,7 +99,7 @@ fun Settings(navController: NavController, gameData: GameData) {
                                         steps = ((settingsItem.max - settingsItem.min) / settingsItem.interval).toInt() - 1
                                     )
                                     Text(
-                                        text = ((settingsItem.value.value / settingsItem.interval).toInt() * settingsItem.interval).toString(),
+                                        text = if (settingsItem.interval < 1) String.format("%.1f", settingsItem.value.value) else String.format("%.0f", settingsItem.value.value),
                                         fontSize = 20.sp,
                                         color = white,
                                         fontFamily = myFont,
@@ -216,54 +216,64 @@ data class SettingsUtil(var initialized: Boolean = false) {
     fun initializeSettings() {
         cameraSettings.clear()
         facialSettings.clear()
-        cameraSettings.add(SettingsItem(
+        var s = SettingsItem(
             title = "Show Camera in Game",
             type = Type.Switch,
             onText = "Yes", offText = "No"
-        ))
-        cameraSettings.add(SettingsItem(
+        )
+        cameraSettings.add(s)
+        s = SettingsItem(
             title = "Rotation",
             type = Type.Slider,
             interval = 90f, min = 0f, max = 360f
-        ))
-        cameraSettings.add(SettingsItem(
+        )
+        cameraSettings.add(s)
+        s = SettingsItem(
             title = "Outer Scale",
             type = Type.Slider,
             interval = 0.1f, min = 0.5f, max = 2f
-        ))
-        cameraSettings.add(SettingsItem(
+        )
+        cameraSettings.add(s)
+        s = SettingsItem(
             title = "Inner Scale",
             type = Type.Slider,
             interval = 0.1f, min = 0.5f, max = 2f
-        ))
-        cameraSettings.add(SettingsItem(
+        )
+        cameraSettings.add(s)
+        s = SettingsItem(
             title = "Facing",
             type = Type.Switch,
             onText = "Front", offText = "Back"
-        ))
-        cameraSettings.add(SettingsItem(
+        )
+        cameraSettings.add(s)
+        s = SettingsItem(
             title = "Position",
             type = Type.Button,
-        ))
-        cameraSettings.add(SettingsItem(
+        )
+        cameraSettings.add(s)
+        s = SettingsItem(
             title = "Permission",
             type = Type.Button,
-        ))
-        facialSettings.add(SettingsItem(
+        )
+        cameraSettings.add(s)
+        s = SettingsItem(
             title = "Left Eye Sensitivity",
             type = Type.Slider,
             interval = 0.1f, min = 0f, max = 1f
-        ))
-        facialSettings.add(SettingsItem(
+        )
+        facialSettings.add(s)
+        s = SettingsItem(
             title = "Right Eye Sensitivity",
             type = Type.Slider,
             interval = 0.1f, min = 0f, max = 1f
-        ))
-        facialSettings.add(SettingsItem(
+        )
+        facialSettings.add(s)
+        s = SettingsItem(
             title = "Smiling Sensitivity",
             type = Type.Slider,
             interval = 0.1f, min = 0f, max = 1f
-        ))
+        )
+        facialSettings.add(s)
         initialized = true
     }
 
