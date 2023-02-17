@@ -123,7 +123,6 @@ fun GameConsole(navController: NavHostController, gameData: GameData) {
                     4 -> if (!gameMode.value.isRight()) gameMode.value.setRight() else gameMode.value.setBoth()
                     5 -> if (!gameMode.value.isBoth()) gameMode.value.setBoth() else gameMode.value.setTap()
                 }
-                gameMode.value.setTap()
                 delay((3..7).random() * 1000L)
             }
         } else if (gameDifficulty.value == 2) {
