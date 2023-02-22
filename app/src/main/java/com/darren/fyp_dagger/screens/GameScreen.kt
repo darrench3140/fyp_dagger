@@ -170,13 +170,11 @@ fun GameConsole(navController: NavHostController, gameData: GameData) {
     Canvas(modifier = Modifier
         .fillMaxSize()
         .pointerInput(Unit) {
-            if (gameMode.value.isTap()) {
-                detectTapGestures(
-                    onTap = {
-                        if (gameState.value.isRunning()) gameState.value.setShooting()
-                    }
-                )
-            }
+            detectTapGestures(
+                onTap = {
+                    if (gameMode.value.isTap() && gameState.value.isRunning()) gameState.value.setShooting()
+                }
+            )
         }
     ) {
         animation.value //use to maintain animation loop

@@ -17,9 +17,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.imageResource
 import androidx.core.content.ContextCompat
 import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
 import com.darren.fyp_dagger.R
 import kotlinx.coroutines.flow.Flow
@@ -32,11 +30,37 @@ class GameData(private val context: Context) {
         val FRUIT_COUNT = intPreferencesKey("fruit_count")
         val DAGGER_IN_USE_ID = intPreferencesKey("dagger_in_use_ID")
         val PURCHASED_COUNT = intPreferencesKey("purchased_count")
+        val SHOW_CAMERA = booleanPreferencesKey("show_camera")
+        val CAMERA_ROTATION = floatPreferencesKey("camera_rotation")
+        val CAMERA_OUT_SCALE = floatPreferencesKey("camera_out_scale")
+        val CAMERA_IN_SCALE = floatPreferencesKey("camera_in_scale")
+        val CAMERA_FACING = booleanPreferencesKey("camera_facing")
+        val FACE_LEFT = floatPreferencesKey("face_left")
+        val FACE_RIGHT = floatPreferencesKey("face_right")
+        val FACE_SMILE = floatPreferencesKey("face_smile")
     }
     val getMaxScore: Flow<Int> = context.dataStore.data.map { it[MAX_SCORE] ?: 0 }
     val getFruitCount: Flow<Int> = context.dataStore.data.map { it[FRUIT_COUNT] ?: 0 }
     val getDaggerInUseID: Flow<Int> = context.dataStore.data.map { it[DAGGER_IN_USE_ID] ?: 1 }
     val getPurchasedCount: Flow<Int> = context.dataStore.data.map { it[PURCHASED_COUNT] ?: 1 }
+    val getShowCamera: Flow<Boolean> = context.dataStore.data.map { it[SHOW_CAMERA] ?: true }
+    val getCameraRotation: Flow<Float> = context.dataStore.data.map { it[CAMERA_ROTATION] ?: 0f }
+    val getCameraOutScale: Flow<Float> = context.dataStore.data.map { it[CAMERA_OUT_SCALE] ?: 1f }
+    val getCameraInScale: Flow<Float> = context.dataStore.data.map { it[CAMERA_IN_SCALE] ?: 1f }
+    val getCameraFacing: Flow<Boolean> = context.dataStore.data.map { it[CAMERA_FACING] ?: false }
+    val getFaceLeft: Flow<Float> = context.dataStore.data.map { it[FACE_LEFT] ?: 0.2f }
+    val getFaceRight: Flow<Float> = context.dataStore.data.map { it[FACE_RIGHT] ?: 0.2f }
+    val getFaceSmile: Flow<Float> = context.dataStore.data.map { it[FACE_SMILE] ?: 0.5f }
+    suspend fun saveSettings() { context.dataStore.edit {
+        it[SHOW_CAMERA] = showCameraSettings.value
+        it[CAMERA_ROTATION] = cameraRotationSettings.value
+        it[CAMERA_OUT_SCALE] = cameraOutScaleSettings.value
+        it[CAMERA_IN_SCALE] = cameraInScaleSettings.value
+        it[CAMERA_FACING] = lensFacing.value
+        it[FACE_LEFT] = faceLeftSensitivity.value
+        it[FACE_RIGHT] = faceRightSensitivity.value
+        it[FACE_SMILE] = faceSmileSensitivity.value
+    }}
     suspend fun saveMaxScore(score: Int) { context.dataStore.edit { it[MAX_SCORE] = score } }
     suspend fun saveFruitCount(count: Int) { context.dataStore.edit { it[FRUIT_COUNT] = count }}
     suspend fun saveDaggerInUseID(id: Int) { context.dataStore.edit { it[DAGGER_IN_USE_ID] = id }}
@@ -65,14 +89,18 @@ object GameUtil {
                 }
             }
         }
-        val savedMaxScore = gameData.getMaxScore.collectAsState(initial = 0)
-        val savedFruitCount = gameData.getFruitCount.collectAsState(initial = 0)
-        val savedPurchasedCount = gameData.getPurchasedCount.collectAsState(initial = 1)
-        val savedDaggerInUseID = gameData.getDaggerInUseID.collectAsState(initial = 1)
-        maxScore.value = savedMaxScore.value
-        fruitCount.value = savedFruitCount.value
-        purchasedCount.value = savedPurchasedCount.value
-        daggerUtil.value.Init(savedDaggerInUseID.value)
+        maxScore.value = gameData.getMaxScore.collectAsState(initial = 0).value
+        fruitCount.value = gameData.getFruitCount.collectAsState(initial = 0).value
+        purchasedCount.value = gameData.getPurchasedCount.collectAsState(initial = 1).value
+        showCameraSettings.value = gameData.getShowCamera.collectAsState(initial = true).value
+        cameraRotationSettings.value = gameData.getCameraRotation.collectAsState(initial = 0f).value
+        cameraOutScaleSettings.value = gameData.getCameraOutScale.collectAsState(initial = 1f).value
+        cameraInScaleSettings.value = gameData.getCameraInScale.collectAsState(initial = 1f).value
+        lensFacing.value = gameData.getCameraFacing.collectAsState(initial = false).value
+        faceLeftSensitivity.value = gameData.getFaceLeft.collectAsState(initial = 0.2f).value
+        faceRightSensitivity.value = gameData.getFaceRight.collectAsState(initial = 0.2f).value
+        faceSmileSensitivity.value = gameData.getFaceSmile.collectAsState(initial = 0.5f).value
+        daggerUtil.value.Init(gameData.getDaggerInUseID.collectAsState(initial = 1).value)
         spinnerUtil.value.Init()
         return gameData
     }

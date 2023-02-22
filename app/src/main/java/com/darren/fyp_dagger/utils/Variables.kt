@@ -1,6 +1,5 @@
 package com.darren.fyp_dagger.utils
 
-import androidx.camera.core.CameraSelector
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
@@ -33,7 +32,14 @@ val maxScore : MutableState<Int> = mutableStateOf(0)
 val fruitCount : MutableState<Int> = mutableStateOf(0)
 val fruitGained : MutableState<Int> = mutableStateOf(0)
 val purchasedCount : MutableState<Int> = mutableStateOf(1)
-val lensFacing : MutableState<Int> = mutableStateOf(CameraSelector.LENS_FACING_BACK)
+val showCameraSettings: MutableState<Boolean> = mutableStateOf(true)
+val cameraRotationSettings: MutableState<Float> = mutableStateOf(0f)
+val cameraOutScaleSettings: MutableState<Float> = mutableStateOf(1f)
+val cameraInScaleSettings: MutableState<Float> = mutableStateOf(1f)
+val lensFacing : MutableState<Boolean> = mutableStateOf(false)
+val faceLeftSensitivity: MutableState<Float> = mutableStateOf(0.2f)
+val faceRightSensitivity: MutableState<Float> = mutableStateOf(0.2f)
+val faceSmileSensitivity: MutableState<Float> = mutableStateOf(0.5f)
 
 //Utils
 val spinnerUtil = mutableStateOf(SpinnerUtil())

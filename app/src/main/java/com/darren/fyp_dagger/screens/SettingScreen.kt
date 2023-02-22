@@ -1,12 +1,9 @@
 package com.darren.fyp_dagger.screens
 
-import android.util.Log
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.Canvas
+import android.os.SystemClock
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -15,13 +12,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -33,6 +24,17 @@ import com.darren.fyp_dagger.utils.*
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun Settings(navController: NavController, gameData: GameData) {
+
+    var lastClickTime by remember { mutableStateOf(0L) }
+    val saveToDataStore = remember{ mutableStateOf(false) }
+
+    LaunchedEffect(saveToDataStore.value) {
+        if (saveToDataStore.value) {
+            gameData.saveSettings()
+            saveToDataStore.value = false
+        }
+    }
+
     DrawBackground()
     Box(modifier = Modifier.fillMaxSize()) {
         DrawShopLights()
@@ -86,29 +88,32 @@ fun Settings(navController: NavController, gameData: GameData) {
                             )
                             when (settingsItem.type) {
                                 SettingsUtil.Type.Switch -> {
-                                    DrawSwitch(settingsItem.onText, settingsItem.offText, settingsItem.switchOn) { switchOn->
-                                        Log.d("game", "$switchOn")
+                                    DrawSwitch(settingsItem.onText, settingsItem.offText, settingsItem.switchOn) {
+                                        saveToDataStore.value = true
                                     }
                                 }
                                 SettingsUtil.Type.Slider -> {
                                     Slider(
-                                        modifier = Modifier.width(screenWidthDp.times(0.8f)).align(Alignment.Center).offset(y = 25.dp),
-                                        value = settingsItem.value.value,
-                                        onValueChange = { settingsItem.value.value = it },
+                                        modifier = Modifier
+                                            .width(screenWidthDp.times(0.8f))
+                                            .align(Alignment.Center)
+                                            .offset(y = 25.dp),
+                                        value = settingsItem.slideValue.value,
+                                        onValueChange = { settingsItem.slideValue.value = it },
+                                        onValueChangeFinished = { saveToDataStore.value = true },
                                         valueRange = settingsItem.min..settingsItem.max,
                                         steps = ((settingsItem.max - settingsItem.min) / settingsItem.interval).toInt() - 1
                                     )
                                     Text(
-                                        text = if (settingsItem.interval < 1) String.format("%.1f", settingsItem.value.value) else String.format("%.0f", settingsItem.value.value),
+                                        text = if (settingsItem.interval < 1) String.format("%.1f", settingsItem.slideValue.value) else String.format("%.0f", settingsItem.slideValue.value),
                                         fontSize = 20.sp,
                                         color = white,
                                         fontFamily = myFont,
                                         fontWeight = FontWeight.Bold,
-                                        modifier = Modifier.align(Alignment.CenterEnd).offset(x = (-30).dp)
+                                        modifier = Modifier
+                                            .align(Alignment.CenterEnd)
+                                            .offset(x = (-30).dp)
                                     )
-                                }
-                                SettingsUtil.Type.Button -> {
-
                                 }
                             }
                         }
@@ -118,63 +123,10 @@ fun Settings(navController: NavController, gameData: GameData) {
         }
     }
     DrawReturnButton(offsetY = (-50).dp) {
-        navController.popBackStack()
-    }
-}
-
-@Composable
-fun DrawSwitch(
-    checkedText: String = "ON",
-    uncheckedText: String = "OFF",
-    switchON: MutableState<Boolean>,
-    onClick: (Boolean) -> Unit
-) {
-    val checkedTrackColor by remember { mutableStateOf(Color(0xFF35898F)) }
-    val uncheckedTrackColor by remember { mutableStateOf(Color(0xFFe0e0e0)) }
-    val animatePosition = animateFloatAsState(
-        targetValue = if (switchON.value) with(LocalDensity.current) { 26.dp.toPx() }
-        else with(LocalDensity.current) { 10.dp.toPx() }
-    )
-    Box(modifier = Modifier.size(screenWidthDp, 100.dp)) {
-        Canvas(
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .padding(0.dp, 0.dp, 30.dp, 0.dp)
-                .size(width = 36.dp, height = 20.dp)
-                .scale(scale = 1.5f)
-                .pointerInput(Unit) {
-                    detectTapGestures(
-                        onTap = {
-                            switchON.value = !switchON.value
-                            onClick(switchON.value)
-                        }
-                    )
-                }
-        ) {
-            drawRoundRect(
-                color = if (switchON.value) checkedTrackColor else uncheckedTrackColor,
-                cornerRadius = CornerRadius(x = 10.dp.toPx(), y = 10.dp.toPx()),
-                style = Stroke(width = 2.dp.toPx())
-            )
-            drawCircle(
-                color = if (switchON.value) checkedTrackColor else uncheckedTrackColor,
-                radius = 6.dp.toPx(),
-                center = Offset(
-                    x = animatePosition.value,
-                    y = size.height / 2
-                )
-            )
+        if (SystemClock.elapsedRealtime() - lastClickTime > 2000L) {
+            lastClickTime = SystemClock.elapsedRealtime()
+            navController.popBackStack()
         }
-        Text(
-            text = if (switchON.value) checkedText else uncheckedText,
-            fontSize = 20.sp,
-            color = white,
-            fontFamily = myFont,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .padding(0.dp, 65.dp, 30.dp, 0.dp)
-        )
     }
 }
 
@@ -183,7 +135,6 @@ data class SettingsUtil(var initialized: Boolean = false) {
     private val facialSettings: MutableList<SettingsItem> = emptyList<SettingsItem>().toMutableList()
 
     enum class Type {
-        Button,
         Slider,
         Switch
     }
@@ -197,12 +148,8 @@ data class SettingsUtil(var initialized: Boolean = false) {
         //Switch
         var onText: String = "On", var offText: String = "Off",
     ) {
-        val value = mutableStateOf(0f)
-        val switchOn = mutableStateOf(false)
-        //button
-        fun onClick() {
-
-        }
+        var slideValue = mutableStateOf(0f)
+        var switchOn = mutableStateOf(false)
     }
 
     fun getSectionItems(section: String): List<SettingsItem> {
@@ -221,78 +168,58 @@ data class SettingsUtil(var initialized: Boolean = false) {
             type = Type.Switch,
             onText = "Yes", offText = "No"
         )
+        s.switchOn = showCameraSettings
         cameraSettings.add(s)
         s = SettingsItem(
             title = "Rotation",
             type = Type.Slider,
             interval = 90f, min = 0f, max = 360f
         )
+        s.slideValue = cameraRotationSettings
         cameraSettings.add(s)
         s = SettingsItem(
             title = "Outer Scale",
             type = Type.Slider,
-            interval = 0.1f, min = 0.5f, max = 2f
+            interval = 0.1f, min = 0.5f, max = 1.5f
         )
+        s.slideValue = cameraOutScaleSettings
         cameraSettings.add(s)
         s = SettingsItem(
             title = "Inner Scale",
             type = Type.Slider,
-            interval = 0.1f, min = 0.5f, max = 2f
+            interval = 0.1f, min = 0.5f, max = 1.5f
         )
+        s.slideValue = cameraInScaleSettings
         cameraSettings.add(s)
         s = SettingsItem(
             title = "Facing",
             type = Type.Switch,
             onText = "Front", offText = "Back"
         )
-        cameraSettings.add(s)
-        s = SettingsItem(
-            title = "Position",
-            type = Type.Button,
-        )
-        cameraSettings.add(s)
-        s = SettingsItem(
-            title = "Permission",
-            type = Type.Button,
-        )
+        s.switchOn = lensFacing
         cameraSettings.add(s)
         s = SettingsItem(
             title = "Left Eye Sensitivity",
             type = Type.Slider,
             interval = 0.1f, min = 0f, max = 1f
         )
+        s.slideValue = faceLeftSensitivity
         facialSettings.add(s)
         s = SettingsItem(
             title = "Right Eye Sensitivity",
             type = Type.Slider,
             interval = 0.1f, min = 0f, max = 1f
         )
+        s.slideValue = faceRightSensitivity
         facialSettings.add(s)
         s = SettingsItem(
             title = "Smiling Sensitivity",
             type = Type.Slider,
             interval = 0.1f, min = 0f, max = 1f
         )
+        s.slideValue = faceSmileSensitivity
         facialSettings.add(s)
         initialized = true
     }
 
 }
-
-/*
-Camera settings:
-    show camera (switch)
-    rotation (slider) 0 - 360
-    outer scale (float slider) 1 - 2
-    inner scale (float slider) 1 - 2
-    facing (switch)
-    position (button -> then drag)
-    get permission (button)
-Facial Detection Sensitivity:
-    Left Eye sensitivity (float slider) 0 - 1
-    right Eye sensitivity (float slider) 0 - 1
-    Smiling sensitivity (float slider) 0 - 1
-General:
-    sound (slider) 0 - 100
-    exit (button)
- */

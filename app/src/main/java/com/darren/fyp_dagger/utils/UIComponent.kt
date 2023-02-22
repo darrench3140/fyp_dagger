@@ -11,8 +11,10 @@ import androidx.camera.view.PreviewView
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Text
@@ -23,11 +25,16 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -69,10 +76,11 @@ fun DrawCamera() {
                     .size(130.dp)
                     .align(Alignment.BottomEnd)
                     .offset((-25).dp + cameraOffset.value, (-25).dp)
-                    .rotate(-90f)
+                    .rotate(-90f + cameraRotationSettings.value)
+                    .scale(cameraOutScaleSettings.value)
                     .clip(CircleShape)
-                    .scale(1.5f)
-                    .alpha(cameraAlpha.value),
+                    .scale(1.5f * cameraInScaleSettings.value)
+                    .alpha(if (showCameraSettings.value) cameraAlpha.value else 0f),
                 factory = { ctx ->
                     val previewView = PreviewView(ctx).apply {
                         implementationMode = PreviewView.ImplementationMode.COMPATIBLE
@@ -86,7 +94,7 @@ fun DrawCamera() {
                             it.setSurfaceProvider(previewView.surfaceProvider)
                         }
                         val cameraSelector = CameraSelector.Builder()
-                            .requireLensFacing(lensFacing.value)
+                            .requireLensFacing(if (lensFacing.value) CameraSelector.LENS_FACING_FRONT else CameraSelector.LENS_FACING_BACK)
                             .build()
                         val imageAnalysis = ImageAnalysis.Builder()
                             .setTargetResolution(Size(previewView.width, previewView.height))
@@ -384,6 +392,62 @@ fun DrawTopFruit() {
             modifier = Modifier
                 .size(30.dp)
                 .offset(x = (-20).dp)
+        )
+    }
+}
+
+@Composable
+fun DrawSwitch(
+    checkedText: String = "ON",
+    uncheckedText: String = "OFF",
+    switchON: MutableState<Boolean>,
+    onClick: () -> Unit
+) {
+    val checkedTrackColor by remember { mutableStateOf(Color(0xFF35898F)) }
+    val uncheckedTrackColor by remember { mutableStateOf(Color(0xFFe0e0e0)) }
+    val animatePosition = animateFloatAsState(
+        targetValue = if (switchON.value) with(LocalDensity.current) { 26.dp.toPx() }
+        else with(LocalDensity.current) { 10.dp.toPx() }
+    )
+    Box(modifier = Modifier.size(screenWidthDp, 100.dp)) {
+        Canvas(
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .padding(0.dp, 0.dp, 30.dp, 0.dp)
+                .size(width = 36.dp, height = 20.dp)
+                .scale(scale = 1.5f)
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onTap = {
+                            switchON.value = !switchON.value
+                            onClick()
+                        }
+                    )
+                }
+        ) {
+            drawRoundRect(
+                color = if (switchON.value) checkedTrackColor else uncheckedTrackColor,
+                cornerRadius = CornerRadius(x = 10.dp.toPx(), y = 10.dp.toPx()),
+                style = Stroke(width = 2.dp.toPx())
+            )
+            drawCircle(
+                color = if (switchON.value) checkedTrackColor else uncheckedTrackColor,
+                radius = 6.dp.toPx(),
+                center = Offset(
+                    x = animatePosition.value,
+                    y = size.height / 2
+                )
+            )
+        }
+        Text(
+            text = if (switchON.value) checkedText else uncheckedText,
+            fontSize = 20.sp,
+            color = white,
+            fontFamily = myFont,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .padding(0.dp, 65.dp, 30.dp, 0.dp)
         )
     }
 }
