@@ -219,6 +219,13 @@ data class SettingsUtil(var initialized: Boolean = false) {
         )
         s.slideValue = faceSmileSensitivity
         facialSettings.add(s)
+        s = SettingsItem(
+            title = "In Game Controls Helper",
+            type = Type.Switch,
+            onText = "Text", offText = "Icons"
+        )
+        s.switchOn = iconHelperOption
+        facialSettings.add(s)
         initialized = true
     }
 

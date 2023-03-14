@@ -122,48 +122,63 @@ fun DrawCamera() {
 
 @Composable
 fun DrawControllerIcons() {
-    if (gameDifficulty.value >= 2) {
-        val iconAlpha = animateFloatAsState(targetValue = if (gameState.value.isOver() || gameState.value.isWipe() || !cameraReady.value) 0f else 1f, animationSpec = if (!gameState.value.isWipe()) tween(1000) else tween(0))
-        Box(modifier = Modifier
-            .fillMaxSize()
-            .alpha(iconAlpha.value)) {
-            Image( //Left Eye
-                painter = painterResource(id = R.drawable.eye_open),
-                contentDescription = "left eye icon",
+    val iconAlpha = animateFloatAsState(targetValue = if (gameState.value.isOver() || gameState.value.isWipe() || !cameraReady.value) 0f else 1f, animationSpec = if (!gameState.value.isWipe()) tween(1000) else tween(0))
+    if (iconHelperOption.value) {
+        Box(modifier = Modifier.fillMaxSize().alpha(iconAlpha.value)) {
+            Text(
+                text = if (gameMode.value.isTap()) "TAP" else if (gameMode.value.isRight()) "RIGHT EYE" else if (gameMode.value.isLeft()) "LEFT EYE" else if (gameMode.value.isSmile()) "SMILE" else "BOTH EYES",
+                fontSize = 30.sp,
+                color = white,
+                fontFamily = myFont,
                 modifier = Modifier
                     .align(Alignment.Center)
-                    .size(50.dp)
-                    .offset(x = (-30).dp, y = 60.dp),
-                alpha = if (gameMode.value.isLeft() || gameMode.value.isBoth()) 1f else 0.5f
+                    .offset(y = 80.dp)
+                    .alpha(0.8f)
             )
-            Image( //Right Eye
-                painter = painterResource(id = R.drawable.eye_open),
-                contentDescription = "right eye icon",
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .size(50.dp)
-                    .offset(x = 30.dp, y = 60.dp),
-                alpha = if (gameMode.value.isRight() || gameMode.value.isBoth()) 1f else 0.5f
-            )
-            if (gameDifficulty.value > 2) {
-                Image( //Smile
-                    painter = painterResource(id = R.drawable.smile),
-                    contentDescription = "smile icon",
+        }
+    } else {
+        if (gameDifficulty.value >= 2) {
+            Box(modifier = Modifier
+                .fillMaxSize()
+                .alpha(iconAlpha.value)) {
+                Image( //Left Eye
+                    painter = painterResource(id = R.drawable.eye_open),
+                    contentDescription = "left eye icon",
                     modifier = Modifier
                         .align(Alignment.Center)
                         .size(50.dp)
-                        .offset(x = (-30).dp, y = 120.dp),
-                    alpha = if (gameMode.value.isSmile()) 1f else 0.5f
+                        .offset(x = (-30).dp, y = 60.dp),
+                    alpha = if (gameMode.value.isLeft() || gameMode.value.isBoth()) 1f else 0.5f
                 )
-                Image(
-                    painter = painterResource(id = R.drawable.tap),
-                    contentDescription = "tap icon",
+                Image( //Right Eye
+                    painter = painterResource(id = R.drawable.eye_open),
+                    contentDescription = "right eye icon",
                     modifier = Modifier
                         .align(Alignment.Center)
                         .size(50.dp)
-                        .offset(x = 30.dp, y = 120.dp),
-                    alpha = if (gameMode.value.isTap()) 1f else 0.5f
+                        .offset(x = 30.dp, y = 60.dp),
+                    alpha = if (gameMode.value.isRight() || gameMode.value.isBoth()) 1f else 0.5f
                 )
+                if (gameDifficulty.value > 2) {
+                    Image( //Smile
+                        painter = painterResource(id = R.drawable.smile),
+                        contentDescription = "smile icon",
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .size(50.dp)
+                            .offset(x = (-30).dp, y = 120.dp),
+                        alpha = if (gameMode.value.isSmile()) 1f else 0.5f
+                    )
+                    Image(
+                        painter = painterResource(id = R.drawable.tap),
+                        contentDescription = "tap icon",
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .size(50.dp)
+                            .offset(x = 30.dp, y = 120.dp),
+                        alpha = if (gameMode.value.isTap()) 1f else 0.5f
+                    )
+                }
             }
         }
     }
