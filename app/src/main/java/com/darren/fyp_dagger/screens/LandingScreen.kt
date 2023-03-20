@@ -17,7 +17,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.darren.fyp_dagger.*
 import com.darren.fyp_dagger.utils.*
 import kotlinx.coroutines.delay
 
@@ -103,7 +102,7 @@ fun LandingScreen(navController: NavHostController) {
                 lastClickTime = SystemClock.elapsedRealtime()
             }
         }
-        DrawGameModeItem(buttonText = "SMILE", descriptionText = "Smile to shoot", rewardText = "x2", offsetY = screenHeightDp * 0.1f) {
+        DrawGameModeItem(buttonText = "SMILE", descriptionText = "Smile to shoot", rewardText = "x2", offsetY = 0.dp) {
             if (SystemClock.elapsedRealtime() - lastClickTime > 500L) {
                 if (PermissionUtil.hasPermission()) {
                     gameDifficulty.value = 1
@@ -114,7 +113,7 @@ fun LandingScreen(navController: NavHostController) {
                 } else PermissionUtil.requestCameraPermission()
             }
         }
-        DrawGameModeItem(buttonText = "BLINK", descriptionText = "Blink both eyes to shoot", rewardText = "x3", offsetY = screenHeightDp * 0.25f) {
+        DrawGameModeItem(buttonText = "BLINK", descriptionText = "Blink both eyes to shoot", rewardText = "x3", offsetY = screenHeightDp * 0.18f) {
             if (SystemClock.elapsedRealtime() - lastClickTime > 500L) {
                 if (PermissionUtil.hasPermission()) {
                     gameDifficulty.value = 2
@@ -125,16 +124,6 @@ fun LandingScreen(navController: NavHostController) {
                 } else PermissionUtil.requestCameraPermission()
             }
         }
-//        DrawGameModeItem(buttonText = "Crazy", descriptionText = "CONTROL: RANDOM", rewardText = "x4", offsetY = screenHeightDp * 0.25f) {
-//            if (SystemClock.elapsedRealtime() - lastClickTime > 500L) {
-//                if (PermissionUtil.hasPermission()) {
-//                    gameDifficulty.value = 3
-//                    gameState.value.setWipe()
-//                    navController.navigate("game_screen")
-//                    lastClickTime = SystemClock.elapsedRealtime()
-//                } else PermissionUtil.requestCameraPermission()
-//            }
-//        }
         DrawReturnButton(offsetY = (-50).dp) {
             showLevelMenu.value = false
         }

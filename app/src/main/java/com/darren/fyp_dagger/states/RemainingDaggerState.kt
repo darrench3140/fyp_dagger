@@ -6,6 +6,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.dp
 
 data class RemainingDaggerState(val image: ImageBitmap, val remainingDaggers: MutableState<Int>, val uiAlpha: State<Float>) {
     private val imgWidth = 30
@@ -22,7 +23,7 @@ data class RemainingDaggerState(val image: ImageBitmap, val remainingDaggers: Mu
                 image = image,
                 srcOffset = IntOffset.Zero,
                 srcSize = imgSize,
-                dstOffset = IntOffset((size.width * 0.05).toInt(), (size.height * 0.95).toInt() - it * 80),
+                dstOffset = IntOffset(45.dp.toPx().toInt(), (size.height * 0.88).toInt() - it * 80),
                 dstSize = imgSize * 3,
                 alpha = uiAlpha.value
             )

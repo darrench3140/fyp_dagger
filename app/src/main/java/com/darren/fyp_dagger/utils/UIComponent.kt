@@ -564,12 +564,6 @@ fun DrawScoreBoard(
                     navController.navigate("shop_screen")
                 }
             }
-            DrawReturnButton(offsetY = 50.dp, alpha = buttonAlpha) {
-                if (SystemClock.elapsedRealtime() - lastClickTime > 2000L) {
-                    lastClickTime = SystemClock.elapsedRealtime()
-                    navController.popBackStack()
-                }
-            }
         }
     }
 }

@@ -46,7 +46,7 @@ fun Settings(navController: NavController, gameData: GameData) {
                 .offset(y = -screenHeightDp.times(0.3f))
                 .size(screenWidthDp.div(4.935f))
         )
-        val sections = listOf("Facial Detection", "Camera")
+        val sections = listOf("Game", "Camera")
         Box(modifier = Modifier
             .align(Alignment.Center)
             .offset(y = screenHeightDp.times(0.16f) - 45.dp)
@@ -132,7 +132,7 @@ fun Settings(navController: NavController, gameData: GameData) {
 
 data class SettingsUtil(var initialized: Boolean = false) {
     private val cameraSettings: MutableList<SettingsItem> = emptyList<SettingsItem>().toMutableList()
-    private val facialSettings: MutableList<SettingsItem> = emptyList<SettingsItem>().toMutableList()
+    private val gameSettings: MutableList<SettingsItem> = emptyList<SettingsItem>().toMutableList()
 
     enum class Type {
         Slider,
@@ -155,14 +155,14 @@ data class SettingsUtil(var initialized: Boolean = false) {
     fun getSectionItems(section: String): List<SettingsItem> {
         return when(section) {
             "Camera" -> cameraSettings
-            "Facial Detection" -> facialSettings
+            "Game" -> gameSettings
             else -> emptyList()
         }
     }
 
     fun initializeSettings() {
         cameraSettings.clear()
-        facialSettings.clear()
+        gameSettings.clear()
         var s = SettingsItem(
             title = "Show Camera in Game",
             type = Type.Switch,
@@ -204,22 +204,28 @@ data class SettingsUtil(var initialized: Boolean = false) {
             interval = 0.1f, min = 0f, max = 1f
         )
         s.slideValue = faceLeftSensitivity
-        facialSettings.add(s)
+        gameSettings.add(s)
         s = SettingsItem(
             title = "Right Eye Sensitivity",
             type = Type.Slider,
             interval = 0.1f, min = 0f, max = 1f
         )
         s.slideValue = faceRightSensitivity
-        facialSettings.add(s)
+        gameSettings.add(s)
         s = SettingsItem(
             title = "Smiling Sensitivity",
             type = Type.Slider,
             interval = 0.1f, min = 0f, max = 1f
         )
         s.slideValue = faceSmileSensitivity
-        facialSettings.add(s)
+        gameSettings.add(s)
+        s = SettingsItem(
+            title = "In Game Text Helper",
+            type = Type.Switch,
+            onText = "Enabled", offText = "Disabled"
+        )
+        s.switchOn = textHelperOption
+        gameSettings.add(s)
         initialized = true
     }
-
 }

@@ -1,19 +1,18 @@
 package com.darren.fyp_dagger.screens
 
+import android.os.SystemClock
 import android.util.Log
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.darren.fyp_dagger.R
 import com.darren.fyp_dagger.states.DaggerState
@@ -26,14 +25,21 @@ import kotlinx.coroutines.delay
 @Composable
 fun GameScreen(navController: NavHostController, gameData: GameData) {
     //UI
+    var lastClickTime by remember { mutableStateOf(0L) }
     DrawBackground()
     GameConsole(navController, gameData)
-    //Top Bar
+    //Top and bottom Bar
     DrawTopBar()
     DrawTopFruit()
+    DrawReturnButton(offsetY = (-50).dp) {
+        if (SystemClock.elapsedRealtime() - lastClickTime > 500L) {
+            navController.popBackStack()
+            lastClickTime = SystemClock.elapsedRealtime()
+        }
+    }
     //Camera
     DrawCamera()
-    DrawControllerIcons()
+    if (textHelperOption.value) DrawControllerIcons()
 }
 
 @Composable
@@ -112,43 +118,10 @@ fun GameConsole(navController: NavHostController, gameData: GameData) {
             }
         }
     }
-    // Special Handling for blink and crazy mode
-//    LaunchedEffect(gameDifficulty.value) {
-//        showCamera.value = gameDifficulty.value > 0
-//        if (gameDifficulty.value == 3) { // Crazy Mode Handling
-//            while(true) {
-//                when ((1..5).random()) {
-//                    1 -> if (!gameMode.value.isTap()) gameMode.value.setTap() else gameMode.value.setSmile()
-//                    2 -> if (!gameMode.value.isSmile()) gameMode.value.setSmile() else gameMode.value.setLeft()
-//                    3 -> if (!gameMode.value.isLeft()) gameMode.value.setLeft() else gameMode.value.setRight()
-//                    4 -> if (!gameMode.value.isRight()) gameMode.value.setRight() else gameMode.value.setBoth()
-//                    5 -> if (!gameMode.value.isBoth()) gameMode.value.setBoth() else gameMode.value.setTap()
-//                }
-//                delay((3..7).random() * 1000L)
-//            }
-//        } else if (gameDifficulty.value == 2) {
-//            while(true) {
-//                when ((1..3).random()) {
-//                    1 -> if (!gameMode.value.isLeft()) gameMode.value.setLeft() else gameMode.value.setRight()
-//                    2 -> if (!gameMode.value.isRight()) gameMode.value.setRight() else gameMode.value.setBoth()
-//                    3 -> if (!gameMode.value.isBoth()) gameMode.value.setBoth() else gameMode.value.setLeft()
-//                }
-//                delay((3..7).random() * 1000L)
-//            }
-//        }
-//    }
     // Smile Control
     LaunchedEffect(gameMode.value.isSmile() && smileP.value > faceSmileSensitivity.value) {
         if (gameMode.value.isSmile() && smileP.value > 0.5f && gameState.value.isRunning()) gameState.value.setShooting()
     }
-    // Left Eye Control
-//    LaunchedEffect(gameMode.value.isLeft() && leftP.value < 0.2f && rightP.value > 0.5) {
-//        if (gameMode.value.isLeft() && leftP.value < 0.2f && rightP.value > 0.5 && gameState.value.isRunning()) gameState.value.setShooting()
-//    }
-    // Right Eye Control
-//    LaunchedEffect(gameMode.value.isRight() && rightP.value < 0.2f && leftP.value > 0.5) {
-//        if (gameMode.value.isRight() && rightP.value < 0.2f && leftP.value > 0.5 && gameState.value.isRunning()) gameState.value.setShooting()
-//    }
     // Both Eye Control
     LaunchedEffect(gameMode.value.isBoth() && leftP.value < faceLeftSensitivity.value && rightP.value < faceRightSensitivity.value) {
         if (gameMode.value.isBoth() && leftP.value < 0.2f && rightP.value < 0.2f && gameState.value.isRunning()) gameState.value.setShooting()
