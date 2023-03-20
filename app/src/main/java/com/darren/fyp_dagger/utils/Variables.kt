@@ -40,7 +40,6 @@ val lensFacing : MutableState<Boolean> = mutableStateOf(false)
 val faceLeftSensitivity: MutableState<Float> = mutableStateOf(0.2f)
 val faceRightSensitivity: MutableState<Float> = mutableStateOf(0.2f)
 val faceSmileSensitivity: MutableState<Float> = mutableStateOf(0.5f)
-val iconHelperOption: MutableState<Boolean> = mutableStateOf(false)
 
 //Utils
 val spinnerUtil = mutableStateOf(SpinnerUtil())

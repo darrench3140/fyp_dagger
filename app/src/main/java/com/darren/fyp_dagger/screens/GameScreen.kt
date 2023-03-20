@@ -77,6 +77,7 @@ fun GameConsole(navController: NavHostController, gameData: GameData) {
     LaunchedEffect(gameState.value) {
         if (gameState.value.isWipe()) {
             gameLevel.value = 1
+            showCamera.value = gameDifficulty.value != 0
             cameraReady.value = false
             showScoreBoardButton.value = false
             delay(100) //Delay for score board scores to show longer
@@ -112,44 +113,44 @@ fun GameConsole(navController: NavHostController, gameData: GameData) {
         }
     }
     // Special Handling for blink and crazy mode
-    LaunchedEffect(gameDifficulty.value) {
-        showCamera.value = gameDifficulty.value > 0
-        if (gameDifficulty.value == 3) { // Crazy Mode Handling
-            while(true) {
-                when ((1..5).random()) {
-                    1 -> if (!gameMode.value.isTap()) gameMode.value.setTap() else gameMode.value.setSmile()
-                    2 -> if (!gameMode.value.isSmile()) gameMode.value.setSmile() else gameMode.value.setLeft()
-                    3 -> if (!gameMode.value.isLeft()) gameMode.value.setLeft() else gameMode.value.setRight()
-                    4 -> if (!gameMode.value.isRight()) gameMode.value.setRight() else gameMode.value.setBoth()
-                    5 -> if (!gameMode.value.isBoth()) gameMode.value.setBoth() else gameMode.value.setTap()
-                }
-                delay((3..7).random() * 1000L)
-            }
-        } else if (gameDifficulty.value == 2) {
-            while(true) {
-                when ((1..3).random()) {
-                    1 -> if (!gameMode.value.isLeft()) gameMode.value.setLeft() else gameMode.value.setRight()
-                    2 -> if (!gameMode.value.isRight()) gameMode.value.setRight() else gameMode.value.setBoth()
-                    3 -> if (!gameMode.value.isBoth()) gameMode.value.setBoth() else gameMode.value.setLeft()
-                }
-                delay((3..7).random() * 1000L)
-            }
-        }
-    }
+//    LaunchedEffect(gameDifficulty.value) {
+//        showCamera.value = gameDifficulty.value > 0
+//        if (gameDifficulty.value == 3) { // Crazy Mode Handling
+//            while(true) {
+//                when ((1..5).random()) {
+//                    1 -> if (!gameMode.value.isTap()) gameMode.value.setTap() else gameMode.value.setSmile()
+//                    2 -> if (!gameMode.value.isSmile()) gameMode.value.setSmile() else gameMode.value.setLeft()
+//                    3 -> if (!gameMode.value.isLeft()) gameMode.value.setLeft() else gameMode.value.setRight()
+//                    4 -> if (!gameMode.value.isRight()) gameMode.value.setRight() else gameMode.value.setBoth()
+//                    5 -> if (!gameMode.value.isBoth()) gameMode.value.setBoth() else gameMode.value.setTap()
+//                }
+//                delay((3..7).random() * 1000L)
+//            }
+//        } else if (gameDifficulty.value == 2) {
+//            while(true) {
+//                when ((1..3).random()) {
+//                    1 -> if (!gameMode.value.isLeft()) gameMode.value.setLeft() else gameMode.value.setRight()
+//                    2 -> if (!gameMode.value.isRight()) gameMode.value.setRight() else gameMode.value.setBoth()
+//                    3 -> if (!gameMode.value.isBoth()) gameMode.value.setBoth() else gameMode.value.setLeft()
+//                }
+//                delay((3..7).random() * 1000L)
+//            }
+//        }
+//    }
     // Smile Control
-    LaunchedEffect(gameMode.value.isSmile() && smileP.value > 0.5f) {
+    LaunchedEffect(gameMode.value.isSmile() && smileP.value > faceSmileSensitivity.value) {
         if (gameMode.value.isSmile() && smileP.value > 0.5f && gameState.value.isRunning()) gameState.value.setShooting()
     }
     // Left Eye Control
-    LaunchedEffect(gameMode.value.isLeft() && leftP.value < 0.2f && rightP.value > 0.5) {
-        if (gameMode.value.isLeft() && leftP.value < 0.2f && rightP.value > 0.5 && gameState.value.isRunning()) gameState.value.setShooting()
-    }
+//    LaunchedEffect(gameMode.value.isLeft() && leftP.value < 0.2f && rightP.value > 0.5) {
+//        if (gameMode.value.isLeft() && leftP.value < 0.2f && rightP.value > 0.5 && gameState.value.isRunning()) gameState.value.setShooting()
+//    }
     // Right Eye Control
-    LaunchedEffect(gameMode.value.isRight() && rightP.value < 0.2f && leftP.value > 0.5) {
-        if (gameMode.value.isRight() && rightP.value < 0.2f && leftP.value > 0.5 && gameState.value.isRunning()) gameState.value.setShooting()
-    }
+//    LaunchedEffect(gameMode.value.isRight() && rightP.value < 0.2f && leftP.value > 0.5) {
+//        if (gameMode.value.isRight() && rightP.value < 0.2f && leftP.value > 0.5 && gameState.value.isRunning()) gameState.value.setShooting()
+//    }
     // Both Eye Control
-    LaunchedEffect(gameMode.value.isBoth() && leftP.value < 0.2f && rightP.value < 0.2f) {
+    LaunchedEffect(gameMode.value.isBoth() && leftP.value < faceLeftSensitivity.value && rightP.value < faceRightSensitivity.value) {
         if (gameMode.value.isBoth() && leftP.value < 0.2f && rightP.value < 0.2f && gameState.value.isRunning()) gameState.value.setShooting()
     }
     // spin speed controller coroutine

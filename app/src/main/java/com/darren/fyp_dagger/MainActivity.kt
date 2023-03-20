@@ -43,7 +43,7 @@ class MainActivity : ComponentActivity() {
             val navController = rememberAnimatedNavController()
             AnimatedNavHost(
                 navController = navController,
-                startDestination = "landing_screen"
+                startDestination = "loading_screen"
             ) {
                 composable(
                     route = "loading_screen",

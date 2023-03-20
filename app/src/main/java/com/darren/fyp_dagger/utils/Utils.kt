@@ -38,7 +38,6 @@ class GameData(private val context: Context) {
         val FACE_LEFT = floatPreferencesKey("face_left")
         val FACE_RIGHT = floatPreferencesKey("face_right")
         val FACE_SMILE = floatPreferencesKey("face_smile")
-        val ICON_HELPER = booleanPreferencesKey("icon_helper_options")
     }
     val getMaxScore: Flow<Int> = context.dataStore.data.map { it[MAX_SCORE] ?: 0 }
     val getFruitCount: Flow<Int> = context.dataStore.data.map { it[FRUIT_COUNT] ?: 0 }
@@ -52,7 +51,6 @@ class GameData(private val context: Context) {
     val getFaceLeft: Flow<Float> = context.dataStore.data.map { it[FACE_LEFT] ?: 0.2f }
     val getFaceRight: Flow<Float> = context.dataStore.data.map { it[FACE_RIGHT] ?: 0.2f }
     val getFaceSmile: Flow<Float> = context.dataStore.data.map { it[FACE_SMILE] ?: 0.5f }
-    val getIconHelper: Flow<Boolean> = context.dataStore.data.map { it[ICON_HELPER] ?: false }
     suspend fun saveSettings() { context.dataStore.edit {
         it[SHOW_CAMERA] = showCameraSettings.value
         it[CAMERA_ROTATION] = cameraRotationSettings.value
@@ -62,7 +60,6 @@ class GameData(private val context: Context) {
         it[FACE_LEFT] = faceLeftSensitivity.value
         it[FACE_RIGHT] = faceRightSensitivity.value
         it[FACE_SMILE] = faceSmileSensitivity.value
-        it[ICON_HELPER] = iconHelperOption.value
     }}
     suspend fun saveMaxScore(score: Int) { context.dataStore.edit { it[MAX_SCORE] = score } }
     suspend fun saveFruitCount(count: Int) { context.dataStore.edit { it[FRUIT_COUNT] = count }}
@@ -103,7 +100,6 @@ object GameUtil {
         faceLeftSensitivity.value = gameData.getFaceLeft.collectAsState(initial = 0.2f).value
         faceRightSensitivity.value = gameData.getFaceRight.collectAsState(initial = 0.2f).value
         faceSmileSensitivity.value = gameData.getFaceSmile.collectAsState(initial = 0.5f).value
-        iconHelperOption.value = gameData.getIconHelper.collectAsState(initial = false).value
         daggerUtil.value.Init(gameData.getDaggerInUseID.collectAsState(initial = 1).value)
         spinnerUtil.value.Init()
         return gameData

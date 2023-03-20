@@ -1,5 +1,6 @@
 package com.darren.fyp_dagger.utils
 
+import android.util.Log
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import androidx.compose.runtime.MutableState
@@ -21,7 +22,7 @@ class FaceDetectionAnalyzer(
                     if (face.smilingProbability != null) smileP.value = face.smilingProbability!!
                     if (face.leftEyeOpenProbability != null) leftP.value = if (!lensFacing.value) face.rightEyeOpenProbability!! else face.leftEyeOpenProbability!!
                     if (face.rightEyeOpenProbability != null) rightP.value = if (!lensFacing.value) face.leftEyeOpenProbability!! else face.rightEyeOpenProbability!!
-//                    Log.d("game", "face values: ${leftP.value}, ${rightP.value}, ${smileP.value}")
+                    Log.d("gameValues", "face values: ${leftP.value}, ${rightP.value}, ${smileP.value}")
                     break
                 }
                 imageProxy.close()

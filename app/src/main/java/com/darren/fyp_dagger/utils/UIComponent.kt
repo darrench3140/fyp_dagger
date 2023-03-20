@@ -122,65 +122,18 @@ fun DrawCamera() {
 
 @Composable
 fun DrawControllerIcons() {
-    val iconAlpha = animateFloatAsState(targetValue = if (gameState.value.isOver() || gameState.value.isWipe() || !cameraReady.value) 0f else 1f, animationSpec = if (!gameState.value.isWipe()) tween(1000) else tween(0))
-    if (iconHelperOption.value) {
-        Box(modifier = Modifier.fillMaxSize().alpha(iconAlpha.value)) {
-            Text(
-                text = if (gameMode.value.isTap()) "TAP" else if (gameMode.value.isRight()) "RIGHT EYE" else if (gameMode.value.isLeft()) "LEFT EYE" else if (gameMode.value.isSmile()) "SMILE" else "BOTH EYES",
-                fontSize = 30.sp,
-                color = white,
-                fontFamily = myFont,
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .offset(y = 80.dp)
-                    .alpha(0.8f)
-            )
-        }
-    } else {
-        if (gameDifficulty.value >= 2) {
-            Box(modifier = Modifier
-                .fillMaxSize()
-                .alpha(iconAlpha.value)) {
-                Image( //Left Eye
-                    painter = painterResource(id = R.drawable.eye_open),
-                    contentDescription = "left eye icon",
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .size(50.dp)
-                        .offset(x = (-30).dp, y = 60.dp),
-                    alpha = if (gameMode.value.isLeft() || gameMode.value.isBoth()) 1f else 0.5f
-                )
-                Image( //Right Eye
-                    painter = painterResource(id = R.drawable.eye_open),
-                    contentDescription = "right eye icon",
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .size(50.dp)
-                        .offset(x = 30.dp, y = 60.dp),
-                    alpha = if (gameMode.value.isRight() || gameMode.value.isBoth()) 1f else 0.5f
-                )
-                if (gameDifficulty.value > 2) {
-                    Image( //Smile
-                        painter = painterResource(id = R.drawable.smile),
-                        contentDescription = "smile icon",
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .size(50.dp)
-                            .offset(x = (-30).dp, y = 120.dp),
-                        alpha = if (gameMode.value.isSmile()) 1f else 0.5f
-                    )
-                    Image(
-                        painter = painterResource(id = R.drawable.tap),
-                        contentDescription = "tap icon",
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .size(50.dp)
-                            .offset(x = 30.dp, y = 120.dp),
-                        alpha = if (gameMode.value.isTap()) 1f else 0.5f
-                    )
-                }
-            }
-        }
+    val iconAlpha = animateFloatAsState(targetValue = if (gameState.value.isOver() || gameState.value.isWipe()) 0f else 1f, animationSpec = if (!gameState.value.isWipe()) tween(1000) else tween(0))
+    Box(modifier = Modifier.fillMaxSize().alpha(iconAlpha.value)) {
+        Text(
+            text = if (gameMode.value.isTap()) "TAP" else if (gameMode.value.isSmile()) "SMILE" else "BLINK",
+            fontSize = 30.sp,
+            color = white,
+            fontFamily = myFont,
+            modifier = Modifier
+                .align(Alignment.Center)
+                .offset(y = 80.dp)
+                .alpha(0.8f)
+        )
     }
 }
 
@@ -262,7 +215,7 @@ fun DrawFruit(modifier: Modifier) {
 fun DrawGameModeItem(buttonText: String, descriptionText: String, rewardText: String, offsetY: Dp, onClick: () -> Unit) {
     Box(modifier = Modifier
         .fillMaxSize()
-        .alpha(if (buttonText != "Easy" && !PermissionUtil.hasPermission()) 0.5f else 1f)) {
+        .alpha(if (buttonText != "TAP" && !PermissionUtil.hasPermission()) 0.5f else 1f)) {
         DrawButton(text = buttonText, offsetY = offsetY, id = R.drawable.button1) {
             onClick()
         }
@@ -294,9 +247,9 @@ fun DrawGameModeItem(buttonText: String, descriptionText: String, rewardText: St
                 .align(Alignment.Center)
                 .offset(y = offsetY + 45.dp)
         )
-        if (buttonText != "Easy") {
+        if (buttonText != "TAP") {
             Text(
-                text = "+ Level Up Bonus: " + when(buttonText) { "Normal" -> "2"; "Hard" -> "3"; else -> "5" },
+                text = "+ Level Up Bonus: " + when(buttonText) { "SMILE" -> "2"; else -> "3" },
                 fontSize = 15.sp,
                 color = white,
                 fontFamily = myFont,
