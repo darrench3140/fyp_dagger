@@ -93,7 +93,7 @@ fun LandingScreen(navController: NavHostController) {
                 .align(Alignment.Center)
                 .offset(y = -screenHeightDp * 0.3f)
         )
-        DrawGameModeItem(buttonText = "TAP", descriptionText = "Tap screen to shoot", rewardText = "x1", offsetY = -screenHeightDp * 0.2f) {
+        DrawGameModeItem(buttonText = "TAP", descriptionText = "Tap screen to shoot", rewardText = "x1", offsetY = -screenHeightDp * 0.18f) {
             if (SystemClock.elapsedRealtime() - lastClickTime > 500L) {
                 gameDifficulty.value = 0
                 gameMode.value.setTap()
@@ -102,7 +102,7 @@ fun LandingScreen(navController: NavHostController) {
                 lastClickTime = SystemClock.elapsedRealtime()
             }
         }
-        DrawGameModeItem(buttonText = "SMILE", descriptionText = "Smile to shoot", rewardText = "x2", offsetY = 0.dp) {
+        DrawGameModeItem(buttonText = "SMILE", descriptionText = "Smile to shoot", rewardText = "x2", offsetY = screenHeightDp * 0.05f) {
             if (SystemClock.elapsedRealtime() - lastClickTime > 500L) {
                 if (PermissionUtil.hasPermission()) {
                     gameDifficulty.value = 1
@@ -113,7 +113,7 @@ fun LandingScreen(navController: NavHostController) {
                 } else PermissionUtil.requestCameraPermission()
             }
         }
-        DrawGameModeItem(buttonText = "BLINK", descriptionText = "Blink both eyes to shoot", rewardText = "x3", offsetY = screenHeightDp * 0.18f) {
+        DrawGameModeItem(buttonText = "BLINK", descriptionText = "Blink both eyes to shoot", rewardText = "x3", offsetY = screenHeightDp * 0.23f) {
             if (SystemClock.elapsedRealtime() - lastClickTime > 500L) {
                 if (PermissionUtil.hasPermission()) {
                     gameDifficulty.value = 2

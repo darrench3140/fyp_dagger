@@ -225,19 +225,23 @@ fun DrawGameModeItem(buttonText: String, descriptionText: String, rewardText: St
         DrawFruit(modifier = Modifier
             .align(Alignment.Center)
             .offset(x = (-90).dp, y = offsetY))
-        DrawFruit(modifier = Modifier
-            .align(Alignment.Center)
-            .offset(x = 120.dp, y = offsetY)
-            .scale(2f))
-        Text(
-            text = rewardText,
-            fontSize = 25.sp,
-            color = Color(0xFFFEC868),
-            fontFamily = myFont,
-            modifier = Modifier
-                .align(Alignment.Center)
-                .offset(x = 150.dp, y = offsetY)
-        )
+        if (buttonText != "TAP") {
+            DrawFruit(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .offset(x = 120.dp, y = offsetY)
+                    .scale(2f)
+            )
+            Text(
+                text = rewardText,
+                fontSize = 25.sp,
+                color = Color(0xFFFEC868),
+                fontFamily = myFont,
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .offset(x = 150.dp, y = offsetY)
+            )
+        }
         Text(
             text = descriptionText,
             fontSize = 18.sp,

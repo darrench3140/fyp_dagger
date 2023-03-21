@@ -49,8 +49,8 @@ class GameData(private val context: Context) {
     val getCameraOutScale: Flow<Float> = context.dataStore.data.map { it[CAMERA_OUT_SCALE] ?: 1f }
     val getCameraInScale: Flow<Float> = context.dataStore.data.map { it[CAMERA_IN_SCALE] ?: 1f }
     val getCameraFacing: Flow<Boolean> = context.dataStore.data.map { it[CAMERA_FACING] ?: false }
-    val getFaceLeft: Flow<Float> = context.dataStore.data.map { it[FACE_LEFT] ?: 0.2f }
-    val getFaceRight: Flow<Float> = context.dataStore.data.map { it[FACE_RIGHT] ?: 0.2f }
+    val getFaceLeft: Flow<Float> = context.dataStore.data.map { it[FACE_LEFT] ?: 0.5f }
+    val getFaceRight: Flow<Float> = context.dataStore.data.map { it[FACE_RIGHT] ?: 0.5f }
     val getFaceSmile: Flow<Float> = context.dataStore.data.map { it[FACE_SMILE] ?: 0.5f }
     val getTextHelper: Flow<Boolean> = context.dataStore.data.map { it[TEXT_HELPER] ?: true }
     suspend fun saveSettings() { context.dataStore.edit {
@@ -100,8 +100,8 @@ object GameUtil {
         cameraOutScaleSettings.value = gameData.getCameraOutScale.collectAsState(initial = 1f).value
         cameraInScaleSettings.value = gameData.getCameraInScale.collectAsState(initial = 1f).value
         lensFacing.value = gameData.getCameraFacing.collectAsState(initial = false).value
-        faceLeftSensitivity.value = gameData.getFaceLeft.collectAsState(initial = 0.2f).value
-        faceRightSensitivity.value = gameData.getFaceRight.collectAsState(initial = 0.2f).value
+        faceLeftSensitivity.value = gameData.getFaceLeft.collectAsState(initial = 0.5f).value
+        faceRightSensitivity.value = gameData.getFaceRight.collectAsState(initial = 0.5f).value
         faceSmileSensitivity.value = gameData.getFaceSmile.collectAsState(initial = 0.5f).value
         textHelperOption.value = gameData.getTextHelper.collectAsState(initial = true).value
         daggerUtil.value.Init(gameData.getDaggerInUseID.collectAsState(initial = 1).value)
