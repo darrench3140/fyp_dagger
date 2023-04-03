@@ -74,8 +74,7 @@ fun DrawCamera() {
             AndroidView(
                 modifier = Modifier
                     .size(130.dp)
-                    .align(Alignment.BottomEnd)
-                    .offset((-25).dp + cameraOffset.value, (-25).dp)
+                    .offset(screenWidthDp.times(0.65f) + cameraOffset.value, screenHeightDp.times(0.75f))
                     .rotate(-90f + cameraRotationSettings.value)
                     .scale(cameraOutScaleSettings.value)
                     .clip(CircleShape)
