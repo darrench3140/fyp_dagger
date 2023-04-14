@@ -119,8 +119,12 @@ fun GameConsole(navController: NavHostController, gameData: GameData) {
         }
     }
     // Smile Control
-    LaunchedEffect(gameMode.value.isSmile() && smileP.value > faceSmileSensitivity.value) {
+    LaunchedEffect( mlModeOption.value && gameMode.value.isSmile() && smileP.value > faceSmileSensitivity.value) {
         if (gameMode.value.isSmile() && smileP.value > 0.5f && gameState.value.isRunning()) gameState.value.setShooting()
+    }
+    // Landmark Smile Control
+    LaunchedEffect(!mlModeOption.value && gameMode.value.isSmile() && smiling.value) {
+        if (gameMode.value.isSmile() && smiling.value && gameState.value.isRunning()) gameState.value.setShooting()
     }
     // Both Eye Control
     LaunchedEffect(gameMode.value.isBoth() && leftP.value < faceLeftSensitivity.value && rightP.value < faceRightSensitivity.value) {

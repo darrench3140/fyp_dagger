@@ -1,5 +1,6 @@
 package com.darren.fyp_dagger.utils
 
+import android.graphics.PointF
 import android.os.SystemClock
 import android.util.Log
 import android.util.Size
@@ -50,6 +51,7 @@ import com.darren.fyp_dagger.states.FruitState
 import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetectorOptions
 import kotlinx.coroutines.delay
+import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.Executors
 
 @Composable
@@ -61,12 +63,14 @@ fun DrawCamera() {
     val faceDetector = remember {
         FaceDetection.getClient(
             FaceDetectorOptions.Builder()
-                .setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_NONE)
+                .setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_ALL)
                 .setContourMode(FaceDetectorOptions.CONTOUR_MODE_NONE)
                 .setClassificationMode(FaceDetectorOptions.CLASSIFICATION_MODE_ALL)
-                .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
+                .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_ACCURATE)
+                .setMinFaceSize(0.3f)
                 .build())
     }
+    val landmarksList = remember { CopyOnWriteArrayList<PointF>() }
     if (PermissionUtil.hasPermission() && showCamera.value) {
         val cameraAlpha = animateFloatAsState(targetValue = if (gameState.value.isOver()) 0f else 1f, animationSpec = tween(500))
         val cameraOffset = animateDpAsState(targetValue = if (!cameraReady.value) screenWidthDp else 0.dp, animationSpec = if (cameraReady.value) tween(500) else tween(0))
@@ -99,7 +103,7 @@ fun DrawCamera() {
                             .setTargetResolution(Size(previewView.width, previewView.height))
                             .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                             .build()
-                        imageAnalysis.setAnalyzer(cameraExecutor, FaceDetectionAnalyzer(faceDetector, lensFacing))
+                        imageAnalysis.setAnalyzer(cameraExecutor, FaceDetectionAnalyzer(faceDetector, lensFacing, landmarksList))
                         try {
                             cameraProvider.unbindAll()
                             cameraProvider.bindToLifecycle(
@@ -115,6 +119,17 @@ fun DrawCamera() {
                     previewView
                 }
             )
+            Canvas(modifier = Modifier
+                .size(130.dp)
+                .offset(screenWidthDp.times(0.65f) + cameraOffset.value, screenHeightDp.times(0.75f))
+                .alpha(if (showCameraSettings.value) cameraAlpha.value else 0f),) {
+                if (landmarksList.isNotEmpty()) {
+                    val scaleFac = cameraOutScaleSettings.value * cameraInScaleSettings.value * 1.5f
+                    for (point in landmarksList) {
+                        drawCircle(Color.Yellow, radius = 10f, center = Offset(scaleFac * point.x - 300f, scaleFac * point.y - 180f), style = Stroke(2f))
+                    }
+                }
+            }
         }
     }
 }
@@ -133,6 +148,18 @@ fun DrawControllerIcons() {
                 .offset(y = 80.dp)
                 .alpha(0.8f)
         )
+        if (!gameMode.value.isTap() && cameraReady.value && !faceDetected.value) {
+            Text(
+                text = "Face undetected...",
+                fontSize = 25.sp,
+                color = Color.Red,
+                fontFamily = myFont,
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .offset(y = 110.dp)
+                    .alpha(0.8f)
+            )
+        }
     }
 }
 

@@ -22,7 +22,6 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        val splashScreen = installSplashScreen()
         StatusBarUtil.transparentStatusBar(this)
         setContent {
             // Initialization

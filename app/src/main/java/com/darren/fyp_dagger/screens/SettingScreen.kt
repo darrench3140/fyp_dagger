@@ -226,6 +226,13 @@ data class SettingsUtil(var initialized: Boolean = false) {
         )
         s.switchOn = textHelperOption
         gameSettings.add(s)
+        s = SettingsItem(
+            title = "ML approach for Smiling",
+            type = Type.Switch,
+            onText = "Classification", offText = "Landmark"
+        )
+        s.switchOn = mlModeOption
+        gameSettings.add(s)
         initialized = true
     }
 }
